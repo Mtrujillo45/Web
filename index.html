@@ -182,6 +182,24 @@
     .rank-row { grid-template-columns: 110px 1fr; }
     .rank-val { grid-column: 2; text-align: left; }
   }
+
+  /* Alertas de inventario */
+  :root { --crit: #D4483B; }
+  @media (prefers-color-scheme: dark) { :root { --crit: #F0776A; } }
+  :root[data-theme="light"] { --crit: #D4483B; }
+  :root[data-theme="dark"] { --crit: #F0776A; }
+  .alerts { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .alerts:empty { display: none; }
+  .alerts .ahead { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--ink-muted); }
+  .alert-item { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border-radius: 10px; font-size: 13px; border: 1px solid; }
+  .alert-item .lvl { font-weight: 800; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 6px; color: #fff; white-space: nowrap; }
+  .alert-item.out { background: color-mix(in srgb, var(--crit) 12%, var(--surface)); border-color: color-mix(in srgb, var(--crit) 45%, transparent); }
+  .alert-item.out .lvl { background: var(--crit); }
+  .alert-item.crit { background: color-mix(in srgb, var(--warn) 15%, var(--surface)); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+  .alert-item.crit .lvl { background: var(--warn); }
+  .alert-item .fire { margin-left: auto; font-size: 12px; color: var(--bloom-ink); font-weight: 700; white-space: nowrap; }
+  .chip.crit { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, var(--surface)); color: var(--ink); opacity: 1; }
+  .chip.out { border-color: var(--crit); background: color-mix(in srgb, var(--crit) 15%, var(--surface)); color: var(--ink); opacity: 1; }
 </style>
 
 <header>
@@ -207,6 +225,8 @@
     <span class="tag refund" id="refundTag">↩ 1 pedido reembolsado excluido</span>
     <span>Auto‑refresco cada 5 min · COP</span>
   </div>
+
+  <div class="alerts" id="alerts"></div>
 
   <div class="kpis" id="kpis"></div>
 
@@ -249,6 +269,7 @@
 
 <script>
   const GENERATED_AT = "2026-07-24T15:31:00-05:00";
+  const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
 
   // ===== Datos derivados de las LÍNEAS DE PEDIDO (pagados, netos de reembolsos) =====
   // kind: 'kit' | 'garment' | 'accessory'
@@ -338,8 +359,10 @@
     const isKit = p.kind==='kit';
     const monoCls = isKit ? 'kit' : (p.kind==='accessory' ? 'acc' : '');
     const chips = p.sizes.map(s=>{
-      const cls = (s.stock===0 && s.sold===0) ? 'out' : (s.sold>0 ? (isKit?'sold kit':'sold') : '');
-      return `<span class="chip ${cls}"><span class="cz">${s.z}</span><span class="cs">${num(s.stock)}</span>${s.sold>0?`<span class="sold-badge">·${s.sold}▲</span>`:''}</span>`;
+      let cls = s.sold>0 ? (isKit?'sold kit':'sold') : '';
+      if (s.stock<=0) cls += ' out';
+      else if (s.stock<=ALERT_CRIT) cls += ' crit';
+      return `<span class="chip ${cls.trim()}"><span class="cz">${s.z}</span><span class="cs">${num(s.stock)}</span>${s.sold>0?`<span class="sold-badge">·${s.sold}▲</span>`:''}</span>`;
     }).join('');
     const pill = isKit ? '<span class="pill kit">🎀 Kit</span>' : `<span class="pill ${p.sold>0?'on':'off'}">${p.sold>0?'Con venta':'Sin venta'}</span>`;
     const stockLabel = isKit ? 'Armables' : 'Stock';
@@ -370,6 +393,27 @@
   document.getElementById('grid').innerHTML = individuals.map(card).join('');
   document.getElementById('kitCount').textContent = `${totals.kitsSold} vendidos`;
   document.getElementById('indCount').textContent = `${num(totals.units-totals.kitsSold)} vendidos`;
+
+  // ---- Alertas de inventario (solo individuales; los kits comparten el mismo stock) ----
+  const ALERTS = [];
+  individuals.forEach(p => p.sizes.forEach(s => {
+    if (s.stock<=0) ALERTS.push({name:p.name, z:s.z, stock:s.stock, sold:s.sold, lvl:'out'});
+    else if (s.stock<=ALERT_CRIT) ALERTS.push({name:p.name, z:s.z, stock:s.stock, sold:s.sold, lvl:'crit'});
+  }));
+  ALERTS.sort((a,b)=> (a.lvl==='out'?0:1)-(b.lvl==='out'?0:1) || (b.sold>0)-(a.sold>0) || a.stock-b.stock);
+  const alertsEl = document.getElementById('alerts');
+  if (ALERTS.length) {
+    const fast = ALERTS.filter(a=>a.sold>0).length;
+    alertsEl.innerHTML = `<div class="ahead">⚠️ Alertas de inventario · crítico ≤ ${ALERT_CRIT} und.${fast?` · ${fast} vendiéndose 🔥`:''}</div>` +
+      ALERTS.map(a=>{
+        const talla = a.z==='Única' ? '' : ` · talla <b>${a.z}</b>`;
+        const lvlTxt = a.lvl==='out' ? '🔴 Agotado' : '🟠 Crítico';
+        const fire = a.sold>0 ? `<span class="fire">🔥 vendiendo (${num(a.sold)})</span>` : '';
+        return `<div class="alert-item ${a.lvl}"><span class="lvl">${lvlTxt}</span><span><b>${a.name}</b>${talla} · quedan <b>${num(a.stock)}</b></span>${fire}</div>`;
+      }).join('');
+  } else {
+    alertsEl.innerHTML = '';
+  }
 
   // ---- Tabla ----
   document.getElementById('tableView').innerHTML = `<table>

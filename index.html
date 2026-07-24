@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Medellín Mi Amor — Monitor de ventas en vivo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<style>*{box-sizing:border-box}html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+  :root {
+    --bg: #F5F7F2;
+    --surface: #FFFFFF;
+    --surface-2: #FBFCFA;
+    --ink: #14231A;
+    --ink-muted: #5B6B60;
+    --border: #E4EAE1;
+    --border-strong: #D3DDCF;
+    --accent: #1F9E63;
+    --accent-deep: #0F5C3A;
+    --accent-soft: #E4F3EA;
+    --accent-ink: #0F5C3A;
+    --bloom: #E6417F;
+    --bloom-deep: #B8285F;
+    --bloom-soft: #FBE3EC;
+    --bloom-ink: #A21F52;
+    --warn: #C98A00;
+    --track: #EDF1EA;
+    --shadow: 0 1px 2px rgba(20,35,26,.04), 0 8px 24px rgba(20,35,26,.05);
+    --radius: 14px;
+    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0E1712; --surface: #15221B; --surface-2: #182620; --ink: #EAF2EC;
+      --ink-muted: #9DB2A5; --border: #24352B; --border-strong: #2E4436;
+      --accent: #37CB82; --accent-deep: #34C77E; --accent-soft: #16301F; --accent-ink: #8FE7B7;
+      --bloom: #FF6EA0; --bloom-deep: #E6417F; --bloom-soft: #34141F; --bloom-ink: #FF9CBF;
+      --warn: #E8B44A; --track: #1E2E24;
+      --shadow: 0 1px 2px rgba(0,0,0,.25), 0 10px 30px rgba(0,0,0,.30);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F5F7F2; --surface: #FFFFFF; --surface-2: #FBFCFA; --ink: #14231A;
+    --ink-muted: #5B6B60; --border: #E4EAE1; --border-strong: #D3DDCF;
+    --accent: #1F9E63; --accent-deep: #0F5C3A; --accent-soft: #E4F3EA; --accent-ink: #0F5C3A;
+    --bloom: #E6417F; --bloom-deep: #B8285F; --bloom-soft: #FBE3EC; --bloom-ink: #A21F52;
+    --warn: #C98A00; --track: #EDF1EA;
+    --shadow: 0 1px 2px rgba(20,35,26,.04), 0 8px 24px rgba(20,35,26,.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1712; --surface: #15221B; --surface-2: #182620; --ink: #EAF2EC;
+    --ink-muted: #9DB2A5; --border: #24352B; --border-strong: #2E4436;
+    --accent: #37CB82; --accent-deep: #34C77E; --accent-soft: #16301F; --accent-ink: #8FE7B7;
+    --bloom: #FF6EA0; --bloom-deep: #E6417F; --bloom-soft: #34141F; --bloom-ink: #FF9CBF;
+    --warn: #E8B44A; --track: #1E2E24;
+    --shadow: 0 1px 2px rgba(0,0,0,.25), 0 10px 30px rgba(0,0,0,.30);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 64px; }
+
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+  }
+  .head-inner { max-width: 1180px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .brand { display: flex; flex-direction: column; gap: 4px; }
+  .eyebrow { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-ink); font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+  h1 { font-family: var(--serif); font-weight: 700; font-style: italic; font-size: clamp(26px, 4.4vw, 40px); margin: 0; letter-spacing: -.01em; text-wrap: balance; line-height: 1.02; }
+  .sub { color: var(--ink-muted); font-size: 13.5px; margin-top: 2px; }
+  .head-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bloom); animation: pulse 2.2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bloom) 55%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+  .controls { display: flex; align-items: center; gap: 8px; }
+  .btn { font-family: var(--sans); font-size: 13px; font-weight: 600; color: #fff; background: var(--accent); border: 1px solid var(--accent-deep); padding: 8px 14px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: filter .15s, transform .05s; }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--border-strong); }
+  .btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+  .updated { font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .updated b { color: var(--ink); font-weight: 600; }
+
+  .window { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 20px 0 8px; font-size: 13px; color: var(--ink-muted); }
+  .tag { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-soft); color: var(--accent-ink); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; }
+  .tag.refund { background: var(--bloom-soft); color: var(--bloom-ink); border-color: color-mix(in srgb, var(--bloom) 25%, transparent); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+  .kpi.bloom::before { background: var(--bloom); }
+  .kpi .klabel { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); font-weight: 700; }
+  .kpi .kval { font-family: var(--serif); font-size: clamp(22px, 3.2vw, 30px); font-weight: 700; margin-top: 8px; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+  .kpi .kmeta { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+
+  section { margin-top: 34px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  h2 { font-family: var(--serif); font-size: 21px; font-weight: 700; margin: 0; letter-spacing: -.01em; display: flex; align-items: baseline; gap: 9px; }
+  h2 .count { font-family: var(--sans); font-size: 12px; font-weight: 700; color: var(--bloom-ink); background: var(--bloom-soft); padding: 2px 9px; border-radius: 999px; }
+  h2 .count.g { color: var(--accent-ink); background: var(--accent-soft); }
+  .sec-note { font-size: 12.5px; color: var(--ink-muted); }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 22px; }
+  .rank-row { display: grid; grid-template-columns: 210px 1fr 96px; align-items: center; gap: 14px; padding: 9px 0; }
+  .rank-row + .rank-row { border-top: 1px solid var(--border); }
+  .rank-name { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .kchip { font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #fff; background: var(--bloom); padding: 1px 6px; border-radius: 5px; }
+  .bar-track { background: var(--track); border-radius: 6px; height: 22px; position: relative; overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-deep), var(--accent)); border-radius: 6px; min-width: 3px; transition: width .6s cubic-bezier(.22,.61,.36,1); }
+  .bar-fill.kit { background: linear-gradient(90deg, var(--bloom-deep), var(--bloom)); }
+  .rank-val { text-align: right; font-variant-numeric: tabular-nums; }
+  .rank-val .u { font-size: 15px; font-weight: 700; }
+  .rank-val .r { font-size: 11.5px; color: var(--ink-muted); display: block; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid.two { grid-template-columns: repeat(2, 1fr); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; display: flex; flex-direction: column; gap: 13px; }
+  .card.kit { border-color: color-mix(in srgb, var(--bloom) 35%, var(--border)); background: linear-gradient(180deg, var(--bloom-soft) 0%, var(--surface) 34%); }
+  .card-top { display: flex; gap: 12px; align-items: flex-start; }
+  .mono { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 11px; display: grid; place-items: center; font-family: var(--serif); font-weight: 700; font-size: 15px; color: #fff; letter-spacing: .02em; background: linear-gradient(135deg, var(--accent-deep), var(--accent)); }
+  .mono.acc { background: linear-gradient(135deg, #7d8a2e, #A9B93C); }
+  .mono.kit { background: linear-gradient(135deg, var(--bloom-deep), var(--bloom)); font-size: 18px; }
+  .card-title { font-size: 14px; font-weight: 700; line-height: 1.25; }
+  .card-price { font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .pill { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 6px; margin-left: auto; white-space: nowrap; align-self: flex-start; }
+  .pill.on { background: var(--accent-soft); color: var(--accent-ink); }
+  .pill.kit { background: var(--bloom); color: #fff; }
+  .pill.off { background: var(--track); color: var(--ink-muted); }
+
+  .stat-row { display: flex; gap: 14px; }
+  .stat { flex: 1; }
+  .stat .s-lab { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); font-weight: 700; }
+  .stat .s-val { font-family: var(--serif); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .stat .s-sub { font-size: 11px; color: var(--ink-muted); }
+
+  .st-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-muted); margin-bottom: 5px; }
+  .st-head b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .st-track { background: var(--track); border-radius: 5px; height: 8px; overflow: hidden; }
+  .st-fill { height: 100%; background: var(--accent); border-radius: 5px; transition: width .6s ease; }
+  .st-fill.kit { background: var(--bloom); }
+
+  .sizes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 11px; border: 1px solid var(--border-strong); border-radius: 7px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; background: var(--surface-2); }
+  .chip .cz { font-weight: 700; }
+  .chip .cs { color: var(--ink-muted); }
+  .chip.sold { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+  .chip.sold.kit { border-color: var(--bloom); background: var(--bloom-soft); color: var(--bloom-ink); }
+  .chip.out { opacity: .5; }
+  .chip .sold-badge { font-weight: 700; }
+
+  .note { font-size: 11px; color: var(--ink-muted); border-top: 1px dashed var(--border-strong); padding-top: 9px; }
+  .note b { color: var(--ink); }
+
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; background: var(--surface); }
+  th, td { padding: 10px 14px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { background: var(--surface-2); border-bottom: 1px solid var(--border-strong); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-muted); }
+  tbody tr + tr td { border-top: 1px solid var(--border); }
+  tbody tr.kitrow td:first-child { color: var(--bloom-ink); font-weight: 700; }
+  tfoot td { border-top: 2px solid var(--border-strong); font-weight: 700; }
+  .hidden { display: none; }
+
+  footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--ink-muted); font-size: 12.5px; }
+  footer h3 { font-family: var(--serif); font-size: 15px; color: var(--ink); margin: 0 0 8px; }
+  footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+  footer b { color: var(--ink); }
+
+  @media (max-width: 860px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid, .grid.two { grid-template-columns: 1fr; }
+    .rank-row { grid-template-columns: 140px 1fr 84px; }
+  }
+  @media (max-width: 520px) {
+    .kpis { grid-template-columns: 1fr; }
+    .rank-row { grid-template-columns: 110px 1fr; }
+    .rank-val { grid-column: 2; text-align: left; }
+  }
+</style>
+
+<header>
+  <div class="head-inner">
+    <div class="brand">
+      <span class="eyebrow"><span class="dot"></span> Monitor en vivo · Mompossina</span>
+      <h1>Medellín Mi Amor</h1>
+      <div class="sub">Ventas de la campaña · Fábrica de Licores de Antioquia × Mompossina</div>
+    </div>
+    <div class="head-right">
+      <div class="controls">
+        <button class="btn ghost" id="theme" type="button" aria-label="Cambiar tema">◐ Tema</button>
+        <button class="btn" id="refresh" type="button">↻ Actualizar</button>
+      </div>
+      <div class="updated">Actualizado: <b id="stamp">—</b> · <span id="ago">ahora</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="window">
+    <span class="tag">🌸 Desde 24 jul 2026, 00:00 (hora Colombia)</span>
+    <span class="tag refund" id="refundTag">↩ 1 pedido reembolsado excluido</span>
+    <span>Auto‑refresco cada 5 min · COP</span>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <div class="sec-head">
+      <h2>Ranking de ventas <span class="count">unidades</span></h2>
+      <span class="sec-note">🎀 kit · barra = unidades · etiqueta = ingresos brutos</span>
+    </div>
+    <div class="panel" id="rank"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Kits <span class="count" id="kitCount"></span></h2>
+      <span class="sec-note">Cada kit = prenda + abanico + aguardiente ($229.900)</span>
+    </div>
+    <div class="grid two" id="kitsGrid"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Productos individuales <span class="count g" id="indCount"></span></h2>
+      <button class="btn ghost" id="toggleTable" type="button">Ver tabla</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="tbl-wrap hidden" id="tableView"></div>
+  </section>
+
+  <footer>
+    <h3>Cómo se calculan estas cifras</h3>
+    <ul>
+      <li><b>Kits vs. prendas sueltas:</b> se leen las <b>líneas de cada pedido</b>, no la analítica agregada. Un kit se detecta por su <b>aguardiente</b> (solo existe dentro de kits); su prenda y su abanico se atribuyen al kit, no al producto individual.</li>
+      <li><b>Unidades / Ingresos:</b> unidades netas vendidas e ingresos brutos (antes de impuestos) de pedidos pagados. Se excluyen pedidos reembolsados.</li>
+      <li><b>Inventario compartido:</b> el Kit T‑Shirt consume una <b>Un Guarito</b> y el Kit Mesh una <b>Mesh Shirt</b>; su inventario es el mismo pool que el del producto individual (por eso no se suman dos veces en el total).</li>
+      <li><b>Sell‑through</b> = unidades vendidas ÷ inventario inicial de la referencia.</li>
+      <li>Datos en vivo de la API de Shopify Admin. El enlace se vuelve a consultar y publicar automáticamente; usa <b>Actualizar</b> para recargar la última versión.</li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+  const GENERATED_AT = "2026-07-24T13:38:12-05:00";
+
+  // ===== Datos derivados de las LÍNEAS DE PEDIDO (pagados, netos de reembolsos) =====
+  // kind: 'kit' | 'garment' | 'accessory'
+  const PRODUCTS = [
+    // --- Kits (categoría propia) ---
+    { name:"Kit · T‑Shirt", full:"Kit Medellín Mi Amor · T‑Shirt", mono:"🎀", kind:"kit",
+      price:229900, revenue:459800, buildable:569,
+      note:"Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
+      sizes:[{z:"XS",stock:105,sold:0},{z:"S",stock:187,sold:1},{z:"M",stock:209,sold:1},{z:"L",stock:43,sold:0},{z:"XL",stock:25,sold:0}] },
+    { name:"Kit · Mesh", full:"Kit Medellín Mi Amor · Mesh", mono:"🎀", kind:"kit",
+      price:229900, revenue:919600, buildable:540,
+      note:"Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
+      sizes:[{z:"XS",stock:105,sold:0},{z:"S",stock:199,sold:0},{z:"M",stock:94,sold:2},{z:"L",stock:107,sold:2},{z:"XL",stock:35,sold:0}] },
+
+    // --- Prendas individuales (solo ventas sueltas) ---
+    { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment", price:129900, revenue:259800,
+      note:"Inventario compartido con Kit T‑Shirt.",
+      sizes:[{z:"XS",stock:105,sold:0},{z:"S",stock:187,sold:1},{z:"M",stock:209,sold:0},{z:"L",stock:43,sold:1},{z:"XL",stock:25,sold:0}] },
+    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", price:139900, revenue:839400,
+      note:"Inventario compartido con Kit Mesh.",
+      sizes:[{z:"XS",stock:105,sold:0},{z:"S",stock:199,sold:1},{z:"M",stock:94,sold:4},{z:"L",stock:107,sold:0},{z:"XL",stock:35,sold:1}] },
+    { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory", price:59900, revenue:119800,
+      note:"También se incluye 1 abanico dentro de cada kit (no contado aquí).",
+      sizes:[{z:"Única",stock:1352,sold:2}] },
+    { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment", price:139900, revenue:139900,
+      sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:43,sold:1},{z:"M",stock:59,sold:0},{z:"L",stock:25,sold:0},{z:"XL",stock:15,sold:0}] },
+    { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment", price:139900, revenue:279800,
+      sizes:[{z:"XS",stock:20,sold:0},{z:"S",stock:38,sold:2},{z:"M",stock:52,sold:0},{z:"L",stock:28,sold:0},{z:"XL",stock:20,sold:0}] },
+    { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment", price:129900, revenue:0,
+      sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:4,sold:0},{z:"M",stock:0,sold:0},{z:"L",stock:5,sold:0},{z:"XL",stock:15,sold:0}] },
+    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", price:64900, revenue:64900,
+      sizes:[{z:"Única",stock:99,sold:1}] },
+    { name:"Primavera Charm", mono:"PC", kind:"accessory", price:143900, revenue:143900,
+      sizes:[{z:"Única",stock:29,sold:1}] },
+  ];
+
+  PRODUCTS.forEach(p => {
+    p.sold = p.sizes.reduce((a,s)=>a+s.sold,0);
+    p.stock = p.kind==='kit' ? p.buildable : p.sizes.reduce((a,s)=>a+s.stock,0);
+    const start = p.sold + p.stock;
+    p.sellThrough = start>0 ? p.sold/start : 0;
+  });
+
+  const kits = PRODUCTS.filter(p=>p.kind==='kit');
+  const individuals = PRODUCTS.filter(p=>p.kind!=='kit');
+
+  const totals = {
+    revenue: PRODUCTS.reduce((a,p)=>a+p.revenue,0),
+    units: PRODUCTS.reduce((a,p)=>a+p.sold,0),
+    kitsSold: kits.reduce((a,p)=>a+p.sold,0),
+    invRestante: individuals.reduce((a,p)=>a+p.stock,0), // sin kits (comparten pool)
+    withSales: PRODUCTS.filter(p=>p.sold>0).length,
+  };
+
+  const cop = n => new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n);
+  const num = n => new Intl.NumberFormat('es-CO').format(n);
+  const pct = n => (n*100).toLocaleString('es-CO',{maximumFractionDigits: n>0&&n<0.01?2:1})+'%';
+
+  // ---- KPIs ----
+  document.getElementById('kpis').innerHTML = [
+    { lab:"Ingresos brutos", val:cop(totals.revenue), meta:`${totals.units} unidades vendidas`, bloom:false },
+    { lab:"Kits vendidos", val:num(totals.kitsSold), meta:`${num(kits[0].sold)} T‑Shirt · ${num(kits[1].sold)} Mesh`, bloom:true },
+    { lab:"Prendas/accesorios sueltos", val:num(totals.units-totals.kitsSold), meta:`${totals.withSales} referencias con venta`, bloom:false },
+    { lab:"Inventario restante", val:num(totals.invRestante), meta:"unidades disponibles (sin doble conteo)", bloom:false },
+  ].map(k=>`
+    <div class="kpi ${k.bloom?'bloom':''}">
+      <div class="klabel">${k.lab}</div>
+      <div class="kval">${k.val}</div>
+      <div class="kmeta">${k.meta}</div>
+    </div>`).join('');
+
+  // ---- Ranking (kits + individuales juntos) ----
+  const ranked = [...PRODUCTS].filter(p=>p.sold>0 || p.kind==='kit').sort((a,b)=> b.sold-a.sold || b.revenue-a.revenue);
+  const maxSold = Math.max(1, ...ranked.map(p=>p.sold));
+  document.getElementById('rank').innerHTML = ranked.map(p=>{
+    const w = Math.max(p.sold/maxSold*100, p.sold>0?6:0);
+    const isKit = p.kind==='kit';
+    return `<div class="rank-row">
+      <div class="rank-name">${isKit?'<span class="kchip">Kit</span>':''}${p.name}</div>
+      <div class="bar-track"><div class="bar-fill ${isKit?'kit':''}" style="width:${w}%"></div></div>
+      <div class="rank-val"><span class="u">${num(p.sold)}</span><span class="r">${p.revenue>0?cop(p.revenue):'—'}</span></div>
+    </div>`;
+  }).join('');
+
+  // ---- Card renderer ----
+  function card(p){
+    const isKit = p.kind==='kit';
+    const monoCls = isKit ? 'kit' : (p.kind==='accessory' ? 'acc' : '');
+    const chips = p.sizes.map(s=>{
+      const cls = (s.stock===0 && s.sold===0) ? 'out' : (s.sold>0 ? (isKit?'sold kit':'sold') : '');
+      return `<span class="chip ${cls}"><span class="cz">${s.z}</span><span class="cs">${num(s.stock)}</span>${s.sold>0?`<span class="sold-badge">·${s.sold}▲</span>`:''}</span>`;
+    }).join('');
+    const pill = isKit ? '<span class="pill kit">🎀 Kit</span>' : `<span class="pill ${p.sold>0?'on':'off'}">${p.sold>0?'Con venta':'Sin venta'}</span>`;
+    const stockLabel = isKit ? 'Armables' : 'Stock';
+    return `<div class="card ${isKit?'kit':''}">
+      <div class="card-top">
+        <div class="mono ${monoCls}">${p.mono}</div>
+        <div style="min-width:0">
+          <div class="card-title">${p.full||p.name}</div>
+          <div class="card-price">${cop(p.price)}${isKit?' · kit':''}</div>
+        </div>
+        ${pill}
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="s-lab">Vendid${isKit?'os':'as'}</div><div class="s-val">${num(p.sold)}</div><div class="s-sub">${isKit?'kits':'unidades'}</div></div>
+        <div class="stat"><div class="s-lab">Ingresos</div><div class="s-val" style="font-size:16px">${p.revenue>0?cop(p.revenue):'—'}</div><div class="s-sub">brutos</div></div>
+        <div class="stat"><div class="s-lab">${stockLabel}</div><div class="s-val">${num(p.stock)}</div><div class="s-sub">${isKit?'posibles':'disponible'}</div></div>
+      </div>
+      <div>
+        <div class="st-head"><span>Sell‑through</span><b>${pct(p.sellThrough)}</b></div>
+        <div class="st-track"><div class="st-fill ${isKit?'kit':''}" style="width:${Math.min(100,Math.max(p.sellThrough*100,p.sold>0?2:0))}%"></div></div>
+      </div>
+      <div class="sizes">${chips}</div>
+      ${p.note?`<div class="note">ℹ️ ${p.note}</div>`:''}
+    </div>`;
+  }
+
+  document.getElementById('kitsGrid').innerHTML = kits.map(card).join('');
+  document.getElementById('grid').innerHTML = individuals.map(card).join('');
+  document.getElementById('kitCount').textContent = `${totals.kitsSold} vendidos`;
+  document.getElementById('indCount').textContent = `${num(totals.units-totals.kitsSold)} vendidos`;
+
+  // ---- Tabla ----
+  document.getElementById('tableView').innerHTML = `<table>
+    <thead><tr><th>Referencia</th><th>Tipo</th><th>Precio</th><th>Vendidas</th><th>Ingresos brutos</th><th>Stock</th><th>Sell‑through</th></tr></thead>
+    <tbody>
+      ${[...PRODUCTS].sort((a,b)=>(b.kind==='kit')-(a.kind==='kit') || b.sold-a.sold || b.revenue-a.revenue).map(p=>`<tr class="${p.kind==='kit'?'kitrow':''}">
+        <td>${p.full||p.name}</td><td>${p.kind==='kit'?'Kit':(p.kind==='accessory'?'Accesorio':'Prenda')}</td>
+        <td>${cop(p.price)}</td><td>${num(p.sold)}</td><td>${p.revenue>0?cop(p.revenue):'—'}</td>
+        <td>${num(p.stock)}</td><td>${pct(p.sellThrough)}</td>
+      </tr>`).join('')}
+    </tbody>
+    <tfoot><tr><td>Total campaña</td><td>—</td><td>—</td><td>${num(totals.units)}</td><td>${cop(totals.revenue)}</td><td>${num(totals.invRestante)}</td><td>—</td></tr></tfoot>
+  </table>`;
+
+  const tBtn = document.getElementById('toggleTable'), tView = document.getElementById('tableView'), gView = document.getElementById('grid');
+  tBtn.addEventListener('click', ()=>{
+    const showTable = tView.classList.contains('hidden');
+    tView.classList.toggle('hidden', !showTable);
+    gView.classList.toggle('hidden', showTable);
+    tBtn.textContent = showTable ? 'Ver tarjetas' : 'Ver tabla';
+  });
+
+  // ---- Timestamp ----
+  const genDate = new Date(GENERATED_AT);
+  document.getElementById('stamp').textContent = genDate.toLocaleString('es-CO',{ day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Bogota' });
+  function tickAgo(){
+    const s = Math.max(0, Math.floor((Date.now()-genDate.getTime())/1000));
+    const el = document.getElementById('ago');
+    if (s<60) el.textContent = `hace ${s}s`;
+    else if (s<3600) el.textContent = `hace ${Math.floor(s/60)} min`;
+    else el.textContent = `hace ${Math.floor(s/3600)} h`;
+  }
+  tickAgo(); setInterval(tickAgo, 5000);
+
+  // ---- Controles ----
+  document.getElementById('refresh').addEventListener('click', ()=>location.reload());
+  setTimeout(()=>location.reload(), 300000); // auto‑refresco 5 min
+  document.getElementById('theme').addEventListener('click', ()=>{
+    const root = document.documentElement;
+    const cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    root.setAttribute('data-theme', cur==='dark' ? 'light' : 'dark');
+  });
+</script>
+</body>
+</html>

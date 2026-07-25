@@ -202,6 +202,26 @@
   .alert-item .fire { margin-left: auto; font-size: 12px; color: var(--bloom-ink); font-weight: 700; white-space: nowrap; }
   .chip.crit { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, var(--surface)); color: var(--ink); opacity: 1; }
   .chip.out { border-color: var(--crit); background: color-mix(in srgb, var(--crit) 15%, var(--surface)); color: var(--ink); opacity: 1; }
+
+  /* Proyección / Forecast */
+  .fc-scen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+  .fc-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; background: var(--surface); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .fc-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--ink-muted); }
+  .fc-card.base::before { background: var(--bloom); }
+  .fc-card.base { border-color: color-mix(in srgb, var(--bloom) 38%, var(--border)); background: linear-gradient(180deg, var(--bloom-soft) 0%, var(--surface) 42%); }
+  .fc-card .fc-tag { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+  .fc-card.base .fc-tag { color: var(--bloom-ink); }
+  .fc-card .fc-u { font-family: var(--serif); font-size: 27px; font-weight: 700; margin-top: 6px; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+  .fc-card .fc-u small { font-family: var(--sans); font-size: 12px; color: var(--ink-muted); font-weight: 600; }
+  .fc-card .fc-r { font-size: 14px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .fc-card .fc-d { font-size: 11.5px; color: var(--ink-muted); margin-top: 9px; border-top: 1px dashed var(--border-strong); padding-top: 8px; }
+  .fc-assume { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px 18px; margin-top: 16px; font-size: 12.5px; color: var(--ink-muted); }
+  .fc-assume h4 { margin: 0 0 9px; font-family: var(--serif); font-size: 14.5px; color: var(--ink); }
+  .fc-assume ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+  .fc-assume b { color: var(--ink); }
+  .fc-gap { height: 16px; }
+  tbody tr.fcweek td:first-child { font-weight: 600; }
+  @media (max-width: 860px) { .fc-scen { grid-template-columns: 1fr; } }
 </style>
 
 <header>
@@ -261,6 +281,18 @@
       <span class="sec-note">Agotados y en riesgo · umbral crítico ≤ 15 und.</span>
     </div>
     <div class="alerts" id="alerts"></div>
+  </section>
+
+  <section id="forecast">
+    <div class="sec-head">
+      <h2>Proyección de venta · 24 jul → 16 ago</h2>
+      <span class="sec-note">Forecast 24 días · 3 escenarios · modelo con supuestos ajustables</span>
+    </div>
+    <div class="fc-scen" id="fcScen"></div>
+    <div class="tbl-wrap" id="fcWeekly"></div>
+    <div class="fc-gap"></div>
+    <div class="tbl-wrap" id="fcProducts"></div>
+    <div class="fc-assume" id="fcAssume"></div>
   </section>
 
   <footer>
@@ -445,6 +477,66 @@
   });
 
   // ---- Timestamp ----
+  // ===== Proyección / Forecast (modelo con supuestos; base = ventas reales al 25 jul) =====
+  const FORECAST = {
+    scenarios: [
+      { name:"Conservador", units:880, rev:126000000, d:"Decae rápido tras el pico, Feria moderada, pauta a ROAS bajo (~2x). Sin sostenimiento fuerte." },
+      { name:"Base (esperado)", units:1264, rev:180900000, base:true, d:"Pauta $20M a ROAS ~3x + email Klaviyo + 15 UGC, con pico de Feria de las Flores (1–10 ago) ~x2." },
+      { name:"Optimista", units:1700, rev:243000000, d:"Alta retención + Feria muy fuerte por turismo + UGC con buen alcance viral y pauta eficiente." },
+    ],
+    weeks: [
+      { label:"Semana 1 · 24–30 jul", units:396, rev:56700000, tag:"Lanzamiento" },
+      { label:"Semana 2 · 31 jul–6 ago", units:382, rev:54700000, tag:"🌸 Feria arranca" },
+      { label:"Semana 3 · 7–13 ago", units:402, rev:57500000, tag:"🌸 Pico Feria + UGC" },
+      { label:"Cierre · 14–16 ago", units:84, rev:12000000, tag:"Cola" },
+    ],
+    products: [
+      { name:"🎀 Kit · Mesh", units:267, rev:61384300 },
+      { name:"🎀 Kit · T‑Shirt", units:92, rev:21150800 },
+      { name:"Medellín Mi Amor Mesh Shirt", units:267, rev:37353300 },
+      { name:"Un Guarito T‑Shirt", units:128, rev:16627200 },
+      { name:"Eterna Primavera Mesh Shirt", units:105, rev:14689500 },
+      { name:"Abanico Medellín Mi Amor", units:197, rev:11800300 },
+      { name:"Medellín Mi Amor Headkerchief", units:150, rev:9735000 },
+      { name:"Bloom Mesh Shirt", units:47, rev:6575300 },
+      { name:"Primavera Charm", units:11, rev:1582900 },
+    ],
+  };
+
+  document.getElementById('fcScen').innerHTML = FORECAST.scenarios.map(s=>`
+    <div class="fc-card ${s.base?'base':''}">
+      <div class="fc-tag">${s.base?'★ ':''}${s.name}</div>
+      <div class="fc-u">${num(s.units)} <small>unidades</small></div>
+      <div class="fc-r">${cop(s.rev)}</div>
+      <div class="fc-d">${s.d}</div>
+    </div>`).join('');
+
+  const fcWkTot = FORECAST.weeks.reduce((a,w)=>({units:a.units+w.units, rev:a.rev+w.rev}),{units:0,rev:0});
+  document.getElementById('fcWeekly').innerHTML = `<table>
+    <thead><tr><th>Semana (escenario base)</th><th>Hito</th><th>Unidades</th><th>Ingresos brutos</th></tr></thead>
+    <tbody>${FORECAST.weeks.map(w=>`<tr class="fcweek"><td>${w.label}</td><td>${w.tag}</td><td>${num(w.units)}</td><td>${cop(w.rev)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Total ventana (24 días)</td><td>—</td><td>${num(fcWkTot.units)}</td><td>${cop(fcWkTot.rev)}</td></tr></tfoot>
+  </table>`;
+
+  const fcPrTot = FORECAST.products.reduce((a,p)=>({units:a.units+p.units, rev:a.rev+p.rev}),{units:0,rev:0});
+  document.getElementById('fcProducts').innerHTML = `<table>
+    <thead><tr><th>Proyección por referencia (base)</th><th>Unidades</th><th>Ingresos brutos</th><th>% ingresos</th></tr></thead>
+    <tbody>${FORECAST.products.map(p=>`<tr><td>${p.name}</td><td>${num(p.units)}</td><td>${cop(p.rev)}</td><td>${(p.rev/fcPrTot.rev*100).toLocaleString('es-CO',{maximumFractionDigits:1})}%</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Total campaña</td><td>${num(fcPrTot.units)}</td><td>${cop(fcPrTot.rev)}</td><td>100%</td></tr></tfoot>
+  </table>`;
+
+  document.getElementById('fcAssume').innerHTML = `
+    <h4>Supuestos del modelo (ajustables)</h4>
+    <ul>
+      <li><b>Base de cálculo:</b> ventas reales al 25 jul (109 und · $15,6M) y pico del día 1 (~96 und/día).</li>
+      <li><b>Decaimiento orgánico:</b> caída desde el pico de lanzamiento hacia ~15–20 und/día, calibrada con drops pasados (descartando picos promocionales atípicos de tu historia).</li>
+      <li><b>Pauta:</b> $20M COP con ROAS asumido ~3x en el escenario base.</li>
+      <li><b>CRM + creadores:</b> base Klaviyo &gt;15.000 (campañas de email) + 15 UGC enviando el kit → alcance y conversión adicionales; los <b>kits podrían sobre‑indexar</b> por la campaña de UGC.</li>
+      <li><b>Feria de las Flores (~1–10 ago):</b> pico de demanda por afluencia de turistas; multiplicador ~x2–2,5 en esos días (2.º pico de la ventana).</li>
+      <li><b>Inventario:</b> <b>no limita</b> el forecast — Un Guarito y Mesh están en producción/reprogramación (el bajo stock XL actual es parcial, entra más).</li>
+      <li><b>Mezcla por referencia:</b> igual a la mezcla de ventas actual. <b>No es una promesa</b>: es un modelo sensible a la ejecución (eficiencia de pauta y afluencia real de Feria).</li>
+    </ul>`;
+
   const genDate = new Date(GENERATED_AT);
   document.getElementById('stamp').textContent = genDate.toLocaleString('es-CO',{ day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Bogota' });
   function tickAgo(){

@@ -276,7 +276,7 @@
 </div>
 
 <script>
-  const GENERATED_AT = "2026-07-24T21:25:04-05:00";
+  const GENERATED_AT = "2026-07-25T06:18:30-05:00";
   const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
 
   // ===== Datos derivados de las LÍNEAS DE PEDIDO (pagados, netos de reembolsos) =====
@@ -284,32 +284,32 @@
   const PRODUCTS = [
     // --- Kits (categoría propia) ---
     { name:"Kit · T‑Shirt", full:"Kit Medellín Mi Amor · T‑Shirt", mono:"🎀", kind:"kit",
-      price:229900, revenue:1379400, buildable:723,
+      price:229900, revenue:1839200, buildable:721,
       note:"Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:104,sold:0},{z:"S",stock:236,sold:1},{z:"M",stock:289,sold:4},{z:"L",stock:80,sold:1},{z:"XL",stock:14,sold:0}] },
+      sizes:[{z:"XS",stock:104,sold:0},{z:"S",stock:236,sold:1},{z:"M",stock:288,sold:5},{z:"L",stock:80,sold:1},{z:"XL",stock:13,sold:1}] },
     { name:"Kit · Mesh", full:"Kit Medellín Mi Amor · Mesh", mono:"🎀", kind:"kit",
-      price:229900, revenue:4368100, buildable:696,
+      price:229900, revenue:5287700, buildable:690,
       note:"Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:103,sold:1},{z:"S",stock:294,sold:2},{z:"M",stock:175,sold:9},{z:"L",stock:90,sold:5},{z:"XL",stock:34,sold:2}] },
+      sizes:[{z:"XS",stock:103,sold:1},{z:"S",stock:293,sold:3},{z:"M",stock:172,sold:11},{z:"L",stock:89,sold:5},{z:"XL",stock:33,sold:3}] },
 
     // --- Prendas individuales (solo ventas sueltas) ---
     { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment", price:129900, revenue:1428900,
       note:"Inventario compartido con Kit T‑Shirt.",
-      sizes:[{z:"XS",stock:104,sold:1},{z:"S",stock:236,sold:4},{z:"M",stock:289,sold:3},{z:"L",stock:80,sold:2},{z:"XL",stock:14,sold:1}] },
-    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", price:139900, revenue:3077800,
+      sizes:[{z:"XS",stock:104,sold:1},{z:"S",stock:236,sold:4},{z:"M",stock:288,sold:3},{z:"L",stock:80,sold:2},{z:"XL",stock:13,sold:1}] },
+    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", price:139900, revenue:3217700,
       note:"Inventario compartido con Kit Mesh.",
-      sizes:[{z:"XS",stock:103,sold:0},{z:"S",stock:294,sold:1},{z:"M",stock:175,sold:15},{z:"L",stock:90,sold:3},{z:"XL",stock:34,sold:3}] },
-    { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory", price:59900, revenue:958400,
+      sizes:[{z:"XS",stock:103,sold:0},{z:"S",stock:293,sold:1},{z:"M",stock:172,sold:16},{z:"L",stock:89,sold:3},{z:"XL",stock:33,sold:3}] },
+    { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory", price:59900, revenue:1018300,
       note:"También se incluye 1 abanico dentro de cada kit (no contado aquí).",
-      sizes:[{z:"Única",stock:1306,sold:16}] },
+      sizes:[{z:"Única",stock:1299,sold:17}] },
     { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment", price:139900, revenue:559600,
       sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:99,sold:1},{z:"M",stock:58,sold:2},{z:"L",stock:139,sold:1},{z:"XL",stock:14,sold:0}] },
-    { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment", price:139900, revenue:1119200,
-      sizes:[{z:"XS",stock:35,sold:0},{z:"S",stock:101,sold:3},{z:"M",stock:145,sold:5},{z:"L",stock:63,sold:0},{z:"XL",stock:35,sold:0}] },
+    { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment", price:139900, revenue:1259100,
+      sizes:[{z:"XS",stock:35,sold:0},{z:"S",stock:101,sold:3},{z:"M",stock:144,sold:6},{z:"L",stock:63,sold:0},{z:"XL",stock:35,sold:0}] },
     { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment", price:129900, revenue:0,
       sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:45,sold:0},{z:"M",stock:55,sold:0},{z:"L",stock:30,sold:0},{z:"XL",stock:15,sold:0}] },
-    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", price:64900, revenue:584100,
-      sizes:[{z:"Única",stock:141,sold:9}] },
+    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", price:64900, revenue:843700,
+      sizes:[{z:"Única",stock:137,sold:13}] },
     { name:"Primavera Charm", mono:"PC", kind:"accessory", price:143900, revenue:143900,
       sizes:[{z:"Única",stock:29,sold:1}] },
   ];

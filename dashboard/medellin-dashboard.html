@@ -275,7 +275,7 @@
   <section id="forecast">
     <div class="sec-head">
       <h2>Proyección de venta · 24 jul → 16 ago</h2>
-      <span class="sec-note">Forecast 24 días · 3 escenarios · modelo con supuestos ajustables</span>
+      <span class="sec-note">Forecast 24 días · recalibrado con 3 días reales · modelo día a día ajustable</span>
     </div>
     <div class="fc-scen" id="fcScen"></div>
     <div class="tbl-wrap" id="fcWeekly"></div>
@@ -473,29 +473,33 @@
   });
 
   // ---- Timestamp ----
-  // ===== Proyección / Forecast (modelo con supuestos; base = ventas reales al 25 jul) =====
+  // ===== Proyección / Forecast (RECALIBRADO 26 jul con 3 días de venta real) =====
+  // Modelo día a día: decaimiento post-lanzamiento + UGC (Semana 2) + Feria ×1.5 (1–10 ago).
+  // Base real: día 1 = 103 und/$14,7M · día 2 = 118 und/$18,8M (creció +28%, sin decaer).
   const FORECAST = {
     scenarios: [
-      { name:"Conservador", units:880, rev:126000000, d:"Decae rápido tras el pico, Feria moderada, pauta a ROAS bajo (~2x). Sin sostenimiento fuerte." },
-      { name:"Base (esperado)", units:1264, rev:180900000, base:true, d:"Pauta $20M a ROAS ~3x + email Klaviyo + 15 UGC, con pico de Feria de las Flores (1–10 ago) ~x2." },
-      { name:"Optimista", units:1700, rev:243000000, d:"Alta retención + Feria muy fuerte por turismo + UGC con buen alcance viral y pauta eficiente." },
+      { name:"Conservador", units:1408, rev:215300000, d:"El impulso de lanzamiento se enfría rápido (τ≈5 d) hacia ~30 und/día; UGC y Feria (×1,35) aportan poco. Piso defensivo." },
+      { name:"Base (esperado)", units:2054, rev:314000000, base:true, d:"Decaimiento moderado hacia ~44 und/día, UGC publicando desde Semana 2 (×1,12) y Feria ×1,5 (1–10 ago). Pauta full escalando. Escenario central." },
+      { name:"Optimista", units:3227, rev:493300000, d:"El ritmo se sostiene alto (τ≈11 d, piso ~70), UGC con buen alcance (×1,25) y Feria ×1,6. Pauta muy eficiente." },
     ],
     weeks: [
-      { label:"Semana 1 · 24–30 jul", units:396, rev:56700000, tag:"Lanzamiento" },
-      { label:"Semana 2 · 31 jul–6 ago", units:382, rev:54700000, tag:"🌸 Feria arranca" },
-      { label:"Semana 3 · 7–13 ago", units:402, rev:57500000, tag:"🌸 Pico Feria + UGC" },
-      { label:"Cierre · 14–16 ago", units:84, rev:12000000, tag:"Cola" },
+      { label:"Semana 1 · 24–30 jul", units:688, rev:105182000, tag:"Lanzamiento (días 1–2 reales)" },
+      { label:"Semana 2 · 31 jul–6 ago", units:698, rev:106711000, tag:"🌸 UGC + Feria arranca" },
+      { label:"Semana 3 · 7–13 ago", units:511, rev:78122000, tag:"🌸 Pico Feria (hasta 10 ago)" },
+      { label:"Cierre · 14–16 ago", units:157, rev:24002000, tag:"Cola post‑Feria" },
     ],
+    // Prorrateo por mezcla actual, ajustado por inventario en refs sin reposición.
     products: [
-      { name:"🎀 Kit · Mesh", units:267, rev:61384300 },
-      { name:"🎀 Kit · T‑Shirt", units:92, rev:21150800 },
-      { name:"Medellín Mi Amor Mesh Shirt", units:267, rev:37353300 },
-      { name:"Un Guarito T‑Shirt", units:128, rev:16627200 },
-      { name:"Eterna Primavera Mesh Shirt", units:105, rev:14689500 },
-      { name:"Abanico Medellín Mi Amor", units:197, rev:11800300 },
-      { name:"Medellín Mi Amor Headkerchief", units:150, rev:9735000 },
-      { name:"Bloom Mesh Shirt", units:47, rev:6575300 },
-      { name:"Primavera Charm", units:11, rev:1582900 },
+      { name:"🎀 Kit · Mesh", units:514, rev:118053650 },
+      { name:"🎀 Kit · T‑Shirt", units:146, rev:33477901 },
+      { name:"Medellín Mi Amor Mesh Shirt", units:536, rev:75055306, cap:"requiere reprogramación (demanda &gt; stock 601)" },
+      { name:"Un Guarito T‑Shirt", units:184, rev:23893845 },
+      { name:"Abanico Medellín Mi Amor", units:238, rev:14231614 },
+      { name:"Eterna Primavera Mesh Shirt", units:92, rev:12866624 },
+      { name:"Bloom Mesh Shirt", units:92, rev:12866624 },
+      { name:"Medellín Mi Amor Headkerchief", units:150, rev:9735000, cap:"capado a stock (129 und + 21 vendidas)" },
+      { name:"Primavera Charm", units:30, rev:4317000, cap:"capado: solo 19 und y sin reposición" },
+      { name:"Eterna Primavera T‑Shirt", units:8, rev:995577 },
     ],
   };
 
@@ -516,21 +520,22 @@
 
   const fcPrTot = FORECAST.products.reduce((a,p)=>({units:a.units+p.units, rev:a.rev+p.rev}),{units:0,rev:0});
   document.getElementById('fcProducts').innerHTML = `<table>
-    <thead><tr><th>Proyección por referencia (base)</th><th>Unidades</th><th>Ingresos brutos</th><th>% ingresos</th></tr></thead>
-    <tbody>${FORECAST.products.map(p=>`<tr><td>${p.name}</td><td>${num(p.units)}</td><td>${cop(p.rev)}</td><td>${(p.rev/fcPrTot.rev*100).toLocaleString('es-CO',{maximumFractionDigits:1})}%</td></tr>`).join('')}</tbody>
+    <thead><tr><th>Proyección por referencia (base, ajustada por inventario)</th><th>Unidades</th><th>Ingresos brutos</th><th>% ingresos</th></tr></thead>
+    <tbody>${FORECAST.products.map(p=>`<tr><td>${p.name}${p.cap?`<br><span style="font-size:11px;color:var(--warn)">⚠ ${p.cap}</span>`:''}</td><td>${num(p.units)}</td><td>${cop(p.rev)}</td><td>${(p.rev/fcPrTot.rev*100).toLocaleString('es-CO',{maximumFractionDigits:1})}%</td></tr>`).join('')}</tbody>
     <tfoot><tr><td>Total campaña</td><td>${num(fcPrTot.units)}</td><td>${cop(fcPrTot.rev)}</td><td>100%</td></tr></tfoot>
   </table>`;
 
   document.getElementById('fcAssume').innerHTML = `
-    <h4>Supuestos del modelo (ajustables)</h4>
+    <h4>Supuestos del modelo · recalibrado con 3 días reales (26 jul)</h4>
     <ul>
-      <li><b>Base de cálculo:</b> ventas reales al 25 jul (109 und · $15,6M) y pico del día 1 (~96 und/día).</li>
-      <li><b>Decaimiento orgánico:</b> caída desde el pico de lanzamiento hacia ~15–20 und/día, calibrada con drops pasados (descartando picos promocionales atípicos de tu historia).</li>
-      <li><b>Pauta:</b> $20M COP con ROAS asumido ~3x en el escenario base.</li>
-      <li><b>CRM + creadores:</b> base Klaviyo &gt;15.000 (campañas de email) + 15 UGC enviando el kit → alcance y conversión adicionales; los <b>kits podrían sobre‑indexar</b> por la campaña de UGC.</li>
-      <li><b>Feria de las Flores (~1–10 ago):</b> pico de demanda por afluencia de turistas; multiplicador ~x2–2,5 en esos días (2.º pico de la ventana).</li>
-      <li><b>Inventario:</b> <b>no limita</b> el forecast — Un Guarito y Mesh están en producción/reprogramación (el bajo stock XL actual es parcial, entra más).</li>
-      <li><b>Mezcla por referencia:</b> igual a la mezcla de ventas actual. <b>No es una promesa</b>: es un modelo sensible a la ejecución (eficiencia de pauta y afluencia real de Feria).</li>
+      <li><b>Base de cálculo:</b> ventas <b>reales</b> día 1 = 103 und/$14,7M y día 2 = 118 und/$18,8M. La campaña <b>creció +28% del día 1 al 2</b> (sin decaimiento). Ritmo actual ≈ 110 und/día.</li>
+      <li><b>Decaimiento:</b> se modela un enfriamiento post‑lanzamiento (la novedad se atenúa aunque la pauta siga) con vida‑media τ≈6,5 días en el escenario base, hacia un piso de ~44 und/día.</li>
+      <li><b>Pauta:</b> $20M COP <b>activa a full desde el día 1</b> y escalando hacia Feria — el ritmo actual <b>ya la incluye</b>, no hay un "encendido" pendiente.</li>
+      <li><b>CRM + creadores:</b> <b>2 emails/semana</b> a Klaviyo (&gt;15.000) sostenidos + <b>15 UGC que empiezan a publicar en Semana 2</b> → catalizador nuevo que sostiene/empuja el ritmo; los <b>kits podrían sobre‑indexar</b>.</li>
+      <li><b>Feria de las Flores (1–10 ago):</b> multiplicador <b>×1,5 (moderado)</b> sobre el ritmo diario base en esos días.</li>
+      <li><b>Ticket promedio:</b> $152.881/u (mezcla actual, con kits sobre‑indexando).</li>
+      <li><b>Inventario:</b> la <b>Mesh</b> (kit+suelto) proyecta ~1.050 und &gt; stock 601 → depende de la <b>reprogramación en curso</b>. <b>Charm</b> (19 und) y <b>Headkerchief</b> van <b>capados</b> por no tener reposición → hay ~$8M de demanda de Charm no capturable.</li>
+      <li><b>No es una promesa:</b> modelo sensible a la ejecución (eficiencia de pauta, alcance real de UGC y afluencia de Feria). Se recalibra con más días de curva.</li>
     </ul>`;
 
   const genDate = new Date(GENERATED_AT);

@@ -275,7 +275,7 @@
   <section id="forecast">
     <div class="sec-head">
       <h2>Proyección de venta · 24 jul → 16 ago</h2>
-      <span class="sec-note">Forecast 24 días · recalibrado con 3 días reales · modelo día a día ajustable</span>
+      <span class="sec-note">Forecast 24 días · recalibrado con 4 días completos · modelo día a día ajustable</span>
     </div>
     <div class="fc-scen" id="fcScen"></div>
     <div class="tbl-wrap" id="fcWeekly"></div>
@@ -297,7 +297,7 @@
 </div>
 
 <script>
-  const GENERATED_AT = "2026-07-27T15:00:17-05:00";
+  const GENERATED_AT = "2026-07-28T08:42:27-05:00";
   const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
 
   // ===== Datos derivados de las LÍNEAS DE PEDIDO (pagados, netos de reembolsos) =====
@@ -305,40 +305,40 @@
   // <<<PRODUCTS_START>>> (auto-generado por compute.py — no editar a mano)
   const PRODUCTS = [
     { name:"Kit · T‑Shirt", full:"Kit Medellín Mi Amor · T‑Shirt", mono:"🎀", kind:"kit",
-      price:229900, revenue:5517600, buildable:686,
+      price:229900, revenue:6667100, buildable:674,
       note:"Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:102,sold:0},{z:"S",stock:228,sold:7},{z:"M",stock:276,sold:9},{z:"L",stock:74,sold:2},{z:"XL",stock:6,sold:6}] },
+      sizes:[{z:"XS",stock:101,sold:0},{z:"S",stock:226,sold:8},{z:"M",stock:270,sold:11},{z:"L",stock:73,sold:3},{z:"XL",stock:4,sold:7}] },
     { name:"Kit · Mesh", full:"Kit Medellín Mi Amor · Mesh", mono:"🎀", kind:"kit",
-      price:229900, revenue:19771400, buildable:555,
+      price:229900, revenue:22300300, buildable:527,
       note:"Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:92,sold:5},{z:"S",stock:259,sold:22},{z:"M",stock:121,sold:33},{z:"L",stock:61,sold:19},{z:"XL",stock:22,sold:7}] },
+      sizes:[{z:"XS",stock:91,sold:6},{z:"S",stock:253,sold:24},{z:"M",stock:112,sold:37},{z:"L",stock:55,sold:21},{z:"XL",stock:16,sold:9}] },
     { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment",
-      price:129900, revenue:3637200,
+      price:129900, revenue:4546500,
       note:"Inventario compartido con Kit T‑Shirt. El stock XL bajo es parcial: hay producción en camino.",
-      sizes:[{z:"XS",stock:102,sold:2},{z:"S",stock:228,sold:6},{z:"M",stock:276,sold:11},{z:"L",stock:74,sold:7},{z:"XL",stock:6,sold:2}] },
+      sizes:[{z:"XS",stock:101,sold:3},{z:"S",stock:226,sold:7},{z:"M",stock:270,sold:15},{z:"L",stock:73,sold:7},{z:"XL",stock:4,sold:3}] },
     { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment",
-      price:139900, revenue:13150600,
+      price:139900, revenue:15249100,
       note:"Inventario compartido con Kit Mesh. Reposición en producción.",
-      sizes:[{z:"XS",stock:92,sold:5},{z:"S",stock:259,sold:17},{z:"M",stock:121,sold:46},{z:"L",stock:61,sold:17},{z:"XL",stock:22,sold:9}] },
+      sizes:[{z:"XS",stock:91,sold:5},{z:"S",stock:253,sold:21},{z:"M",stock:112,sold:49},{z:"L",stock:55,sold:21},{z:"XL",stock:16,sold:13}] },
     { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory",
-      price:59900, revenue:2096500,
+      price:59900, revenue:2216300,
       note:"También se incluye 1 abanico dentro de cada kit (no contado aquí).",
-      sizes:[{z:"Única",stock:1195,sold:35}] },
+      sizes:[{z:"Única",stock:1175,sold:37}] },
     { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment",
-      price:139900, revenue:1538900,
-      sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:96,sold:3},{z:"M",stock:53,sold:5},{z:"L",stock:137,sold:3},{z:"XL",stock:14,sold:0}] },
+      price:139900, revenue:1678800,
+      sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:95,sold:4},{z:"M",stock:53,sold:5},{z:"L",stock:137,sold:3},{z:"XL",stock:14,sold:0}] },
     { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment",
-      price:139900, revenue:1818700,
-      sizes:[{z:"XS",stock:34,sold:1},{z:"S",stock:100,sold:1},{z:"M",stock:139,sold:9},{z:"L",stock:62,sold:1},{z:"XL",stock:34,sold:1}] },
+      price:139900, revenue:1958600,
+      sizes:[{z:"XS",stock:34,sold:1},{z:"S",stock:99,sold:2},{z:"M",stock:139,sold:9},{z:"L",stock:62,sold:1},{z:"XL",stock:34,sold:1}] },
     { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment",
       price:129900, revenue:129900,
       sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:44,sold:1},{z:"M",stock:55,sold:0},{z:"L",stock:30,sold:0},{z:"XL",stock:15,sold:0}] },
     { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory",
-      price:64900, revenue:1427800,
-      sizes:[{z:"Única",stock:127,sold:22}] },
+      price:64900, revenue:1752300,
+      sizes:[{z:"Única",stock:121,sold:27}] },
     { name:"Primavera Charm", mono:"PC", kind:"accessory",
-      price:143900, revenue:1726800,
-      sizes:[{z:"Única",stock:18,sold:12}] },
+      price:143900, revenue:1870700,
+      sizes:[{z:"Única",stock:17,sold:13}] },
   ];
   // <<<PRODUCTS_END>>>
 
@@ -473,33 +473,33 @@
   });
 
   // ---- Timestamp ----
-  // ===== Proyección / Forecast (RECALIBRADO 26 jul con 3 días de venta real) =====
-  // Modelo día a día: decaimiento post-lanzamiento + UGC (Semana 2) + Feria ×1.5 (1–10 ago).
-  // Base real: día 1 = 103 und/$14,7M · día 2 = 118 und/$18,8M (creció +28%, sin decaer).
+  // ===== Proyección / Forecast (RECALIBRADO 28 jul con 4 días completos de venta real) =====
+  // Modelo día a día desde el nivel actual (~74 und/día) + UGC (esta semana) + Feria ×1.5 (1–10 ago).
+  // Base real: d1=102 · d2=112 (pico) · d3=79 · d4=74 und → meseta alta ~75/día (promedio 92, $14,3M/día).
   const FORECAST = {
     scenarios: [
-      { name:"Conservador", units:1408, rev:215300000, d:"El impulso de lanzamiento se enfría rápido (τ≈5 d) hacia ~30 und/día; UGC y Feria (×1,35) aportan poco. Piso defensivo." },
-      { name:"Base (esperado)", units:2054, rev:314000000, base:true, d:"Decaimiento moderado hacia ~44 und/día, UGC publicando desde Semana 2 (×1,12) y Feria ×1,5 (1–10 ago). Pauta full escalando. Escenario central." },
-      { name:"Optimista", units:3227, rev:493300000, d:"El ritmo se sostiene alto (τ≈11 d, piso ~70), UGC con buen alcance (×1,25) y Feria ×1,6. Pauta muy eficiente." },
+      { name:"Conservador", units:1603, rev:250180000, d:"La meseta se enfría más rápido (τ≈8 d) hacia ~38 und/día; UGC y Feria (×1,35) aportan poco. Piso defensivo." },
+      { name:"Base (esperado)", units:2143, rev:334455000, base:true, d:"La meseta ~75/día se sostiene con UGC (×1,15) publicando esta semana y pico de Feria ×1,5 (1–10 ago), luego cede a ~65/día. Escenario central." },
+      { name:"Optimista", units:2769, rev:432150000, d:"El ritmo crece con UGC fuerte (×1,28) y Feria ×1,65 (τ≈20 d, piso ~68). Pauta muy eficiente y buen alcance viral." },
     ],
     weeks: [
-      { label:"Semana 1 · 24–30 jul", units:688, rev:105182000, tag:"Lanzamiento (días 1–2 reales)" },
-      { label:"Semana 2 · 31 jul–6 ago", units:698, rev:106711000, tag:"🌸 UGC + Feria arranca" },
-      { label:"Semana 3 · 7–13 ago", units:511, rev:78122000, tag:"🌸 Pico Feria (hasta 10 ago)" },
-      { label:"Cierre · 14–16 ago", units:157, rev:24002000, tag:"Cola post‑Feria" },
+      { label:"Semana 1 · 24–30 jul", units:595, rev:92860000, tag:"Lanzamiento (días 1–4 reales)" },
+      { label:"Semana 2 · 31 jul–6 ago", units:740, rev:115491000, tag:"🌸 UGC + Feria arranca" },
+      { label:"Semana 3 · 7–13 ago", units:613, rev:95670000, tag:"🌸 Pico Feria (hasta 10 ago)" },
+      { label:"Cierre · 14–16 ago", units:195, rev:30433000, tag:"Cola post‑Feria" },
     ],
     // Prorrateo por mezcla actual, ajustado por inventario en refs sin reposición.
     products: [
-      { name:"🎀 Kit · Mesh", units:514, rev:118053650 },
-      { name:"🎀 Kit · T‑Shirt", units:146, rev:33477901 },
-      { name:"Medellín Mi Amor Mesh Shirt", units:536, rev:75055306, cap:"requiere reprogramación (demanda &gt; stock 601)" },
-      { name:"Un Guarito T‑Shirt", units:184, rev:23893845 },
-      { name:"Abanico Medellín Mi Amor", units:238, rev:14231614 },
-      { name:"Eterna Primavera Mesh Shirt", units:92, rev:12866624 },
-      { name:"Bloom Mesh Shirt", units:92, rev:12866624 },
-      { name:"Medellín Mi Amor Headkerchief", units:150, rev:9735000, cap:"capado a stock (129 und + 21 vendidas)" },
-      { name:"Primavera Charm", units:30, rev:4317000, cap:"capado: solo 19 und y sin reposición" },
-      { name:"Eterna Primavera T‑Shirt", units:8, rev:995577 },
+      { name:"🎀 Kit · Mesh", units:556, rev:127779527 },
+      { name:"Medellín Mi Amor Mesh Shirt", units:625, rev:87376528, cap:"requiere reprogramación (demanda &gt; stock 527)" },
+      { name:"🎀 Kit · T‑Shirt", units:166, rev:38202127 },
+      { name:"Un Guarito T‑Shirt", units:201, rev:26051202 },
+      { name:"Abanico Medellín Mi Amor", units:212, rev:12699280 },
+      { name:"Eterna Primavera Mesh Shirt", units:80, rev:11222673 },
+      { name:"Bloom Mesh Shirt", units:69, rev:9619434 },
+      { name:"Medellín Mi Amor Headkerchief", units:148, rev:9605200, cap:"capado a stock (121 und)" },
+      { name:"Primavera Charm", units:30, rev:4317000, cap:"capado: solo 17 und y sin reposición" },
+      { name:"Eterna Primavera T‑Shirt", units:6, rev:744320 },
     ],
   };
 
@@ -526,15 +526,15 @@
   </table>`;
 
   document.getElementById('fcAssume').innerHTML = `
-    <h4>Supuestos del modelo · recalibrado con 3 días reales (26 jul)</h4>
+    <h4>Supuestos del modelo · recalibrado con 4 días completos (28 jul)</h4>
     <ul>
-      <li><b>Base de cálculo:</b> ventas <b>reales</b> día 1 = 103 und/$14,7M y día 2 = 118 und/$18,8M. La campaña <b>creció +28% del día 1 al 2</b> (sin decaimiento). Ritmo actual ≈ 110 und/día.</li>
-      <li><b>Decaimiento:</b> se modela un enfriamiento post‑lanzamiento (la novedad se atenúa aunque la pauta siga) con vida‑media τ≈6,5 días en el escenario base, hacia un piso de ~44 und/día.</li>
-      <li><b>Pauta:</b> $20M COP <b>activa a full desde el día 1</b> y escalando hacia Feria — el ritmo actual <b>ya la incluye</b>, no hay un "encendido" pendiente.</li>
-      <li><b>CRM + creadores:</b> <b>2 emails/semana</b> a Klaviyo (&gt;15.000) sostenidos + <b>15 UGC que empiezan a publicar en Semana 2</b> → catalizador nuevo que sostiene/empuja el ritmo; los <b>kits podrían sobre‑indexar</b>.</li>
-      <li><b>Feria de las Flores (1–10 ago):</b> multiplicador <b>×1,5 (moderado)</b> sobre el ritmo diario base en esos días.</li>
-      <li><b>Ticket promedio:</b> $152.881/u (mezcla actual, con kits sobre‑indexando).</li>
-      <li><b>Inventario:</b> la <b>Mesh</b> (kit+suelto) proyecta ~1.050 und &gt; stock 601 → depende de la <b>reprogramación en curso</b>. <b>Charm</b> (19 und) y <b>Headkerchief</b> van <b>capados</b> por no tener reposición → hay ~$8M de demanda de Charm no capturable.</li>
+      <li><b>Base de cálculo:</b> ventas <b>reales</b> d1=102 · d2=112 (pico) · d3=79 · d4=74 und. Tras el pico del día 2, la campaña se asentó en una <b>meseta alta de ~75 und/día</b> (promedio 92/día, $14,3M/día) — no un desplome.</li>
+      <li><b>Trayectoria:</b> se modela desde el <b>nivel actual (~74 und/día)</b> con una cesión suave (τ≈12 días en base) hacia un piso de ~52–65 und/día, no desde el pico.</li>
+      <li><b>Pauta:</b> $20M COP <b>activa a full</b> y escalando hacia Feria — el ritmo actual <b>ya la incluye</b>.</li>
+      <li><b>CRM + creadores:</b> <b>2 emails/semana</b> a Klaviyo (&gt;15.000) + <b>15 UGC que empiezan a publicar esta semana</b> → catalizador que sostiene/empuja el ritmo (×1,15 en base); los <b>kits sobre‑indexan</b> (34% de las unidades).</li>
+      <li><b>Feria de las Flores (1–10 ago):</b> multiplicador <b>×1,5 (moderado)</b> sobre el ritmo diario en esos días (2.º pico de la ventana).</li>
+      <li><b>Ticket promedio:</b> $156.069/u (mezcla actual).</li>
+      <li><b>Inventario:</b> la <b>Mesh</b> (kit+suelto) proyecta ~1.180 und &gt; stock 527 → depende de la <b>reprogramación en curso</b> (ya bajó de 601 a 527 en 2 días). <b>Charm</b> (17 und) y <b>Headkerchief</b> (121 und) van <b>capados</b> por no tener reposición.</li>
       <li><b>No es una promesa:</b> modelo sensible a la ejecución (eficiencia de pauta, alcance real de UGC y afluencia de Feria). Se recalibra con más días de curva.</li>
     </ul>`;
 

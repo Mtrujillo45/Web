@@ -211,6 +211,15 @@
   .fc-gap { height: 16px; }
   tbody tr.fcweek td:first-child { font-weight: 600; }
   @media (max-width: 860px) { .fc-scen { grid-template-columns: 1fr; } }
+
+  /* Anexo mayorista */
+  .inv-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; }
+  .inv-title { font-family: var(--serif); font-size: 17px; font-weight: 700; }
+  .inv-meta { font-size: 12.5px; color: var(--ink-muted); margin-top: 3px; }
+  .mono-sku { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 5px; padding: 1px 6px; }
+  #mayorista tbody tr.nc td { color: var(--ink-muted); }
+  #mayorista tbody tr.nc td:nth-child(2)::after { content: ""; }
+  #mayorista tfoot tr:first-child td { color: var(--bloom-ink); font-weight: 700; }
 </style>
 
 <header>
@@ -282,6 +291,14 @@
     <div class="fc-gap"></div>
     <div class="tbl-wrap" id="fcProducts"></div>
     <div class="fc-assume" id="fcAssume"></div>
+  </section>
+
+  <section id="mayorista">
+    <div class="sec-head">
+      <h2>Anexo · Canal mayorista <span class="count g">B2B</span></h2>
+      <span class="sec-note">Ventas a mayoristas · precios al por mayor · adicional al ecommerce retail</span>
+    </div>
+    <div id="wholesale"></div>
   </section>
 
   <footer>
@@ -471,6 +488,69 @@
     gView.classList.toggle('hidden', showTable);
     tBtn.textContent = showTable ? 'Ver tarjetas' : 'Ver tabla';
   });
+
+  // ===== Anexo canal mayorista (facturas B2B, precios al por mayor) =====
+  const WHOLESALE = [
+    { client:"CASA VIVA (18 Razones S.A.S.)", nit:"901898267", city:"Medellín",
+      number:"RFEL 8186", date:"27 jul 2026", pay:"Crédito",
+      subtotal:9778059, iva:1857831, total:11635890, qty:123,
+      lines:[
+        { sku:"30CA36/MED-S",  name:"Medellín Mi Amor Mesh Shirt", size:"S", qty:23, unit:82294,  total:1892765, camp:true },
+        { sku:"30CA36/MED-M",  name:"Medellín Mi Amor Mesh Shirt", size:"M", qty:33, unit:82294,  total:2715706, camp:true },
+        { sku:"30CA36/MED-L",  name:"Medellín Mi Amor Mesh Shirt", size:"L", qty:20, unit:82294,  total:1645882, camp:true },
+        { sku:"30KE21/MED-UN", name:"Medellín Mi Amor Headkerchief", size:"UN", qty:11, unit:38176, total:419941, camp:true },
+        { sku:"30KMMA21/MEDS", name:"🎀 Kit · Mesh", size:"S", qty:1, unit:135235, total:135235, camp:true },
+        { sku:"30KMMA21/MEDM", name:"🎀 Kit · Mesh", size:"M", qty:1, unit:135235, total:135235, camp:true },
+        { sku:"30KMMA21/MEDL", name:"🎀 Kit · Mesh", size:"L", qty:1, unit:135235, total:135235, camp:true },
+        { sku:"30KMMA22/MEDS", name:"🎀 Kit · Un Guarito T‑Shirt", size:"S", qty:1, unit:135235, total:135235, camp:true },
+        { sku:"30KMMA22/MEDM", name:"🎀 Kit · Un Guarito T‑Shirt", size:"M", qty:1, unit:135235, total:135235, camp:true },
+        { sku:"30KMMA22/MEDL", name:"🎀 Kit · Un Guarito T‑Shirt", size:"L", qty:1, unit:135235, total:135235, camp:true },
+        { sku:"28CA36/COL-S",  name:"Colombia Mesh Shirt (otra colección)", size:"S", qty:10, unit:76412, total:764118, camp:false },
+        { sku:"28CA36/COL-M",  name:"Colombia Mesh Shirt (otra colección)", size:"M", qty:10, unit:76412, total:764118, camp:false },
+        { sku:"28CA36/COL-L",  name:"Colombia Mesh Shirt (otra colección)", size:"L", qty:10, unit:76412, total:764118, camp:false },
+      ] },
+  ];
+
+  (function renderWholesale(){
+    const host = document.getElementById('wholesale');
+    if (!host) return;
+    host.innerHTML = WHOLESALE.map(inv=>{
+      const campUnits = inv.lines.filter(l=>l.camp).reduce((a,l)=>a+l.qty,0);
+      const campSub   = inv.lines.filter(l=>l.camp).reduce((a,l)=>a+l.total,0);
+      const rows = inv.lines.map(l=>`<tr class="${l.camp?'':'nc'}">
+        <td><span class="mono-sku">${l.sku}</span></td>
+        <td>${l.name}</td><td style="text-align:center">${l.size}</td>
+        <td>${num(l.qty)}</td><td>${cop(l.unit)}</td><td>${cop(l.total)}</td>
+        <td style="text-align:center">${l.camp?'🌸':'—'}</td></tr>`).join('');
+      return `
+      <div class="inv-head">
+        <div>
+          <div class="inv-title">Factura ${inv.number}</div>
+          <div class="inv-meta">${inv.client} · NIT ${inv.nit} · ${inv.city} · ${inv.date} · ${inv.pay}</div>
+        </div>
+        <span class="pill on">🌸 ${num(campUnits)} und Medellín Mi Amor</span>
+      </div>
+      <div class="kpis" style="margin-top:14px">
+        <div class="kpi"><div class="klabel">Total facturado</div><div class="kval">${cop(inv.total)}</div><div class="kmeta">IVA incl. · subtotal ${cop(inv.subtotal)} + IVA ${cop(inv.iva)}</div></div>
+        <div class="kpi"><div class="klabel">Unidades (13 ítems)</div><div class="kval">${num(inv.qty)}</div><div class="kmeta">${num(campUnits)} de la campaña · ${num(inv.qty-campUnits)} otras colecciones</div></div>
+        <div class="kpi bloom"><div class="klabel">Subtotal Medellín Mi Amor</div><div class="kval">${cop(campSub)}</div><div class="kmeta">antes de IVA · precio mayorista</div></div>
+        <div class="kpi"><div class="klabel">Ticket promedio mayorista</div><div class="kval" style="font-size:20px">${cop(Math.round(inv.subtotal/inv.qty))}</div><div class="kmeta">por unidad (sin IVA)</div></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th>SKU</th><th>Referencia</th><th style="text-align:center">Talla</th><th>Cant.</th><th>Vr. unitario</th><th>Total</th><th style="text-align:center">Camp.</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr><td colspan="5">Subtotal Medellín Mi Amor 🌸 (${num(campUnits)} und)</td><td>${cop(campSub)}</td><td></td></tr>
+            <tr><td colspan="3">Subtotal factura</td><td>${num(inv.qty)}</td><td>—</td><td>${cop(inv.subtotal)}</td><td></td></tr>
+            <tr><td colspan="5">IVA (19%)</td><td>${cop(inv.iva)}</td><td></td></tr>
+            <tr><td colspan="5"><b>Total de la operación</b></td><td><b>${cop(inv.total)}</b></td><td></td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="note" style="margin-top:12px">ℹ️ Venta <b>mayorista (B2B) a crédito</b>, a precio al por mayor — no se suma a los KPIs de ecommerce retail de arriba (que son ventas directas a consumidor). Se anexa como canal aparte. La línea <b>Colombia Mesh Shirt</b> es de otra colección (no Medellín Mi Amor).</div>`;
+    }).join('');
+  })();
 
   // ---- Timestamp ----
   // ===== Proyección / Forecast (RECALIBRADO 28 jul con 4 días completos de venta real) =====

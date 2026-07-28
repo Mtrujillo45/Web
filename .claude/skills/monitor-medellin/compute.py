@@ -74,8 +74,12 @@ def load_inventory(path):
 
 def compute(orders, inv):
     # acumuladores de UNIDADES vendidas (netas, solo pedidos PAID)
-    kitT   = new_sizemap()   # kit t-shirt por talla (prenda = un guarito a precio de kit)
-    kitM   = new_sizemap()   # kit mesh por talla
+    # KITS: se separan VIEJOS (prenda + abanico + botella) de NUEVOS (prenda +
+    # botella + cosmetiquera, SIN abanico). La botella (aguardiente) cierra cada
+    # kit; si el bloque trae abanico -> viejo, si no -> nuevo.
+    kitT_old = new_sizemap(); kitT_new = new_sizemap()   # kit t-shirt (Un Guarito)
+    kitM_old = new_sizemap(); kitM_new = new_sizemap()   # kit mesh
+    rev_new_T = 0.0; rev_new_M = 0.0                      # ingreso real de kits nuevos
     ugStd  = new_sizemap()   # un guarito suelta
     meshStd= new_sizemap()   # mesh shirt suelta
     bloom  = new_sizemap()
@@ -96,6 +100,11 @@ def compute(orders, inv):
         if st != "PAID":     # PENDING u otros no cuentan como venta
             pend += 1
             continue
+
+        # buffers del bloque de kit en curso (se resuelven al llegar la botella)
+        seg = []       # [ ['T'/'M', size, qty, unit], ... ] prendas a precio de kit
+        seg_aba = 0    # abanicos a precio de kit acumulados en el bloque
+
         for le in o["lineItems"]["edges"]:
             n = le["node"]
             sku = n.get("sku") or ""
@@ -106,17 +115,36 @@ def compute(orders, inv):
             unit = total / qty if qty else 0.0
 
             if sku == AGUA_SKU:
-                agua_units += qty
+                # La botella cierra 'qty' kits. Con abanico = viejos; sin = nuevos.
+                A = qty
+                agua_units += A
+                old_left = min(seg_aba, A)   # nº de kits viejos en el bloque
+                need = A
+                for gp in seg:               # gp = [type, size, qty, unit]
+                    if need <= 0: break
+                    take = min(gp[2], need); need -= take; gp[2] -= take
+                    o_take = min(old_left, take); old_left -= o_take
+                    n_take = take - o_take
+                    sz = gp[1] if gp[1] in SIZES else None
+                    if not sz: continue
+                    if gp[0] == 'T':
+                        kitT_old[sz] += o_take; kitT_new[sz] += n_take
+                        rev_new_T += gp[3] * n_take
+                    else:
+                        kitM_old[sz] += o_take; kitM_new[sz] += n_take
+                        rev_new_M += gp[3] * n_take
+                seg = []; seg_aba = 0
                 continue
+
             if prod == GUARITO:
-                tgt = kitT if unit >= 143000 else ugStd
-                if size in tgt: tgt[size] += qty
+                if unit >= 143000: seg.append(['T', size, qty, unit])
+                elif size in ugStd: ugStd[size] += qty
             elif prod == MESH:
-                tgt = kitM if unit >= 150000 else meshStd
-                if size in tgt: tgt[size] += qty
+                if unit >= 150000: seg.append(['M', size, qty, unit])
+                elif size in meshStd: meshStd[size] += qty
             elif prod == ABANICO:
-                if unit <= 63000:        # suelto (59.900); si es más caro va dentro de un kit
-                    abanico += qty
+                if unit <= 63000: abanico += qty     # suelto (59.900)
+                else: seg_aba += qty                 # dentro de un kit viejo
             elif prod == HK:
                 hk += qty
             elif prod == CHARM:
@@ -128,12 +156,18 @@ def compute(orders, inv):
             elif prod == ETT:
                 if size in ett: ett[size] += qty
 
-    kits_total = sum(kitT.values()) + sum(kitM.values())
+    kits_old = sum(kitT_old.values()) + sum(kitM_old.values())
+    kits_new = sum(kitT_new.values()) + sum(kitM_new.values())
+    kits_total = kits_old + kits_new
     validation = {"kits_por_prenda": kits_total, "aguardientes": agua_units,
-                  "cuadra": kits_total == agua_units}
+                  "cuadra": kits_total == agua_units, "kits_nuevos": kits_new}
 
     return {
-        "kitT": kitT, "kitM": kitM, "ugStd": ugStd, "meshStd": meshStd,
+        "kitT_old": kitT_old, "kitT_new": kitT_new,
+        "kitM_old": kitM_old, "kitM_new": kitM_new,
+        "rev_new_T": rev_new_T, "rev_new_M": rev_new_M,
+        "kits_old": kits_old, "kits_new": kits_new,
+        "ugStd": ugStd, "meshStd": meshStd,
         "bloom": bloom, "etm": etm, "ett": ett,
         "abanico": abanico, "hk": hk, "charm": charm,
         "refunds": refunds, "pending": pend, "validation": validation,
@@ -154,15 +188,24 @@ def single_entry(sold, inv_prod):
 def build_products(c, inv):
     g = lambda k: inv.get(k, {"total": 0, "by": {}})
     P = []
-    # Kits (comparten inventario con su prenda componente)
-    P.append({"name": "Kit · T‑Shirt", "full": "Kit Medellín Mi Amor · T‑Shirt", "mono": "🎀", "kind": "kit",
-              "price": KIT_PRICE, "revenue": sum(c["kitT"].values()) * KIT_PRICE, "buildable": g(GUARITO)["total"],
+    # Kits (comparten inventario con su prenda componente).
+    # VIEJOS = prenda + abanico + botella.  NUEVOS = prenda + botella + cosmetiquera (sin abanico).
+    P.append({"name": "Kit · T‑Shirt", "full": "Kit Medellín Mi Amor · T‑Shirt", "mono": "🎀", "kind": "kit", "gar": "T",
+              "price": KIT_PRICE, "revenue": sum(c["kitT_old"].values()) * KIT_PRICE, "buildable": g(GUARITO)["total"],
               "note": "Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
-              "sizes": sized_entry(c["kitT"], g(GUARITO))})
-    P.append({"name": "Kit · Mesh", "full": "Kit Medellín Mi Amor · Mesh", "mono": "🎀", "kind": "kit",
-              "price": KIT_PRICE, "revenue": sum(c["kitM"].values()) * KIT_PRICE, "buildable": g(MESH)["total"],
+              "sizes": sized_entry(c["kitT_old"], g(GUARITO))})
+    P.append({"name": "Kit · Mesh", "full": "Kit Medellín Mi Amor · Mesh", "mono": "🎀", "kind": "kit", "gar": "M",
+              "price": KIT_PRICE, "revenue": sum(c["kitM_old"].values()) * KIT_PRICE, "buildable": g(MESH)["total"],
               "note": "Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
-              "sizes": sized_entry(c["kitM"], g(MESH))})
+              "sizes": sized_entry(c["kitM_old"], g(MESH))})
+    P.append({"name": "Kit Nuevo · T‑Shirt", "full": "Kit Nuevo Medellín Mi Amor · T‑Shirt", "mono": "🍾", "kind": "kit", "gar": "T",
+              "price": KIT_PRICE, "revenue": round(c["rev_new_T"]), "buildable": g(GUARITO)["total"],
+              "note": "Un Guarito + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Un Guarito».",
+              "sizes": sized_entry(c["kitT_new"], g(GUARITO))})
+    P.append({"name": "Kit Nuevo · Mesh", "full": "Kit Nuevo Medellín Mi Amor · Mesh", "mono": "🍾", "kind": "kit", "gar": "M",
+              "price": KIT_PRICE, "revenue": round(c["rev_new_M"]), "buildable": g(MESH)["total"],
+              "note": "Mesh Shirt + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Mesh Shirt».",
+              "sizes": sized_entry(c["kitM_new"], g(MESH))})
     # Prendas / accesorios individuales
     P.append({"name": "Un Guarito T‑Shirt", "mono": "UG", "kind": "garment", "price": 129900,
               "revenue": sum(c["ugStd"].values()) * 129900,
@@ -265,6 +308,7 @@ def main():
     v = c["validation"]
     flag = "OK" if v["cuadra"] else "⚠️ REVISAR"
     print(f"Validación kits: prenda={v['kits_por_prenda']} vs aguardientes={v['aguardientes']} -> {flag}")
+    print(f"  Kits viejos (con abanico): {c['kits_old']}  |  Kits NUEVOS (sin abanico): {c['kits_new']}")
     print(f"TOTALES -> unidades: {T['units']}  |  kits: {T['kits']}  |  ingresos brutos: ${T['revenue']:,.0f} COP")
     a = alerts(P)
     if a:

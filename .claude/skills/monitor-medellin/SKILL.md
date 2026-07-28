@@ -19,12 +19,20 @@ Salidas que mantiene sincronizadas:
 pedidos a mano. Si algo no cuadra, se arregla el script, no el resultado.
 
 La regla de negocio clave — **separar KITS de ventas SUELTAS** — vive en el script:
-- Un **kit** se detecta por la línea de aguardiente (SKU `30AGDT21/MEDSKU`): cada
-  aguardiente = 1 kit. La prenda y el abanico dentro del kit NO se cuentan como
+- Un **kit** se detecta por la línea de **botella/aguardiente** (SKU `30AGDT21/MEDSKU`):
+  cada botella = 1 kit. La prenda y el abanico dentro del kit NO se cuentan como
   ventas sueltas.
-- Se clasifica por **precio unitario**: la prenda a precio de kit (Guarito ≥143.000;
-  Mesh ≥150.000) es parte de un kit; a precio completo (129.900 / 139.900) es suelta.
-  El abanico a >63.000 es de kit; a 59.900 es suelto.
+- **Kit clásico 🎀 vs kit nuevo 🍾:** dentro de cada bloque de kit (la botella lo
+  cierra), si trae **abanico** es **clásico** (prenda + abanico + botella); si **no
+  trae abanico** es **nuevo** (prenda + botella + cosmetiquera, la cosmetiquera no
+  está creada como producto). `compute.py` agrupa las líneas por bloque y separa
+  `kitT_old/kitM_old` (con abanico) de `kitT_new/kitM_new` (sin abanico).
+- Se clasifica la prenda por **precio unitario**: la prenda a precio de kit (Guarito
+  ≥143.000; Mesh ≥150.000) es parte de un kit; a precio completo (129.900 / 139.900)
+  es suelta. El abanico a >63.000 es de kit clásico; a 59.900 es suelto.
+- El **ingreso del kit nuevo** se toma del monto real de la línea (aún sin precio
+  fijo confirmado); el del clásico es 229.900. Confirmar el precio del kit nuevo en
+  su primera venta.
 - Solo cuentan pedidos **PAID**; se excluyen **REFUNDED** (se reportan aparte) y los
   **PENDING** no cuentan como venta.
 

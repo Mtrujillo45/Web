@@ -270,7 +270,7 @@
   <section>
     <div class="sec-head">
       <h2>Kits <span class="count" id="kitCount"></span></h2>
-      <span class="sec-note">Cada kit = prenda + abanico + aguardiente ($229.900)</span>
+      <span class="sec-note">🎀 Kit clásico = prenda + abanico + botella · 🍾 Kit nuevo = prenda + botella + cosmetiquera (sin abanico)</span>
     </div>
     <div class="grid two" id="kitsGrid"></div>
   </section>
@@ -315,7 +315,7 @@
   <footer>
     <h3>Cómo se calculan estas cifras</h3>
     <ul>
-      <li><b>Kits vs. prendas sueltas:</b> se leen las <b>líneas de cada pedido</b>, no la analítica agregada. Un kit se detecta por su <b>aguardiente</b> (solo existe dentro de kits); su prenda y su abanico se atribuyen al kit, no al producto individual.</li>
+      <li><b>Kits vs. prendas sueltas:</b> se leen las <b>líneas de cada pedido</b>, no la analítica agregada. Un kit se detecta por su <b>botella</b> (aguardiente, solo existe dentro de kits). Si el kit <b>trae abanico</b> es <b>clásico 🎀</b>; si <b>no trae abanico</b> (lleva cosmetiquera) es <b>nuevo 🍾</b>. La prenda y el abanico se atribuyen al kit, no al producto individual.</li>
       <li><b>Unidades / Ingresos:</b> unidades netas vendidas e ingresos brutos (antes de impuestos) de pedidos pagados. Se excluyen pedidos reembolsados.</li>
       <li><b>Inventario compartido:</b> el Kit T‑Shirt consume una <b>Un Guarito</b> y el Kit Mesh una <b>Mesh Shirt</b>; su inventario es el mismo pool que el del producto individual (por eso no se suman dos veces en el total).</li>
       <li><b>Sell‑through</b> = unidades vendidas ÷ inventario inicial de la referencia.</li>
@@ -325,7 +325,7 @@
 </div>
 
 <script>
-  const GENERATED_AT = "2026-07-28T08:42:27-05:00";
+  const GENERATED_AT = "2026-07-28T18:47:30-05:00";
   const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
 
   // ===== Datos derivados de las LÍNEAS DE PEDIDO (pagados, netos de reembolsos) =====
@@ -333,28 +333,36 @@
   // <<<PRODUCTS_START>>> (auto-generado por compute.py — no editar a mano)
   const PRODUCTS = [
     { name:"Kit · T‑Shirt", full:"Kit Medellín Mi Amor · T‑Shirt", mono:"🎀", kind:"kit",
-      price:229900, revenue:6667100, buildable:674,
+      price:229900, revenue:7126900, buildable:669,
       note:"Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:101,sold:0},{z:"S",stock:226,sold:8},{z:"M",stock:270,sold:11},{z:"L",stock:73,sold:3},{z:"XL",stock:4,sold:7}] },
+      sizes:[{z:"XS",stock:99,sold:0},{z:"S",stock:225,sold:8},{z:"M",stock:269,sold:12},{z:"L",stock:73,sold:3},{z:"XL",stock:3,sold:8}] },
     { name:"Kit · Mesh", full:"Kit Medellín Mi Amor · Mesh", mono:"🎀", kind:"kit",
-      price:229900, revenue:22300300, buildable:527,
+      price:229900, revenue:24369400, buildable:507,
       note:"Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:91,sold:6},{z:"S",stock:253,sold:24},{z:"M",stock:112,sold:37},{z:"L",stock:55,sold:21},{z:"XL",stock:16,sold:9}] },
+      sizes:[{z:"XS",stock:88,sold:7},{z:"S",stock:250,sold:26},{z:"M",stock:105,sold:39},{z:"L",stock:48,sold:25},{z:"XL",stock:16,sold:9}] },
+    { name:"Kit Nuevo · T‑Shirt", full:"Kit Nuevo Medellín Mi Amor · T‑Shirt", mono:"🍾", kind:"kit",
+      price:229900, revenue:0, buildable:669,
+      note:"Un Guarito + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Un Guarito».",
+      sizes:[{z:"XS",stock:99,sold:0},{z:"S",stock:225,sold:0},{z:"M",stock:269,sold:0},{z:"L",stock:73,sold:0},{z:"XL",stock:3,sold:0}] },
+    { name:"Kit Nuevo · Mesh", full:"Kit Nuevo Medellín Mi Amor · Mesh", mono:"🍾", kind:"kit",
+      price:229900, revenue:0, buildable:507,
+      note:"Mesh Shirt + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Mesh Shirt».",
+      sizes:[{z:"XS",stock:88,sold:0},{z:"S",stock:250,sold:0},{z:"M",stock:105,sold:0},{z:"L",stock:48,sold:0},{z:"XL",stock:16,sold:0}] },
     { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment",
-      price:129900, revenue:4546500,
+      price:129900, revenue:4806300,
       note:"Inventario compartido con Kit T‑Shirt. El stock XL bajo es parcial: hay producción en camino.",
-      sizes:[{z:"XS",stock:101,sold:3},{z:"S",stock:226,sold:7},{z:"M",stock:270,sold:15},{z:"L",stock:73,sold:7},{z:"XL",stock:4,sold:3}] },
+      sizes:[{z:"XS",stock:99,sold:4},{z:"S",stock:225,sold:8},{z:"M",stock:269,sold:15},{z:"L",stock:73,sold:7},{z:"XL",stock:3,sold:3}] },
     { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment",
-      price:139900, revenue:15249100,
+      price:139900, revenue:16508200,
       note:"Inventario compartido con Kit Mesh. Reposición en producción.",
-      sizes:[{z:"XS",stock:91,sold:5},{z:"S",stock:253,sold:21},{z:"M",stock:112,sold:49},{z:"L",stock:55,sold:21},{z:"XL",stock:16,sold:13}] },
+      sizes:[{z:"XS",stock:88,sold:5},{z:"S",stock:250,sold:22},{z:"M",stock:105,sold:54},{z:"L",stock:48,sold:24},{z:"XL",stock:16,sold:13}] },
     { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory",
-      price:59900, revenue:2216300,
+      price:59900, revenue:2336100,
       note:"También se incluye 1 abanico dentro de cada kit (no contado aquí).",
-      sizes:[{z:"Única",stock:1175,sold:37}] },
+      sizes:[{z:"Única",stock:1159,sold:39}] },
     { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment",
-      price:139900, revenue:1678800,
-      sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:95,sold:4},{z:"M",stock:53,sold:5},{z:"L",stock:137,sold:3},{z:"XL",stock:14,sold:0}] },
+      price:139900, revenue:1818700,
+      sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:95,sold:4},{z:"M",stock:53,sold:5},{z:"L",stock:136,sold:4},{z:"XL",stock:14,sold:0}] },
     { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment",
       price:139900, revenue:1958600,
       sizes:[{z:"XS",stock:34,sold:1},{z:"S",stock:99,sold:2},{z:"M",stock:139,sold:9},{z:"L",stock:62,sold:1},{z:"XL",stock:34,sold:1}] },
@@ -362,11 +370,11 @@
       price:129900, revenue:129900,
       sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:44,sold:1},{z:"M",stock:55,sold:0},{z:"L",stock:30,sold:0},{z:"XL",stock:15,sold:0}] },
     { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory",
-      price:64900, revenue:1752300,
-      sizes:[{z:"Única",stock:121,sold:27}] },
+      price:64900, revenue:1817200,
+      sizes:[{z:"Única",stock:119,sold:28}] },
     { name:"Primavera Charm", mono:"PC", kind:"accessory",
       price:143900, revenue:1870700,
-      sizes:[{z:"Única",stock:17,sold:13}] },
+      sizes:[{z:"Única",stock:16,sold:13}] },
   ];
   // <<<PRODUCTS_END>>>
 
@@ -379,6 +387,9 @@
 
   const kits = PRODUCTS.filter(p=>p.kind==='kit');
   const individuals = PRODUCTS.filter(p=>p.kind!=='kit');
+  const kitsT = kits.filter(p=>p.name.includes('T‑Shirt')).reduce((a,p)=>a+p.sold,0);
+  const kitsM = kits.filter(p=>p.name.includes('Mesh')).reduce((a,p)=>a+p.sold,0);
+  const kitsNew = kits.filter(p=>p.name.includes('Nuevo')).reduce((a,p)=>a+p.sold,0);
 
   const totals = {
     revenue: PRODUCTS.reduce((a,p)=>a+p.revenue,0),
@@ -395,7 +406,7 @@
   // ---- KPIs ----
   document.getElementById('kpis').innerHTML = [
     { lab:"Ingresos brutos", val:cop(totals.revenue), meta:`${totals.units} unidades vendidas`, bloom:false },
-    { lab:"Kits vendidos", val:num(totals.kitsSold), meta:`${num(kits[0].sold)} T‑Shirt · ${num(kits[1].sold)} Mesh`, bloom:true },
+    { lab:"Kits vendidos", val:num(totals.kitsSold), meta:`${num(kitsT)} T‑Shirt · ${num(kitsM)} Mesh${kitsNew?` · ${num(kitsNew)} nuevos 🍾`:''}`, bloom:true },
     { lab:"Prendas/accesorios sueltos", val:num(totals.units-totals.kitsSold), meta:`${totals.withSales} referencias con venta`, bloom:false },
     { lab:"Inventario restante", val:num(totals.invRestante), meta:"unidades disponibles (sin doble conteo)", bloom:false },
   ].map(k=>`

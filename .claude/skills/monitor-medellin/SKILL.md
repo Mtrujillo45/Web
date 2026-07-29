@@ -30,9 +30,9 @@ La regla de negocio clave — **separar KITS de ventas SUELTAS** — vive en el 
 - Se clasifica la prenda por **precio unitario**: la prenda a precio de kit (Guarito
   ≥143.000; Mesh ≥150.000) es parte de un kit; a precio completo (129.900 / 139.900)
   es suelta. El abanico a >63.000 es de kit clásico; a 59.900 es suelto.
-- El **ingreso del kit nuevo** se toma del monto real de la línea (aún sin precio
-  fijo confirmado); el del clásico es 229.900. Confirmar el precio del kit nuevo en
-  su primera venta.
+- **Precios:** kit clásico 229.900; **kit nuevo 179.900** (la prenda del kit nuevo
+  se factura a 179.900 y la cosmetiquera va de obsequio $0). El ingreso del kit
+  nuevo se toma del monto real de la línea (coincide con 179.900 × unidades).
 - Solo cuentan pedidos **PAID**; se excluyen **REFUNDED** (se reportan aparte) y los
   **PENDING** no cuentan como venta.
 

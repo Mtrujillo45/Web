@@ -24,7 +24,8 @@ Uso:
 import json, re, sys, argparse, glob
 
 AGUA_SKU   = "30AGDT21/MEDSKU"          # aguardiente = marcador de kit (1 x kit)
-KIT_PRICE  = 229900
+KIT_PRICE  = 229900                     # kit clásico (prenda + abanico + botella)
+KIT_NEW_PRICE = 179900                  # kit nuevo (prenda + botella + cosmetiquera, sin abanico)
 ALERT_CRIT = 15
 
 # id de producto -> metadatos. 'kitprice_min' es el umbral de precio unitario
@@ -199,11 +200,11 @@ def build_products(c, inv):
               "note": "Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
               "sizes": sized_entry(c["kitM_old"], g(MESH))})
     P.append({"name": "Kit Nuevo · T‑Shirt", "full": "Kit Nuevo Medellín Mi Amor · T‑Shirt", "mono": "🍾", "kind": "kit", "gar": "T",
-              "price": KIT_PRICE, "revenue": round(c["rev_new_T"]), "buildable": g(GUARITO)["total"],
+              "price": KIT_NEW_PRICE, "revenue": round(c["rev_new_T"]), "buildable": g(GUARITO)["total"],
               "note": "Un Guarito + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Un Guarito».",
               "sizes": sized_entry(c["kitT_new"], g(GUARITO))})
     P.append({"name": "Kit Nuevo · Mesh", "full": "Kit Nuevo Medellín Mi Amor · Mesh", "mono": "🍾", "kind": "kit", "gar": "M",
-              "price": KIT_PRICE, "revenue": round(c["rev_new_M"]), "buildable": g(MESH)["total"],
+              "price": KIT_NEW_PRICE, "revenue": round(c["rev_new_M"]), "buildable": g(MESH)["total"],
               "note": "Mesh Shirt + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Mesh Shirt».",
               "sizes": sized_entry(c["kitM_new"], g(MESH))})
     # Prendas / accesorios individuales

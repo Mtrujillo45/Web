@@ -99,6 +99,12 @@
   .kpi .kval { font-family: var(--serif); font-size: clamp(22px, 3.2vw, 30px); font-weight: 700; margin-top: 8px; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
   .kpi .kmeta { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
 
+  .ivabar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; padding: 11px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); font-size: 13px; color: var(--ink-muted); }
+  .ivabar b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ivabar .sep { color: var(--border); }
+  .ivabar .lead { color: var(--accent-ink); font-weight: 700; }
+  tr.ivafoot td { font-weight: 400; color: var(--ink-muted); font-size: 12.5px; }
+
   section { margin-top: 34px; }
   .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
   h2 { font-family: var(--serif); font-size: 21px; font-weight: 700; margin: 0; letter-spacing: -.01em; display: flex; align-items: baseline; gap: 9px; }
@@ -258,11 +264,12 @@
   </div>
 
   <div class="kpis" id="kpis"></div>
+  <div class="ivabar" id="ivabar"></div>
 
   <section>
     <div class="sec-head">
       <h2>Ranking de ventas <span class="count">unidades</span></h2>
-      <span class="sec-note">🎀 kit · barra = unidades · etiqueta = ingresos brutos</span>
+      <span class="sec-note">🎀 kit · barra = unidades · etiqueta = ingresos con IVA</span>
     </div>
     <div class="panel" id="rank"></div>
   </section>
@@ -316,7 +323,7 @@
     <h3>Cómo se calculan estas cifras</h3>
     <ul>
       <li><b>Kits vs. prendas sueltas:</b> se leen las <b>líneas de cada pedido</b>, no la analítica agregada. Un kit se detecta por su <b>botella</b> (aguardiente, solo existe dentro de kits). Si el kit <b>trae abanico</b> es <b>clásico 🎀</b>; si <b>no trae abanico</b> (lleva cosmetiquera) es <b>nuevo 🍾</b>. La prenda y el abanico se atribuyen al kit, no al producto individual.</li>
-      <li><b>Unidades / Ingresos:</b> unidades netas vendidas e ingresos brutos (antes de impuestos) de pedidos pagados. Se excluyen pedidos reembolsados.</li>
+      <li><b>Unidades / Ingresos:</b> unidades netas vendidas e ingresos de pedidos pagados. La tienda vende con <b>IVA incluido</b>, así que los ingresos mostrados son <b>precio de venta al público (con IVA 19%)</b>; la base gravable sin IVA y el IVA contenido se muestran en el desglose bajo los indicadores. Se excluyen pedidos reembolsados.</li>
       <li><b>Inventario compartido:</b> el Kit T‑Shirt consume una <b>Un Guarito</b> y el Kit Mesh una <b>Mesh Shirt</b>; su inventario es el mismo pool que el del producto individual (por eso no se suman dos veces en el total).</li>
       <li><b>Sell‑through</b> = unidades vendidas ÷ inventario inicial de la referencia.</li>
       <li>Datos en vivo de la API de Shopify Admin. El enlace se vuelve a consultar y publicar automáticamente; usa <b>Actualizar</b> para recargar la última versión.</li>
@@ -327,6 +334,7 @@
 <script>
   const GENERATED_AT = "2026-07-29T07:56:37-05:00";
   const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
+  const IVA_RATE = 0.19; // tienda con IVA INCLUIDO: ingresos = precio de venta al público (con IVA)
 
   // ===== Datos derivados de las LÍNEAS DE PEDIDO (pagados, netos de reembolsos) =====
   // kind: 'kit' | 'garment' | 'accessory'
@@ -391,8 +399,11 @@
   const kitsM = kits.filter(p=>p.name.includes('Mesh')).reduce((a,p)=>a+p.sold,0);
   const kitsNew = kits.filter(p=>p.name.includes('Nuevo')).reduce((a,p)=>a+p.sold,0);
 
+  const revTotal = PRODUCTS.reduce((a,p)=>a+p.revenue,0);
   const totals = {
-    revenue: PRODUCTS.reduce((a,p)=>a+p.revenue,0),
+    revenue: revTotal,                       // ingresos con IVA (precio de venta al público)
+    base: revTotal / (1 + IVA_RATE),         // base gravable (sin IVA)
+    iva:  revTotal - revTotal / (1 + IVA_RATE), // IVA contenido (19%)
     units: PRODUCTS.reduce((a,p)=>a+p.sold,0),
     kitsSold: kits.reduce((a,p)=>a+p.sold,0),
     invRestante: individuals.reduce((a,p)=>a+p.stock,0), // sin kits (comparten pool)
@@ -405,7 +416,7 @@
 
   // ---- KPIs ----
   document.getElementById('kpis').innerHTML = [
-    { lab:"Ingresos brutos", val:cop(totals.revenue), meta:`${totals.units} unidades vendidas`, bloom:false },
+    { lab:"Ingresos (con IVA)", val:cop(totals.revenue), meta:`${totals.units} unidades · precio de venta al público`, bloom:false },
     { lab:"Kits vendidos", val:num(totals.kitsSold), meta:`${num(kitsT)} T‑Shirt · ${num(kitsM)} Mesh${kitsNew?` · ${num(kitsNew)} nuevos 🍾`:''}`, bloom:true },
     { lab:"Prendas/accesorios sueltos", val:num(totals.units-totals.kitsSold), meta:`${totals.withSales} referencias con venta`, bloom:false },
     { lab:"Inventario restante", val:num(totals.invRestante), meta:"unidades disponibles (sin doble conteo)", bloom:false },
@@ -415,6 +426,15 @@
       <div class="kval">${k.val}</div>
       <div class="kmeta">${k.meta}</div>
     </div>`).join('');
+
+  // Desglose de IVA: la tienda vende con IVA incluido, así que los ingresos son
+  // precio de venta al público. Mostramos base gravable e IVA contenido (19%).
+  document.getElementById('ivabar').innerHTML =
+    `<span class="lead">Desglose IVA</span>`
+    + `<span>De <b>${cop(totals.revenue)}</b> con IVA:</span>`
+    + `<span>base gravable <b>${cop(Math.round(totals.base))}</b> (sin IVA)</span>`
+    + `<span class="sep">+</span>`
+    + `<span>IVA 19% <b>${cop(Math.round(totals.iva))}</b></span>`;
 
   // ---- Ranking (kits + individuales juntos) ----
   const ranked = [...PRODUCTS].filter(p=>p.sold>0 || p.kind==='kit').sort((a,b)=> b.sold-a.sold || b.revenue-a.revenue);
@@ -452,7 +472,7 @@
       </div>
       <div class="stat-row">
         <div class="stat"><div class="s-lab">Vendid${isKit?'os':'as'}</div><div class="s-val">${num(p.sold)}</div><div class="s-sub">${isKit?'kits':'unidades'}</div></div>
-        <div class="stat"><div class="s-lab">Ingresos</div><div class="s-val" style="font-size:16px">${p.revenue>0?cop(p.revenue):'—'}</div><div class="s-sub">brutos</div></div>
+        <div class="stat"><div class="s-lab">Ingresos</div><div class="s-val" style="font-size:16px">${p.revenue>0?cop(p.revenue):'—'}</div><div class="s-sub">con IVA</div></div>
         <div class="stat"><div class="s-lab">${stockLabel}</div><div class="s-val">${num(p.stock)}</div><div class="s-sub">${isKit?'posibles':'disponible'}</div></div>
       </div>
       <div>
@@ -492,7 +512,7 @@
 
   // ---- Tabla ----
   document.getElementById('tableView').innerHTML = `<table>
-    <thead><tr><th>Referencia</th><th>Tipo</th><th>Precio</th><th>Vendidas</th><th>Ingresos brutos</th><th>Stock</th><th>Sell‑through</th></tr></thead>
+    <thead><tr><th>Referencia</th><th>Tipo</th><th>Precio</th><th>Vendidas</th><th>Ingresos (con IVA)</th><th>Stock</th><th>Sell‑through</th></tr></thead>
     <tbody>
       ${[...PRODUCTS].sort((a,b)=>(b.kind==='kit')-(a.kind==='kit') || b.sold-a.sold || b.revenue-a.revenue).map(p=>`<tr class="${p.kind==='kit'?'kitrow':''}">
         <td>${p.full||p.name}</td><td>${p.kind==='kit'?'Kit':(p.kind==='accessory'?'Accesorio':'Prenda')}</td>
@@ -500,7 +520,11 @@
         <td>${num(p.stock)}</td><td>${pct(p.sellThrough)}</td>
       </tr>`).join('')}
     </tbody>
-    <tfoot><tr><td>Total campaña</td><td>—</td><td>—</td><td>${num(totals.units)}</td><td>${cop(totals.revenue)}</td><td>${num(totals.invRestante)}</td><td>—</td></tr></tfoot>
+    <tfoot>
+      <tr><td>Total campaña <span style="color:var(--ink-muted);font-weight:400">(con IVA)</span></td><td>—</td><td>—</td><td>${num(totals.units)}</td><td>${cop(totals.revenue)}</td><td>${num(totals.invRestante)}</td><td>—</td></tr>
+      <tr class="ivafoot"><td>· Base gravable (sin IVA)</td><td>—</td><td>—</td><td>—</td><td>${cop(Math.round(totals.base))}</td><td>—</td><td>—</td></tr>
+      <tr class="ivafoot"><td>· IVA 19%</td><td>—</td><td>—</td><td>—</td><td>${cop(Math.round(totals.iva))}</td><td>—</td><td>—</td></tr>
+    </tfoot>
   </table>`;
 
   const tBtn = document.getElementById('toggleTable'), tView = document.getElementById('tableView'), gView = document.getElementById('grid');
@@ -615,14 +639,14 @@
 
   const fcWkTot = FORECAST.weeks.reduce((a,w)=>({units:a.units+w.units, rev:a.rev+w.rev}),{units:0,rev:0});
   document.getElementById('fcWeekly').innerHTML = `<table>
-    <thead><tr><th>Semana (escenario base)</th><th>Hito</th><th>Unidades</th><th>Ingresos brutos</th></tr></thead>
+    <thead><tr><th>Semana (escenario base)</th><th>Hito</th><th>Unidades</th><th>Ingresos (con IVA)</th></tr></thead>
     <tbody>${FORECAST.weeks.map(w=>`<tr class="fcweek"><td>${w.label}</td><td>${w.tag}</td><td>${num(w.units)}</td><td>${cop(w.rev)}</td></tr>`).join('')}</tbody>
     <tfoot><tr><td>Total ventana (24 días)</td><td>—</td><td>${num(fcWkTot.units)}</td><td>${cop(fcWkTot.rev)}</td></tr></tfoot>
   </table>`;
 
   const fcPrTot = FORECAST.products.reduce((a,p)=>({units:a.units+p.units, rev:a.rev+p.rev}),{units:0,rev:0});
   document.getElementById('fcProducts').innerHTML = `<table>
-    <thead><tr><th>Proyección por referencia (base, ajustada por inventario)</th><th>Unidades</th><th>Ingresos brutos</th><th>% ingresos</th></tr></thead>
+    <thead><tr><th>Proyección por referencia (base, ajustada por inventario)</th><th>Unidades</th><th>Ingresos (con IVA)</th><th>% ingresos</th></tr></thead>
     <tbody>${FORECAST.products.map(p=>`<tr><td>${p.name}${p.cap?`<br><span style="font-size:11px;color:var(--warn)">⚠ ${p.cap}</span>`:''}</td><td>${num(p.units)}</td><td>${cop(p.rev)}</td><td>${(p.rev/fcPrTot.rev*100).toLocaleString('es-CO',{maximumFractionDigits:1})}%</td></tr>`).join('')}</tbody>
     <tfoot><tr><td>Total campaña</td><td>${num(fcPrTot.units)}</td><td>${cop(fcPrTot.rev)}</td><td>100%</td></tr></tfoot>
   </table>`;

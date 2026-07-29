@@ -27,6 +27,9 @@ AGUA_SKU   = "30AGDT21/MEDSKU"          # aguardiente = marcador de kit (1 x kit
 KIT_PRICE  = 229900                     # kit clásico (prenda + abanico + botella)
 KIT_NEW_PRICE = 179900                  # kit nuevo (prenda + botella + cosmetiquera, sin abanico)
 ALERT_CRIT = 15
+IVA_RATE   = 0.19                       # la tienda vende con IVA INCLUIDO (taxesIncluded=true):
+                                        # los ingresos son precio de venta al público (con IVA).
+                                        # base gravable = ingresos / (1+IVA_RATE); IVA = ingresos - base.
 
 # id de producto -> metadatos. 'kitprice_min' es el umbral de precio unitario
 # por encima del cual una línea de esa prenda se considera parte de un KIT
@@ -310,7 +313,10 @@ def main():
     flag = "OK" if v["cuadra"] else "⚠️ REVISAR"
     print(f"Validación kits: prenda={v['kits_por_prenda']} vs aguardientes={v['aguardientes']} -> {flag}")
     print(f"  Kits viejos (con abanico): {c['kits_old']}  |  Kits NUEVOS (sin abanico): {c['kits_new']}")
-    print(f"TOTALES -> unidades: {T['units']}  |  kits: {T['kits']}  |  ingresos brutos: ${T['revenue']:,.0f} COP")
+    base = T['revenue'] / (1 + IVA_RATE)
+    iva  = T['revenue'] - base
+    print(f"TOTALES -> unidades: {T['units']}  |  kits: {T['kits']}  |  ingresos (con IVA): ${T['revenue']:,.0f} COP")
+    print(f"  Desglose IVA -> base gravable (sin IVA): ${base:,.0f}  |  IVA {IVA_RATE*100:.0f}%: ${iva:,.0f} COP")
     a = alerts(P)
     if a:
         print("ALERTAS de inventario (individuales):")

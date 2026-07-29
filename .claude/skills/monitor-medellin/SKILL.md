@@ -35,6 +35,12 @@ La regla de negocio clave — **separar KITS de ventas SUELTAS** — vive en el 
   nuevo se toma del monto real de la línea (coincide con 179.900 × unidades).
 - Solo cuentan pedidos **PAID**; se excluyen **REFUNDED** (se reportan aparte) y los
   **PENDING** no cuentan como venta.
+- **IVA (importante):** la tienda vende con **IVA INCLUIDO** (`shop.taxesIncluded =
+  true`). El campo `originalTotalSet` que suma el script ya trae el 19% adentro, así
+  que los **ingresos mostrados son precio de venta al público (CON IVA)** — NO son
+  "antes de impuestos". El dashboard muestra el desglose: base gravable = ingresos /
+  1,19; IVA contenido = ingresos − base (`IVA_RATE = 0.19` en `compute.py` y en el
+  JS). No rotular los ingresos como "brutos/antes de impuestos".
 
 ## Datos de referencia
 

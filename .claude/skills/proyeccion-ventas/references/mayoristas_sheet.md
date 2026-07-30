@@ -1,9 +1,15 @@
 # Hoja de registro de ventas mayoristas (Google Sheets)
 
-Vive en Google Sheets, en la cuenta de Mompossina, conectada vía el conector
-**Composio** (herramientas `mcp__Composio__*` — requieren que el conector esté
-habilitado en la conversación; si no aparecen, avisa al usuario que lo active
-en la configuración de conectores de esa sesión antes de continuar).
+Vive en Google Sheets, conectada vía el conector **Composio** (herramientas
+`mcp__Composio__*` — requieren que el conector esté habilitado en la
+conversación; si no aparecen, avisa al usuario que lo active en la
+configuración de conectores de esa sesión antes de continuar).
+
+- **Spreadsheet ID:** `1XU83Z83FWH-ch3W-siU6suDUDZjfJuqP-Z1arvGX6QQ`
+- **URL:** https://docs.google.com/spreadsheets/d/1XU83Z83FWH-ch3W-siU6suDUDZjfJuqP-Z1arvGX6QQ/edit
+- **Pestaña:** `Hoja 1`
+- Compartida con `operaciones@mompossina.com` (escritura). El dueño en Drive
+  es la cuenta Composio conectada al correo que corrió el skill la primera vez.
 
 Una fila por **línea de producto**, no por factura, para que sea directo sumar
 por referencia, talla, cliente o campaña sin tener que desanidar nada.
@@ -48,3 +54,12 @@ por referencia, talla, cliente o campaña sin tener que desanidar nada.
 No es un error — simplemente pasar `--wholesale-known 0` y omitir
 `--wholesale-pipeline`. El dashboard mostrará el mayorista en cero y lo dirá
 explícitamente, no lo oculta.
+
+## Quién escribe en la hoja
+
+`monitor-medellin` es el que **registra** facturas nuevas ahí (una fila por
+línea de producto) cada vez que el usuario comparte una factura de mayorista
+— ver su SKILL.md, sección "Anexo mayorista". Este skill (`proyeccion-ventas`)
+solo **lee** la hoja, nunca escribe. Al agregar filas, usar
+`GOOGLESHEETS_SPREADSHEETS_VALUES_APPEND` (no `_UPDATE`, para no pisar filas
+existentes) y mantener el orden exacto de columnas de la tabla de arriba.

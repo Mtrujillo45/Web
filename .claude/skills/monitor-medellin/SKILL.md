@@ -54,6 +54,7 @@ La regla de negocio clave — **separar KITS de ventas SUELTAS** — vive en el 
 | Rama | `claude/shopify-sales-dashboard-realtime-f7vcvu` |
 | Dashboard fuente (body-only) | `dashboard/medellin-dashboard.html` |
 | Web pública (full doc) | `index.html` |
+| Hoja mayoristas (Google Sheets) | `1XU83Z83FWH-ch3W-siU6suDUDZjfJuqP-Z1arvGX6QQ` — ver `references/mayoristas_sheet.md` |
 
 **IDs de producto** (los usa `compute.py`): Un Guarito `9481810510063` · Mesh Shirt
 `9481804185839` · Abanico `9481816473839` · Headkerchief `9481815949551` · Charm
@@ -140,6 +141,18 @@ git push origin claude/shopify-sales-dashboard-realtime-f7vcvu   # reintenta con
 
 **7. Reportar** en el chat: unidades, kits (T‑Shirt/Mesh), ingresos brutos, top de
 la campaña, y las alertas 🔥 (tallas que se venden y están en riesgo).
+
+## Anexo mayorista (facturas B2B)
+
+Cuando el usuario comparta una factura de un mayorista (Casa Viva, Wanita,
+etc.), ver `references/mayoristas_sheet.md` para el procedimiento completo:
+en resumen, registra cada línea en la hoja de Google Sheets compartida (el
+ledger histórico) y además refleja la factura en el arreglo `WHOLESALE` de
+`dashboard/medellin-dashboard.html` (sección "Anexo · Canal mayorista"), sin
+mezclarla con las ventas online de los pasos anteriores. Los SKU de estas
+facturas vienen del sistema de facturación del mayorista (ej. World Office),
+no de Shopify — mapea por nombre de producto, no por SKU literal. Los kits
+suelen listarse al final de la factura.
 
 ## Notas
 

@@ -544,6 +544,27 @@
         { sku:"28CA36/COL-M",  name:"Colombia Mesh Shirt (otra colección)", size:"M", qty:10, unit:76412, total:764118, camp:false },
         { sku:"28CA36/COL-L",  name:"Colombia Mesh Shirt (otra colección)", size:"L", qty:10, unit:76412, total:764118, camp:false },
       ] },
+    { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", nit:"901378220-5", city:"Medellín",
+      number:"RFEL 8193", date:"28 jul 2026", pay:"Crédito",
+      subtotal:9320975, iva:1770985, total:11091960, qty:132,
+      lines:[
+        { sku:"30CA36/MED-S",  name:"Medellín Mi Amor Mesh Shirt", size:"S", qty:15, unit:70538,  total:1058067, camp:true },
+        { sku:"30CA36/MED-M",  name:"Medellín Mi Amor Mesh Shirt", size:"M", qty:15, unit:70538,  total:1058067, camp:true },
+        { sku:"30CA36/MED-L",  name:"Medellín Mi Amor Mesh Shirt", size:"L", qty:10, unit:70538,  total:705378,  camp:true },
+        { sku:"30TSH20/GUA-S", name:"Un Guarito T‑Shirt", size:"S", qty:12, unit:65496, total:785950, camp:true },
+        { sku:"30TSH20/GUA-M", name:"Un Guarito T‑Shirt", size:"M", qty:12, unit:65496, total:785950, camp:true },
+        { sku:"30TSH20/GUA-L", name:"Un Guarito T‑Shirt", size:"L", qty:8,  unit:65496, total:523966, camp:true },
+        { sku:"30CA36/BLOO-S", name:"Bloom Mesh Shirt", size:"S", qty:12, unit:70538, total:846454, camp:true },
+        { sku:"30CA36/BLOO-M", name:"Bloom Mesh Shirt", size:"M", qty:12, unit:70538, total:846454, camp:true },
+        { sku:"30CA36/BLOO-L", name:"Bloom Mesh Shirt", size:"L", qty:8,  unit:70538, total:564303, camp:true },
+        { sku:"30KE21/MED-UN", name:"Medellín Mi Amor Headkerchief", size:"UN", qty:16, unit:32723, total:523563, camp:true },
+        { sku:"30KMMA21/MEDS", name:"🎀 Kit · Mesh", size:"S", qty:2, unit:135235, total:270471, camp:true },
+        { sku:"30KMMA21/MEDM", name:"🎀 Kit · Mesh", size:"M", qty:2, unit:135235, total:270471, camp:true },
+        { sku:"30KMMA21/MEDL", name:"🎀 Kit · Mesh", size:"L", qty:2, unit:135235, total:270471, camp:true },
+        { sku:"30KMMA22/MEDS", name:"🎀 Kit · Un Guarito T‑Shirt", size:"S", qty:2, unit:135235, total:270471, camp:true },
+        { sku:"30KMMA22/MEDM", name:"🎀 Kit · Un Guarito T‑Shirt", size:"M", qty:2, unit:135235, total:270471, camp:true },
+        { sku:"30KMMA22/MEDL", name:"🎀 Kit · Un Guarito T‑Shirt", size:"L", qty:2, unit:135235, total:270471, camp:true },
+      ] },
   ];
 
   (function renderWholesale(){
@@ -567,7 +588,7 @@
       </div>
       <div class="kpis" style="margin-top:14px">
         <div class="kpi"><div class="klabel">Total facturado</div><div class="kval">${cop(inv.total)}</div><div class="kmeta">IVA incl. · subtotal ${cop(inv.subtotal)} + IVA ${cop(inv.iva)}</div></div>
-        <div class="kpi"><div class="klabel">Unidades (13 ítems)</div><div class="kval">${num(inv.qty)}</div><div class="kmeta">${num(campUnits)} de la campaña · ${num(inv.qty-campUnits)} otras colecciones</div></div>
+        <div class="kpi"><div class="klabel">Unidades (${inv.lines.length} ítems)</div><div class="kval">${num(inv.qty)}</div><div class="kmeta">${num(campUnits)} de la campaña · ${num(inv.qty-campUnits)} otras colecciones</div></div>
         <div class="kpi bloom"><div class="klabel">Subtotal Medellín Mi Amor</div><div class="kval">${cop(campSub)}</div><div class="kmeta">antes de IVA · precio mayorista</div></div>
         <div class="kpi"><div class="klabel">Ticket promedio mayorista</div><div class="kval" style="font-size:20px">${cop(Math.round(inv.subtotal/inv.qty))}</div><div class="kmeta">por unidad (sin IVA)</div></div>
       </div>
@@ -583,7 +604,7 @@
           </tfoot>
         </table>
       </div>
-      <div class="note" style="margin-top:12px">ℹ️ Venta <b>mayorista (B2B) a crédito</b>, a precio al por mayor — no se suma a los KPIs de ecommerce retail de arriba (que son ventas directas a consumidor). Se anexa como canal aparte. La línea <b>Colombia Mesh Shirt</b> es de otra colección (no Medellín Mi Amor).</div>`;
+      <div class="note" style="margin-top:12px">ℹ️ Venta <b>mayorista (B2B) a crédito</b>, a precio al por mayor — no se suma a los KPIs de ecommerce retail de arriba (que son ventas directas a consumidor). Se anexa como canal aparte.${inv.lines.some(l=>!l.camp)?' Las líneas marcadas <b>—</b> en la columna Camp. son de otra colección (no Medellín Mi Amor).':''}</div>`;
     }).join('');
   })();
 

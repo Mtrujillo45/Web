@@ -147,12 +147,16 @@ la campaña, y las alertas 🔥 (tallas que se venden y están en riesgo).
 Cuando el usuario comparta una factura de un mayorista (Casa Viva, Wanita,
 etc.), ver `references/mayoristas_sheet.md` para el procedimiento completo:
 en resumen, registra cada línea en la hoja de Google Sheets compartida (el
-ledger histórico) y además refleja la factura en el arreglo `WHOLESALE` de
-`dashboard/medellin-dashboard.html` (sección "Anexo · Canal mayorista"), sin
-mezclarla con las ventas online de los pasos anteriores. Los SKU de estas
-facturas vienen del sistema de facturación del mayorista (ej. World Office),
-no de Shopify — mapea por nombre de producto, no por SKU literal. Los kits
-suelen listarse al final de la factura.
+ledger histórico, con su columna `estado`) y además actualiza el
+**consolidado** en `dashboard/medellin-dashboard.html` (sección "Anexo ·
+Canal mayorista": `WHOLESALE_INVOICES` + `WHOLESALE_PRODUCTS` + `CONSIGNMENT`)
+— NO como tarjeta de factura individual; el dashboard muestra ranking +
+tarjetas de kits/individuales igual que el online (sin talla en el ranking,
+sin stock/sell-through en las tarjetas), y el detalle línea por línea vive
+solo en la hoja. No mezcles esto con las ventas online de los pasos
+anteriores. Los SKU de estas facturas vienen del sistema de facturación del
+mayorista (ej. World Office), no de Shopify — mapea por nombre de producto,
+no por SKU literal. Los kits suelen listarse al final de la factura.
 
 ## Notas
 

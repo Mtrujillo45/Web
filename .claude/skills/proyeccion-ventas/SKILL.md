@@ -130,6 +130,17 @@ tanto, dejándolo explícito en el resumen que le des al usuario.
   ("Casa Viva probablemente reponga ~$8M en agosto"), arma
   `pipeline.json` con esa información y su nivel de certeza — no lo inventes,
   pregúntale al usuario si no lo ha mencionado.
+- Si el usuario NO tiene pedidos concretos pero pide proyectar el mayorista
+  "con base en el ritmo de esta semana" (cadencia), puedes derivar el
+  pipeline tú mismo: por cliente, `monto_promedio_por_pedido` (de los pedidos
+  confirmados en la ventana) × cuántos pedidos más caben antes del horizonte
+  que te dio el usuario. Si la cadencia observada es muy apretada (ej. 3
+  pedidos en 3 días seguidos), NO extrapoles eso literalmente — probablemente
+  es una ráfaga de lanzamiento, no un ritmo sostenible — usa un supuesto más
+  moderado (ej. "al menos 1 pedido más por cliente") y dilo explícitamente.
+  Marca esta entrada con certeza `"baja"` siempre, muestra la aritmética
+  completa (pedidos, fechas, promedio) en el resumen al usuario, e invita a
+  que la ajuste — esto no reemplaza que te confirme pedidos reales conocidos.
 
 ### Paso 4 — Eventos/campañas de marketing (opcional)
 

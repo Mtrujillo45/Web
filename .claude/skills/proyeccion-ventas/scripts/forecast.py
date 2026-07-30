@@ -48,11 +48,18 @@ from datetime import datetime, timedelta
 # 1. Ajuste de la curva a partir de la venta diaria real
 # ---------------------------------------------------------------------------
 
-def fit_decay(daily):
+def fit_decay(daily, floor_pct=0.55):
     """
     Estima un piso (floor) y una constante de decaimiento (tau) a partir de la
     serie diaria real. Modelo: rate(t) = floor + (peak - floor) * exp(-t/tau),
     con t = días transcurridos desde el día pico.
+
+    'floor_pct' es la fracción del promedio reciente que se asume como meseta
+    de régimen permanente (0.55 = 55%, el default histórico). Cada escenario
+    (conservador/base/optimista) le pasa su PROPIO floor_pct — no un único
+    piso fijo compartido — porque cuando tau es corto (caída rápida) el piso
+    es lo que más pesa en el total proyectado; variar solo tau_scale con un
+    piso compartido apenas mueve la aguja entre escenarios.
 
     tau se ajusta por REGRESIÓN sobre TODOS los días desde el pico en adelante
     (no solo el primero y el último): se linealiza el modelo tomando
@@ -60,6 +67,8 @@ def fit_decay(daily):
     importante porque significa que la proyección mejora sola con el tiempo —
     cada día real adicional después del pico se suma al ajuste y promedia el
     ruido día a día, en vez de quedar a merced de un solo día bueno o malo.
+    Como el piso cambia por escenario, tau también se reajusta por escenario
+    (los puntos por encima de un piso más alto/bajo no son los mismos).
 
     Si la venta del último día sigue en o por encima del pico (campaña todavía
     acelerando), no hay decaimiento que estimar: se devuelve tau=None y el
@@ -73,7 +82,7 @@ def fit_decay(daily):
     recent_n = min(7, len(rates))  # promedio de hasta 7 días: se estabiliza solo a medida que hay más historia
     recent_avg = sum(rates[-recent_n:]) / recent_n
 
-    floor = recent_avg * 0.55  # supuesto: la meseta de régimen permanente ronda 55% del ritmo reciente
+    floor = recent_avg * floor_pct
     dt = len(rates) - 1 - peak_idx
 
     # Puntos (t, log(rate - floor)) para cada día desde el pico en adelante donde
@@ -83,7 +92,7 @@ def fit_decay(daily):
            for i in range(peak_idx, len(rates)) if rates[i] > floor]
 
     if dt <= 0 or last >= peak or len(pts) < 2:
-        return {"floor": floor, "tau": None, "peak": peak, "peak_idx": peak_idx,
+        return {"floor": floor, "floor_pct": floor_pct, "tau": None, "peak": peak, "peak_idx": peak_idx,
                 "recent_avg": recent_avg, "last": last, "n_decay_points": len(pts)}
 
     n = len(pts)
@@ -102,7 +111,7 @@ def fit_decay(daily):
         slope = (n * sum_ty - sum_t * sum_y) / denom  # pendiente de log(rate-floor) vs t
         tau = max(-1 / slope, 1.0) if slope < 0 else dt / 3
 
-    return {"floor": floor, "tau": tau, "peak": peak, "peak_idx": peak_idx,
+    return {"floor": floor, "floor_pct": floor_pct, "tau": tau, "peak": peak, "peak_idx": peak_idx,
              "recent_avg": recent_avg, "last": last, "n_decay_points": len(pts)}
 
 
@@ -135,9 +144,9 @@ def project_daily_rate(fit, day_offset, tau_scale):
 # ---------------------------------------------------------------------------
 
 SCENARIOS = [
-    {"key": "conservador", "label": "Conservador", "tau_scale": 0.7, "mult_key": "mult_conservador"},
-    {"key": "base",        "label": "Base (esperado)", "tau_scale": 1.0, "mult_key": "mult_base", "is_base": True},
-    {"key": "optimista",   "label": "Optimista", "tau_scale": 1.3, "mult_key": "mult_optimista"},
+    {"key": "conservador", "label": "Conservador", "floor_pct": 0.40, "tau_scale": 0.7, "mult_key": "mult_conservador"},
+    {"key": "base",        "label": "Base (esperado)", "floor_pct": 0.55, "tau_scale": 1.0, "mult_key": "mult_base", "is_base": True},
+    {"key": "optimista",   "label": "Optimista", "floor_pct": 0.70, "tau_scale": 1.3, "mult_key": "mult_optimista"},
 ]
 
 
@@ -367,7 +376,8 @@ def scenario_card_html(sc, result):
     </div>"""
 
 
-def build_html(args, fit, scenario_results, weeks_base, wholesale, product_breakdown, events):
+def build_html(args, fits, scenario_results, weeks_base, wholesale, product_breakdown, events):
+    fit = fits["base"]
     scenario_cards = "".join(scenario_card_html(sc, scenario_results[sc["key"]]) for sc in SCENARIOS)
     weekly_rows = "".join(
         f"<tr><td>{w['label']}</td><td>{num(w['units'])}</td><td>{cop(w['revenue'])}</td></tr>"
@@ -410,10 +420,14 @@ def build_html(args, fit, scenario_results, weeks_base, wholesale, product_break
                          "hasta que haya más días para medir la tendencia real.</li>")
     else:
         conf = confidence_label(fit["n_decay_points"])
-        assume_extra += (f"<li><b>Confianza del ajuste:</b> <span class='pill {conf}'>{conf}</span> — basado en "
+        assume_extra += (f"<li><b>Confianza del ajuste (base):</b> <span class='pill {conf}'>{conf}</span> — basado en "
                           f"{fit['n_decay_points']} días reales desde el pico. Esta estimación se afina sola cada "
                           f"vez que corras el skill con un día más de venta real; con pocos días es normal (y más "
                           f"honesto) que el modelo sea conservador.</li>")
+    floor_pcts = "/".join(f"{int(fits[sc['key']]['floor_pct']*100)}%" for sc in SCENARIOS)
+    assume_extra += (f"<li><b>Los 3 escenarios varían el piso de venta</b> (conservador/base/optimista: {floor_pcts} "
+                      f"del promedio reciente) además de la velocidad de caída — así se separan de verdad en vez de "
+                      f"converger casi al mismo número cuando la caída es rápida.</li>")
     if events:
         ev_txt = "; ".join(f"{e['label']} ({e['start']}→{e['end']})" for e in events)
         assume_extra += f"<li><b>Eventos marcados:</b> {ev_txt}.</li>"
@@ -470,38 +484,45 @@ def main():
     if args.subtitle is None:
         args.subtitle = f"{len(daily)} días reales · proyectando {args.horizon_days} días adelante"
 
-    fit = fit_decay(daily)
     total_units_to_date = sum(d["units"] for d in daily)
     total_revenue_to_date = sum(d["revenue"] for d in daily)
-    fit["avg_ticket"] = total_revenue_to_date / total_units_to_date if total_units_to_date else 0
+    avg_ticket = total_revenue_to_date / total_units_to_date if total_units_to_date else 0
 
     last_date = datetime.strptime(daily[-1]["date"], "%Y-%m-%d")
 
+    # Cada escenario ajusta su PROPIO piso (y por tanto su propio tau) — no un
+    # piso único compartido — así conservador/base/optimista se separan de
+    # verdad en vez de converger casi al mismo número cuando tau es corto.
+    fits = {}
     scenario_results = {}
     for sc in SCENARIOS:
+        fit = fit_decay(daily, floor_pct=sc["floor_pct"])
+        fit["avg_ticket"] = avg_ticket
+        fits[sc["key"]] = fit
         scenario_results[sc["key"]] = build_scenario(fit, last_date, args.horizon_days, events, sc)
 
     weeks_base = weekly_buckets(scenario_results["base"]["rows"])
     wholesale = wholesale_summary(args.wholesale_known, pipeline)
     product_breakdown = build_product_breakdown(
         products, scenario_results["base"]["total_revenue"],
-        scenario_results["base"]["total_units"], fit["avg_ticket"]
+        scenario_results["base"]["total_units"], avg_ticket
     ) if products else None
 
-    conf = confidence_label(fit.get("n_decay_points"))
-    print(f"Ajuste de curva -> pico: {fit['peak']:.1f} u/día (día {fit['peak_idx']+1})  "
-          f"|  último real: {fit['last']:.1f} u/día  |  piso estimado: {fit['floor']:.1f} u/día  "
-          f"|  tau: {fit['tau'] if fit['tau'] is None else round(fit['tau'],1)}"
-          f"  |  confianza: {conf} ({fit.get('n_decay_points',0)} días desde el pico)")
     for sc in SCENARIOS:
+        fit = fits[sc["key"]]
+        conf = confidence_label(fit.get("n_decay_points"))
         r = scenario_results[sc["key"]]
-        print(f"  {sc['label']:18s} -> {r['total_units']:.0f} unidades  |  {cop(r['total_revenue'])} (en línea)")
+        print(f"{sc['label']:18s} (piso {int(fit['floor_pct']*100)}% -> {fit['floor']:.1f} u/día) "
+              f"pico: {fit['peak']:.1f} u/día (día {fit['peak_idx']+1})  |  último real: {fit['last']:.1f} u/día  "
+              f"|  tau: {fit['tau'] if fit['tau'] is None else round(fit['tau'],1)}  |  confianza: {conf} "
+              f"({fit.get('n_decay_points',0)} días desde el pico)")
+        print(f"  -> {r['total_units']:.0f} unidades  |  {cop(r['total_revenue'])} (en línea)")
     print(f"Mayorista -> facturado: {cop(wholesale['known'])}  |  pipeline: {cop(wholesale['pipeline_total'])}  "
           f"|  total: {cop(wholesale['total'])}")
     grand = scenario_results["base"]["total_revenue"] + wholesale["total"]
     print(f"TOTAL COMBINADO (base, en línea + mayorista): {cop(grand)}")
 
-    html = build_html(args, fit, scenario_results, weeks_base, wholesale, product_breakdown, events)
+    html = build_html(args, fits, scenario_results, weeks_base, wholesale, product_breakdown, events)
     with open(args.output_html, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"HTML escrito: {args.output_html}")

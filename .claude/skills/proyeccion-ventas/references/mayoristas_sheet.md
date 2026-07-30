@@ -33,12 +33,27 @@ por referencia, talla, cliente o campaña sin tener que desanidar nada.
 | `iva` | número | `359625` | |
 | `total` | número | `2252390` | `subtotal + iva` |
 | `campana` | texto | `Medellín Mi Amor` | Vacío si es venta mayorista normal sin campaña asociada |
+| `estado` | texto | `Facturada` | Ver valores válidos abajo |
+
+### Valores de `estado`
+
+| Valor | Significa | ¿Cuenta como `--wholesale-known`? |
+|---|---|---|
+| `Facturada` | Tiene factura electrónica (RFEL) emitida | Sí |
+| `Confirmada (pendiente factura)` | Pedido ya despachado/cobrado, factura RFEL aún no emitida por administración (queda como proforma en `numero_factura`) | Sí — es venta firme, solo falta el papeleo |
+| `Consignación` | Mercancía enviada a un mayorista SIN venderse todavía — el mayorista la vende después y ahí sí se reconoce el ingreso | **No** — no es venta, es inventario en tránsito. Excluir siempre de `--wholesale-known` |
 
 ## Cómo la usa el skill
 
-- **Ya facturado** (`--wholesale-known`): suma de `total` de todas las filas
-  cuya `fecha` cae dentro de la ventana que se está proyectando (o de toda la
-  hoja, si se está proyectando la tienda completa sin filtro de fecha).
+- **Ya facturado** (`--wholesale-known`): suma de `total` de las filas cuya
+  `fecha` cae dentro de la ventana que se está proyectando (o de toda la
+  hoja, si se está proyectando la tienda completa sin filtro de fecha) **y**
+  cuyo `estado` sea `Facturada` o `Confirmada (pendiente factura)`. Nunca
+  sumar filas con `estado = Consignación`.
+- Si hay consignación dentro del período, menciónala aparte en el resumen
+  (unidades y valor) como una nota informativa — no como ingreso — porque
+  representa mercancía que salió de inventario pero cuya venta real (y por
+  tanto el ingreso) todavía no ocurrió.
 - **Pipeline** (`--wholesale-pipeline`): esta hoja NO registra pedidos futuros
   todavía no facturados — esos se documentan aparte, a mano, en el momento de
   correr el skill (el usuario dice "Casa Viva probablemente reponga ~$8M en

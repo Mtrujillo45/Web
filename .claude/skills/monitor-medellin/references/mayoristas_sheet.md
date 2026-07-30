@@ -14,7 +14,7 @@ solo documenta el lado de **escritura**, que le corresponde a monitor-medellin.
 
 ## Columnas (una fila por línea de producto, no por factura)
 
-`fecha, cliente, nit, ciudad, numero_factura, forma_pago, sku, referencia, talla, cantidad, precio_unitario, subtotal, iva, total, campana`
+`fecha, cliente, nit, ciudad, numero_factura, forma_pago, sku, referencia, talla, cantidad, precio_unitario, subtotal, iva, total, campana, estado`
 
 - `subtotal` = `cantidad × precio_unitario` (antes de IVA).
 - `iva` = `round(subtotal × 0.19)`, `total` = `subtotal + iva`.
@@ -24,6 +24,20 @@ solo documenta el lado de **escritura**, que le corresponde a monitor-medellin.
   distinto a Shopify) — **puede no coincidir con el SKU de Shopify**. No lo
   fuerces a calzar; usa el nombre de `referencia` para mapear al producto real
   de la campaña.
+- `estado` — uno de tres valores:
+  - `Facturada`: tiene RFEL emitido.
+  - `Confirmada (pendiente factura)`: el mayorista ya recibió/pagó el pedido
+    pero administración todavía no le puso número de factura electrónica —
+    poner el número de la proforma en `numero_factura` (ej. `Proforma
+    280726MEDM`) como referencia hasta que llegue el RFEL real.
+  - `Consignación`: mercancía enviada sin venderse todavía — **no es venta**,
+    no se cuenta como ingreso hasta que el mayorista reporte que la vendió.
+    Solo cuando el usuario lo indique explícitamente (como con la proforma de
+    consignación de Wanita).
+- Si un proforma tiene los mismos valores línea por línea que otro ya
+  cargado (mismo cliente, mismas cantidades y totales) y el usuario confirma
+  que es un duplicado sin actualizar, **no lo cargues** — pregúntale primero
+  si no es obvio por contexto.
 
 ## Qué hacer cuando llega una factura nueva de mayorista
 

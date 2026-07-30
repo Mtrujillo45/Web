@@ -54,6 +54,13 @@ def fit_decay(daily):
     serie diaria real. Modelo: rate(t) = floor + (peak - floor) * exp(-t/tau),
     con t = días transcurridos desde el día pico.
 
+    tau se ajusta por REGRESIÓN sobre TODOS los días desde el pico en adelante
+    (no solo el primero y el último): se linealiza el modelo tomando
+    log(rate - floor) y se ajusta una recta por mínimos cuadrados. Esto es
+    importante porque significa que la proyección mejora sola con el tiempo —
+    cada día real adicional después del pico se suma al ajuste y promedia el
+    ruido día a día, en vez de quedar a merced de un solo día bueno o malo.
+
     Si la venta del último día sigue en o por encima del pico (campaña todavía
     acelerando), no hay decaimiento que estimar: se devuelve tau=None y el
     llamador debe tratarlo como "sin señal de caída aún" (se usa una meseta
@@ -63,25 +70,51 @@ def fit_decay(daily):
     peak_idx = max(range(len(rates)), key=lambda i: rates[i])
     peak = rates[peak_idx]
     last = rates[-1]
-    recent_n = min(3, len(rates))
+    recent_n = min(7, len(rates))  # promedio de hasta 7 días: se estabiliza solo a medida que hay más historia
     recent_avg = sum(rates[-recent_n:]) / recent_n
 
     floor = recent_avg * 0.55  # supuesto: la meseta de régimen permanente ronda 55% del ritmo reciente
     dt = len(rates) - 1 - peak_idx
 
-    if dt <= 0 or last >= peak or peak <= floor:
-        return {"floor": floor, "tau": None, "peak": peak, "peak_idx": peak_idx,
-                "recent_avg": recent_avg, "last": last}
+    # Puntos (t, log(rate - floor)) para cada día desde el pico en adelante donde
+    # la venta todavía está por encima del piso (si toca el piso o lo cruza, ese
+    # punto no aporta información al ajuste log-lineal).
+    pts = [(i - peak_idx, math.log(rates[i] - floor))
+           for i in range(peak_idx, len(rates)) if rates[i] > floor]
 
-    ratio = (last - floor) / (peak - floor)
-    if ratio <= 0:
-        tau = dt / 3  # caída más rápida de lo que el modelo puede resolver con logaritmo; usar un tau corto
+    if dt <= 0 or last >= peak or len(pts) < 2:
+        return {"floor": floor, "tau": None, "peak": peak, "peak_idx": peak_idx,
+                "recent_avg": recent_avg, "last": last, "n_decay_points": len(pts)}
+
+    n = len(pts)
+    sum_t = sum(p[0] for p in pts)
+    sum_y = sum(p[1] for p in pts)
+    sum_tt = sum(p[0] ** 2 for p in pts)
+    sum_ty = sum(p[0] * p[1] for p in pts)
+    denom = n * sum_tt - sum_t ** 2
+
+    if denom == 0:
+        # Todos los puntos caen en el mismo día (no debería pasar con dt>0), usar
+        # el ajuste de 2 puntos como respaldo.
+        ratio = (last - floor) / (peak - floor)
+        tau = dt / 3 if ratio <= 0 else max(-dt / math.log(ratio), 1.0)
     else:
-        tau = -dt / math.log(ratio)
-        tau = max(tau, 1.0)
+        slope = (n * sum_ty - sum_t * sum_y) / denom  # pendiente de log(rate-floor) vs t
+        tau = max(-1 / slope, 1.0) if slope < 0 else dt / 3
 
     return {"floor": floor, "tau": tau, "peak": peak, "peak_idx": peak_idx,
-             "recent_avg": recent_avg, "last": last}
+             "recent_avg": recent_avg, "last": last, "n_decay_points": len(pts)}
+
+
+def confidence_label(n_decay_points):
+    """Qué tan confiable es el tau ajustado, en función de cuántos días de caída hay."""
+    if n_decay_points is None or n_decay_points < 2:
+        return None
+    if n_decay_points < 4:
+        return "baja"
+    if n_decay_points < 8:
+        return "media"
+    return "alta"
 
 
 def project_daily_rate(fit, day_offset, tau_scale):
@@ -91,7 +124,6 @@ def project_daily_rate(fit, day_offset, tau_scale):
         # Sin señal de caída todavía: mantener el ritmo reciente (meseta plana).
         return fit["recent_avg"]
     tau = fit["tau"] * tau_scale
-    dt_from_peak = (len(fit.get("_rates", [])) or 0)  # no usado; se recalcula abajo con last como ancla
     # Ancla en el último día real observado (no en el pico) para que el día 0 de la
     # proyección empate exactamente con el último dato real.
     decayed_from_last = floor + (fit["last"] - floor) * math.exp(-day_offset / tau)
@@ -376,6 +408,12 @@ def build_html(args, fit, scenario_results, weeks_base, wholesale, product_break
         assume_extra = ("<li><b>Sin señal de caída todavía:</b> al último día real la venta seguía igual o por "
                          "encima del pico, así que el escenario base asume una meseta plana en vez de decaimiento "
                          "hasta que haya más días para medir la tendencia real.</li>")
+    else:
+        conf = confidence_label(fit["n_decay_points"])
+        assume_extra += (f"<li><b>Confianza del ajuste:</b> <span class='pill {conf}'>{conf}</span> — basado en "
+                          f"{fit['n_decay_points']} días reales desde el pico. Esta estimación se afina sola cada "
+                          f"vez que corras el skill con un día más de venta real; con pocos días es normal (y más "
+                          f"honesto) que el modelo sea conservador.</li>")
     if events:
         ev_txt = "; ".join(f"{e['label']} ({e['start']}→{e['end']})" for e in events)
         assume_extra += f"<li><b>Eventos marcados:</b> {ev_txt}.</li>"
@@ -450,9 +488,11 @@ def main():
         scenario_results["base"]["total_units"], fit["avg_ticket"]
     ) if products else None
 
+    conf = confidence_label(fit.get("n_decay_points"))
     print(f"Ajuste de curva -> pico: {fit['peak']:.1f} u/día (día {fit['peak_idx']+1})  "
           f"|  último real: {fit['last']:.1f} u/día  |  piso estimado: {fit['floor']:.1f} u/día  "
-          f"|  tau: {fit['tau'] if fit['tau'] is None else round(fit['tau'],1)}")
+          f"|  tau: {fit['tau'] if fit['tau'] is None else round(fit['tau'],1)}"
+          f"  |  confianza: {conf} ({fit.get('n_decay_points',0)} días desde el pico)")
     for sc in SCENARIOS:
         r = scenario_results[sc["key"]]
         print(f"  {sc['label']:18s} -> {r['total_units']:.0f} unidades  |  {cop(r['total_revenue'])} (en línea)")

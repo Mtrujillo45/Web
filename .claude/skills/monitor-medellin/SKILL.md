@@ -142,21 +142,45 @@ git push origin claude/shopify-sales-dashboard-realtime-f7vcvu   # reintenta con
 **7. Reportar** en el chat: unidades, kits (T‑Shirt/Mesh), ingresos brutos, top de
 la campaña, y las alertas 🔥 (tallas que se venden y están en riesgo).
 
-## Anexo mayorista (facturas B2B)
+## Canal mayorista (facturas B2B)
 
 Cuando el usuario comparta una factura de un mayorista (Casa Viva, Wanita,
 etc.), ver `references/mayoristas_sheet.md` para el procedimiento completo:
 en resumen, registra cada línea en la hoja de Google Sheets compartida (el
-ledger histórico, con su columna `estado`) y además actualiza el
-**consolidado** en `dashboard/medellin-dashboard.html` (sección "Anexo ·
-Canal mayorista": `WHOLESALE_INVOICES` + `WHOLESALE_PRODUCTS` + `CONSIGNMENT`)
-— NO como tarjeta de factura individual; el dashboard muestra ranking +
-tarjetas de kits/individuales igual que el online (sin talla en el ranking,
-sin stock/sell-through en las tarjetas), y el detalle línea por línea vive
-solo en la hoja. No mezcles esto con las ventas online de los pasos
-anteriores. Los SKU de estas facturas vienen del sistema de facturación del
-mayorista (ej. World Office), no de Shopify — mapea por nombre de producto,
-no por SKU literal. Los kits suelen listarse al final de la factura.
+ledger histórico, con su columna `estado` — esa hoja SÍ tiene el detalle línea
+por línea) y además actualiza tres arreglos en
+`dashboard/medellin-dashboard.html`:
+- `WHOLESALE_INVOICES` — un resumen por factura (cliente, número, fecha,
+  forma de pago, unidades de campaña, total con IVA). Alimenta la tabla
+  "Pedidos mayoristas".
+- `WHOLESALE_PRODUCTS` — el consolidado por referencia (unidades, ingresos
+  con IVA, tallas vendidas), recalculado a mano sumando TODAS las facturas
+  vigentes cada vez que se agrega una nueva. Alimenta el ranking y las
+  tarjetas de kits/individuales.
+- `CONSIGNMENT` — mercancía enviada sin vender todavía. Nunca se suma a
+  `WHOLESALE_INVOICES`/`WHOLESALE_PRODUCTS` ni a sus KPIs.
+
+**El render de la sección "Canal mayorista" es consolidado, NO por factura,**
+igual que el ecommerce online: ranking de ventas por referencia (sin talla) +
+tarjetas de kits/individuales (mismas clases CSS que el online: `.rank-row`,
+`.card`, `.chip`, etc.), sin `stock`/`sell-through` en las tarjetas (no hay un
+pool de inventario propio separado del online) — muestran "ticket promedio"
+en vez de un precio fijo, porque cada cliente negocia un precio distinto para
+la misma referencia. El detalle línea por línea de cada factura vive **solo**
+en el Google Sheet, no en el dashboard.
+
+Al agregar una factura nueva: sé cuidadoso al recalcular `WHOLESALE_PRODUCTS`
+a mano — es la fuente más fácil de desajustar. Si algo no cuadra, sé riguroso:
+recalcula sumando línea por línea desde `WHOLESALE_INVOICES`/el Google Sheet,
+no ajustes el total a ojo para que "se vea bien". Si una factura/proforma
+nueva tiene los mismos valores línea por línea que otra ya cargada (mismo
+cliente, cantidades y totales), probablemente es un duplicado sin actualizar
+— confirma con el usuario antes de sumarla.
+
+No mezcles esto con las ventas online de los pasos anteriores. Los SKU de
+estas facturas vienen del sistema de facturación del mayorista (ej. World
+Office), no de Shopify — mapea por nombre de producto, no por SKU literal.
+Los kits suelen listarse al final de la factura.
 
 ## Notas
 

@@ -98,13 +98,19 @@ Luego agregar a serie diaria:
 
 ```bash
 # Modo campaña (reemplaza los IDs por los de la campaña en cuestión):
+# --kit-aware es OBLIGATORIO si la campaña vende kits con el mecanismo de
+# Mompossina (prenda + abanico + aguardiente como líneas separadas del mismo
+# pedido) — sin él, cada kit se cuenta como 2-3 "unidades" en vez de 1, e
+# infla ~2x las unidades reales (el ingreso no se ve afectado, pero las
+# unidades sí, y con ellas el ticket promedio y todo lo que dependa de él).
 python3 .claude/skills/proyeccion-ventas/scripts/aggregate_daily.py \
   --orders $SCRATCH/proyeccion/pedidos_*.json \
   --product-ids 9481810510063,9481804185839,9481816473839,... \
+  --kit-aware \
   --tz-offset="-05:00" \
   --output $SCRATCH/proyeccion/daily.json
 
-# Modo tienda completa (sin --product-ids):
+# Modo tienda completa (sin --product-ids, sin kits o mezcla no separable):
 python3 .claude/skills/proyeccion-ventas/scripts/aggregate_daily.py \
   --orders $SCRATCH/proyeccion/pedidos_*.json \
   --tz-offset="-05:00" \
@@ -113,7 +119,10 @@ python3 .claude/skills/proyeccion-ventas/scripts/aggregate_daily.py \
 
 Revisa el resumen impreso (pedidos leídos, reembolsos excluidos, días
 agregados) antes de continuar — si un día sale en cero cuando claramente hubo
-venta, algo está mal filtrado.
+venta, algo está mal filtrado. Si el dashboard de monitor-medellin ya reporta
+unidades para el mismo período, cuadra el total de `daily.json` contra ese
+número — si no coincide y la campaña vende kits, seguramente falta
+`--kit-aware`.
 
 ### Paso 3 — Mayorista (Google Sheets vía Composio)
 

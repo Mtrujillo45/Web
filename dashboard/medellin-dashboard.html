@@ -294,7 +294,7 @@
   <section id="forecast">
     <div class="sec-head">
       <h2>Proyección de venta · 24 jul → 16 ago</h2>
-      <span class="sec-note">Forecast 24 días · recalibrado 30 jul con 6 días completos · escenarios con piso variable + mayorista con pipeline</span>
+      <span class="sec-note">Forecast 24 días · recalibrado 31 jul con 7 días completos (unidades deduplicadas) · escenarios con piso variable + mayorista con pipeline</span>
     </div>
     <div class="kpis" id="fcGrand"></div>
     <div class="fc-scen" id="fcScen"></div>
@@ -347,7 +347,7 @@
 </div>
 
 <script>
-  const GENERATED_AT = "2026-07-30T12:37:41-05:00";
+  const GENERATED_AT = "2026-07-31T09:56:41-05:00";
   const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
   const IVA_RATE = 0.19; // tienda con IVA INCLUIDO: ingresos = precio de venta al público (con IVA)
 
@@ -356,48 +356,48 @@
   // <<<PRODUCTS_START>>> (auto-generado por compute.py — no editar a mano)
   const PRODUCTS = [
     { name:"Kit · T‑Shirt", full:"Kit Medellín Mi Amor · T‑Shirt", mono:"🎀", kind:"kit",
-      price:229900, revenue:9196000, buildable:647,
+      price:229900, revenue:10575400, buildable:634,
       note:"Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:98,sold:0},{z:"S",stock:218,sold:10},{z:"M",stock:261,sold:16},{z:"L",stock:70,sold:4},{z:"XL",stock:0,sold:10}] },
+      sizes:[{z:"XS",stock:98,sold:0},{z:"S",stock:214,sold:12},{z:"M",stock:256,sold:18},{z:"L",stock:66,sold:6},{z:"XL",stock:0,sold:10}] },
     { name:"Kit · Mesh", full:"Kit Medellín Mi Amor · Mesh", mono:"🎀", kind:"kit",
-      price:229900, revenue:29197300, buildable:877,
+      price:229900, revenue:31726200, buildable:845,
       note:"Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:106,sold:9},{z:"S",stock:367,sold:29},{z:"M",stock:253,sold:53},{z:"L",stock:128,sold:27},{z:"XL",stock:23,sold:9}] },
+      sizes:[{z:"XS",stock:105,sold:10},{z:"S",stock:363,sold:30},{z:"M",stock:238,sold:59},{z:"L",stock:122,sold:28},{z:"XL",stock:17,sold:11}] },
     { name:"Kit Nuevo · T‑Shirt", full:"Kit Nuevo Medellín Mi Amor · T‑Shirt", mono:"🍾", kind:"kit",
-      price:179900, revenue:539700, buildable:647,
+      price:179900, revenue:899500, buildable:634,
       note:"Un Guarito + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:98,sold:1},{z:"S",stock:218,sold:1},{z:"M",stock:261,sold:1},{z:"L",stock:70,sold:0},{z:"XL",stock:0,sold:0}] },
+      sizes:[{z:"XS",stock:98,sold:1},{z:"S",stock:214,sold:2},{z:"M",stock:256,sold:1},{z:"L",stock:66,sold:1},{z:"XL",stock:0,sold:0}] },
     { name:"Kit Nuevo · Mesh", full:"Kit Nuevo Medellín Mi Amor · Mesh", mono:"🍾", kind:"kit",
-      price:179900, revenue:1619100, buildable:877,
+      price:179900, revenue:1799000, buildable:845,
       note:"Mesh Shirt + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:106,sold:1},{z:"S",stock:367,sold:3},{z:"M",stock:253,sold:1},{z:"L",stock:128,sold:4},{z:"XL",stock:23,sold:0}] },
+      sizes:[{z:"XS",stock:105,sold:1},{z:"S",stock:363,sold:3},{z:"M",stock:238,sold:2},{z:"L",stock:122,sold:4},{z:"XL",stock:17,sold:0}] },
     { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment",
-      price:129900, revenue:5585700,
+      price:129900, revenue:6105300,
       note:"Inventario compartido con Kit T‑Shirt. El stock XL bajo es parcial: hay producción en camino.",
-      sizes:[{z:"XS",stock:98,sold:5},{z:"S",stock:218,sold:10},{z:"M",stock:261,sold:16},{z:"L",stock:70,sold:7},{z:"XL",stock:0,sold:5}] },
+      sizes:[{z:"XS",stock:98,sold:5},{z:"S",stock:214,sold:10},{z:"M",stock:256,sold:19},{z:"L",stock:66,sold:8},{z:"XL",stock:0,sold:5}] },
     { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment",
-      price:139900, revenue:21124900,
+      price:139900, revenue:24062800,
       note:"Inventario compartido con Kit Mesh. Reposición en producción.",
-      sizes:[{z:"XS",stock:106,sold:6},{z:"S",stock:367,sold:29},{z:"M",stock:253,sold:70},{z:"L",stock:128,sold:27},{z:"XL",stock:23,sold:19}] },
+      sizes:[{z:"XS",stock:105,sold:6},{z:"S",stock:363,sold:31},{z:"M",stock:238,sold:78},{z:"L",stock:122,sold:33},{z:"XL",stock:17,sold:24}] },
     { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory",
-      price:59900, revenue:3474200,
+      price:59900, revenue:3893500,
       note:"También se incluye 1 abanico dentro de cada kit (no contado aquí).",
-      sizes:[{z:"Única",stock:1121,sold:58}] },
+      sizes:[{z:"Única",stock:1097,sold:65}] },
     { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment",
-      price:139900, revenue:3637400,
-      sizes:[{z:"XS",stock:24,sold:1},{z:"S",stock:94,sold:6},{z:"M",stock:50,sold:9},{z:"L",stock:132,sold:8},{z:"XL",stock:13,sold:2}] },
+      price:139900, revenue:4476800,
+      sizes:[{z:"XS",stock:22,sold:3},{z:"S",stock:94,sold:6},{z:"M",stock:48,sold:11},{z:"L",stock:131,sold:9},{z:"XL",stock:12,sold:3}] },
     { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment",
-      price:139900, revenue:2798000,
-      sizes:[{z:"XS",stock:34,sold:1},{z:"S",stock:99,sold:4},{z:"M",stock:137,sold:11},{z:"L",stock:60,sold:3},{z:"XL",stock:34,sold:1}] },
+      price:139900, revenue:3357600,
+      sizes:[{z:"XS",stock:34,sold:1},{z:"S",stock:97,sold:6},{z:"M",stock:136,sold:12},{z:"L",stock:59,sold:4},{z:"XL",stock:34,sold:1}] },
     { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment",
       price:129900, revenue:129900,
       sizes:[{z:"XS",stock:25,sold:0},{z:"S",stock:44,sold:1},{z:"M",stock:55,sold:0},{z:"L",stock:30,sold:0},{z:"XL",stock:15,sold:0}] },
     { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory",
-      price:64900, revenue:2596000,
-      sizes:[{z:"Única",stock:109,sold:40}] },
+      price:64900, revenue:3050300,
+      sizes:[{z:"Única",stock:103,sold:47}] },
     { name:"Primavera Charm", mono:"PC", kind:"accessory",
-      price:143900, revenue:2734100,
-      sizes:[{z:"Única",stock:11,sold:19}] },
+      price:143900, revenue:3021900,
+      sizes:[{z:"Única",stock:9,sold:21}] },
   ];
   // <<<PRODUCTS_END>>>
 
@@ -686,37 +686,40 @@
 
 
   // ---- Timestamp ----
-  // ===== Proyección / Forecast (RECALIBRADO 30 jul — motor forecast.py, skill proyeccion-ventas) =====
-  // Curva ajustada por regresión sobre 6 días reales completos (24–29 jul). Cada escenario ajusta
-  // su PROPIO piso (conservador 40% / base 55% / optimista 70% del promedio reciente) además de su
-  // propio tau — así se separan de verdad en vez de converger casi al mismo número. NO incluye
-  // multiplicador de Feria de las Flores en esta corrida — pídelo aparte si quieres modelarlo.
+  // ===== Proyección / Forecast (RECALIBRADO 31 jul — motor forecast.py, skill proyeccion-ventas) =====
+  // Curva ajustada por regresión sobre 7 días reales completos (24–30 jul), con UNIDADES
+  // deduplicadas (1 kit = 1 unidad, no 3 líneas — se corrigió un bug en aggregate_daily.py donde
+  // el abanico y el aguardiente de cada kit se contaban como unidades sueltas, inflando el conteo
+  // casi 2x; usar --kit-aware de ahora en adelante). Cada escenario ajusta su PROPIO piso
+  // (conservador 40% / base 55% / optimista 70% del promedio reciente) Y su propio tau — así se
+  // separan de verdad en vez de converger casi al mismo número. NO incluye multiplicador de Feria
+  // de las Flores en esta corrida — pídelo aparte si quieres modelarlo.
   const FORECAST = {
     scenarios: [
-      { name:"Conservador", units:1076, rev:100875465, d:"Piso 40% del promedio reciente (~56 u/día), τ≈3,1 d. Asume que la meseta de régimen permanente es bastante más baja que el ritmo de esta semana." },
-      { name:"Base (esperado)", units:1418, rev:132900379, base:true, d:"Piso 55% (~77 u/día), τ≈2,1 d — ajuste por regresión sobre los 6 días reales desde el pico (25 jul). Confianza media." },
-      { name:"Optimista", units:1764, rev:165295655, d:"Piso 70% (~99 u/día), τ≈1,5 d. Asume que el ritmo se estabiliza cerca de lo visto esta semana en vez de seguir cayendo." },
+      { name:"Conservador", units:728, rev:111534567, d:"Piso 40% del promedio reciente (~34 u/día), τ≈6,4 d. Asume que la meseta de régimen permanente es bastante más baja que el ritmo de esta semana." },
+      { name:"Base (esperado)", units:898, rev:137482043, base:true, d:"Piso 55% (~46 u/día), τ≈4,7 d — ajuste por regresión sobre los 7 días reales desde el pico (25 jul). Confianza media." },
+      { name:"Optimista", units:1040, rev:159300831, d:"Piso 70% (~59 u/día), τ≈2,5 d. Asume que el ritmo se estabiliza cerca de lo visto esta semana en vez de seguir cayendo." },
     ],
     weeks: [
-      { label:"Semana · 30 jul–5 ago", units:566, rev:53065453, tag:"Proyección desde el día 6 real" },
-      { label:"Semana · 6–12 ago", units:542, rev:50832406, tag:"Meseta cerca del piso (~77 u/día)" },
-      { label:"Cierre · 13–16 ago", units:309, rev:29002520, tag:"Cierre de ventana (18 días proyectados)" },
+      { label:"Semana · 31 jul–6 ago", units:414, rev:63327151, tag:"Proyección desde el día 7 real" },
+      { label:"Semana · 7–13 ago", units:343, rev:52543037, tag:"Meseta cerca del piso base (~46 u/día)" },
+      { label:"Cierre · 14–16 ago", units:141, rev:21611855, tag:"Cierre de ventana (17 días proyectados)" },
     ],
-    // Prorrateo por mezcla histórica de ingreso a la fecha (537 und · $82.632.300 con IVA · 6 días reales),
-    // topado a inventario disponible donde aplica.
+    // Prorrateo por mezcla histórica de ingreso a la fecha (608 und deduplicadas · $93.098.200 con
+    // IVA · 7 días completos + parcial 31 jul), topado a inventario disponible donde aplica.
     products: [
-      { name:"🎀 Kit · Mesh", units:501, rev:46953704 },
-      { name:"Medellín Mi Amor Mesh Shirt", units:362, rev:33969337 },
-      { name:"🎀 Kit · T‑Shirt", units:158, rev:14791812 },
-      { name:"Un Guarito T‑Shirt", units:96, rev:8984066 },
-      { name:"Bloom Mesh Shirt", units:62, rev:5847617 },
-      { name:"Abanico Medellín Mi Amor", units:60, rev:5581816 },
-      { name:"Eterna Primavera Mesh Shirt", units:48, rev:4505323 },
-      { name:"Primavera Charm", units:11, rev:1030803, cap:"capado: demanda proyectada &gt; stock (11 und, sin reposición)" },
-      { name:"Medellín Mi Amor Headkerchief", units:45, rev:4173072 },
-      { name:"🍾 Kit Nuevo · Mesh", units:28, rev:2604847 },
-      { name:"🍾 Kit Nuevo · T‑Shirt", units:9, rev:863852 },
-      { name:"Eterna Primavera T‑Shirt", units:2, rev:212641 },
+      { name:"🎀 Kit · Mesh", units:306, rev:46853880 },
+      { name:"Medellín Mi Amor Mesh Shirt", units:232, rev:35539108 },
+      { name:"🎀 Kit · T‑Shirt", units:102, rev:15617960 },
+      { name:"Un Guarito T‑Shirt", units:59, rev:9018822 },
+      { name:"Bloom Mesh Shirt", units:43, rev:6612886 },
+      { name:"Abanico Medellín Mi Amor", units:38, rev:5746749 },
+      { name:"Eterna Primavera Mesh Shirt", units:32, rev:4963102 },
+      { name:"Medellín Mi Amor Headkerchief", units:29, rev:4509411 },
+      { name:"Primavera Charm", units:9, rev:1378247, cap:"capado: demanda proyectada &gt; stock (9 und, sin reposición)" },
+      { name:"🍾 Kit Nuevo · Mesh", units:17, rev:2653403 },
+      { name:"🍾 Kit Nuevo · T‑Shirt", units:9, rev:1333576 },
+      { name:"Eterna Primavera T‑Shirt", units:1, rev:192475 },
     ],
     // Mayorista NO se proyecta con curva (son pedidos puntuales, no un goteo diario):
     // se suma lo ya facturado/confirmado + un pipeline estimado con la cadencia de esta
@@ -738,7 +741,7 @@
   const fcWsTotal = fcWs.known + fcWsPipelineTotal;
   const fcOnlineBase = FORECAST.scenarios.find(s=>s.base).rev;
   document.getElementById('fcGrand').innerHTML = [
-    { lab:"En línea proyectado (escenario base)", val:cop(fcOnlineBase), meta:"30 jul → 16 ago, 18 días" },
+    { lab:"En línea proyectado (escenario base)", val:cop(fcOnlineBase), meta:"31 jul → 16 ago, 17 días" },
     { lab:"Mayorista (confirmado + pipeline)", val:cop(fcWsTotal), meta:`${cop(fcWs.known)} confirmado + ${cop(fcWsPipelineTotal)} pipeline`, bloom:true },
     { lab:"Total combinado proyectado", val:cop(fcOnlineBase+fcWsTotal), meta:"en línea (base) + mayorista, hacia adelante" },
   ].map(k=>`
@@ -780,16 +783,16 @@
   </table>`;
 
   document.getElementById('fcAssume').innerHTML = `
-    <h4>Supuestos del modelo · recalibrado 30 jul con motor forecast.py (skill proyeccion-ventas)</h4>
+    <h4>Supuestos del modelo · recalibrado 31 jul con motor forecast.py (skill proyeccion-ventas)</h4>
     <ul>
-      <li><b>Base de cálculo:</b> venta diaria <b>real</b> de 6 días completos (24–29 jul): 169 · 206 (pico, 25 jul) · 139 · 124 · 113 · 93 und/día. El ajuste ya NO es a ojo — <b>forecast.py</b> hace una regresión log-lineal sobre todos los días desde el pico, no solo el primero y el último.</li>
-      <li><b>Los 3 escenarios varían el piso</b> de venta (40% / 55% / 70% del promedio reciente) además de τ — así se separan de verdad: conservador ~56 u/día (τ≈3,1 d), base ~77 u/día (τ≈2,1 d), optimista ~99 u/día (τ≈1,5 d). Antes solo variaba τ con un piso fijo y los 3 escenarios casi no se distinguían.</li>
-      <li><b>Confianza del ajuste (base): media</b> (5 días de caída medidos desde el pico). Mejora sola cada vez que se corre el skill con un día más de venta real.</li>
+      <li><b>Base de cálculo:</b> venta diaria <b>real</b> de 7 días completos (24–30 jul), con <b>unidades deduplicadas</b> (1 kit = 1 unidad, no 3 líneas — se corrigió un bug en <code>aggregate_daily.py</code> donde el abanico y el aguardiente de cada kit se contaban como unidades sueltas, inflando el conteo casi 2x): 111 · 120 (pico, 25 jul) · 79 · 74 · 68 · 61 · 74 und/día. El ajuste ya NO es a ojo — <b>forecast.py</b> hace una regresión log-lineal sobre todos los días desde el pico, no solo el primero y el último.</li>
+      <li><b>Los 3 escenarios varían el piso</b> de venta (40% / 55% / 70% del promedio reciente) Y τ (cada uno se reajusta a su propio piso) — así se separan de verdad: conservador ~34 u/día (τ≈6,4 d), base ~46 u/día (τ≈4,7 d), optimista ~59 u/día (τ≈2,5 d). El repunte del día 7 (30 jul, 74 und tras 61 el día anterior) alarga el tau del escenario base frente a la corrida previa, señal de que el decaimiento se está suavizando.</li>
+      <li><b>Confianza del ajuste (base): media</b> (6 días de caída medidos desde el pico). Mejora sola cada vez que se corre el skill con un día más de venta real.</li>
       <li><b>Sin evento marcado:</b> esta corrida <b>no incluye</b> el multiplicador de Feria de las Flores u otro evento — pídelo aparte con sus fechas y multiplicador si quieres volver a modelarlo.</li>
-      <li><b>Ticket promedio:</b> $153.880/u (mezcla real acumulada, 537 und · $82.632.300 con IVA en 6 días).</li>
-      <li><b>Inventario:</b> en el escenario base, ninguna referencia grande queda topada por stock — solo <b>Primavera Charm</b> (11 und, sin reposición) capa la demanda proyectada.</li>
-      <li><b>Mayorista — confirmado:</b> $39.879.403 ya facturados/confirmados de Medellín Mi Amor en el período (Casa Viva RFEL8186 + proformas 28/29 jul pendientes de RFEL, Wanita RFEL8193 + proforma 25 jul pendiente de RFEL) — ver anexo consolidado abajo.</li>
-      <li><b>Mayorista — pipeline (nuevo):</b> $15.805.731 estimados con la <b>cadencia de pedidos de esta semana</b> (Casa Viva ~$8,3M, Wanita ~$7,5M — 1 pedido más de cada uno antes del <b>jueves 6 ago</b>, límite que da la Feria de las Flores este fin de semana y el que viene). Certeza <b>baja</b> — es una estimación, no un pedido confirmado; ajústala si tienes mejor información.</li>
+      <li><b>Ticket promedio:</b> $153.121/u (mezcla real acumulada, 608 und deduplicadas · $93.098.200 con IVA en 7 días completos + parcial 31 jul).</li>
+      <li><b>Inventario:</b> en el escenario base, ninguna referencia grande queda topada por stock — solo <b>Primavera Charm</b> (9 und, sin reposición) capa la demanda proyectada.</li>
+      <li><b>Mayorista — confirmado:</b> $39.879.400 ya facturados/confirmados de Medellín Mi Amor en el período (Casa Viva RFEL8186 + proformas 28/29 jul pendientes de RFEL, Wanita RFEL8193 + proforma 25 jul pendiente de RFEL) — ver anexo consolidado abajo.</li>
+      <li><b>Mayorista — pipeline:</b> $15.805.730 estimados con la <b>cadencia de pedidos de esta semana</b> (Casa Viva ~$8,3M, Wanita ~$7,5M — 1 pedido más de cada uno antes del <b>jueves 6 ago</b>, límite que da la Feria de las Flores este fin de semana y el que viene). Certeza <b>baja</b> — es una estimación, no un pedido confirmado; ajústala si tienes mejor información.</li>
       <li><b>Consignación (no es ingreso):</b> hay además <b>$13.008.494 en consignación con Wanita</b> (mercancía enviada, aún no vendida) que <b>no se cuenta</b> en ninguno de los totales de arriba hasta que llegue el reporte de venta real.</li>
       <li><b>No es una promesa:</b> modelo sensible a la ejecución real (pauta, UGC, eventos, disponibilidad de inventario, y a que el mayorista efectivamente reponga). Se recalibra con más días de curva real.</li>
     </ul>`;

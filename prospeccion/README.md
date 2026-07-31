@@ -46,26 +46,41 @@ que alguien entre a la página de "Contacto" de una tienda.
    - **Places API (New)**
    - **Google Sheets API**
 4. Crea una **API key** (APIs y servicios → Credenciales → Crear credenciales
-   → Clave de API). Restríngela para que solo pueda usar "Places API (New)".
+   → Clave de API). En "Restricciones de aplicaciones" deja **"Ninguno"**
+   (esto corre como script, no como sitio web ni app). En "Restricciones de
+   API" marca **"Restringir clave"** y selecciona solo **"Places API (New)"**.
    Copia esta key, la vas a necesitar en el paso 3 de abajo.
-5. Crea una **cuenta de servicio** (Credenciales → Crear credenciales →
-   Cuenta de servicio). No necesita ningún rol especial a nivel de
-   proyecto. Después de creada, entra a la cuenta → pestaña "Claves" →
-   "Agregar clave" → JSON. Se descarga un archivo `.json`: guárdalo en
-   `prospeccion/credentials/service_account.json` (esa carpeta está en
-   `.gitignore`, nunca se sube al repo).
+5. Crea las credenciales de **OAuth de escritorio** para conectar con Sheets
+   usando tu propia cuenta de Google (no usamos cuenta de servicio con llave
+   JSON porque muchas organizaciones de Google Workspace la bloquean por
+   política de seguridad — `iam.disableServiceAccountKeyCreation`):
+   - Primero, si no lo has hecho antes en este proyecto: **"APIs y
+     servicios" → "Pantalla de consentimiento de OAuth"**. Tipo de usuario:
+     elige **"Interno"** si tu organización lo permite (evita verificación
+     de Google y que el acceso expire cada 7 días). Completa nombre de la
+     app (ej. "Prospección Mompossina") y correos de soporte/contacto →
+     Guardar y continuar en las siguientes pantallas (puedes dejar
+     "Permisos" en blanco, se piden en tiempo real al correr el script).
+   - Luego: **"Credenciales" → "+ Crear credenciales" → "ID de cliente de
+     OAuth"**. Tipo de aplicación: **"Aplicación de escritorio"**. Nombre:
+     ej. "Prospección Mompossina Desktop" → Crear.
+   - Te aparece un modal con el Client ID/Secret y un botón **"Descargar
+     JSON"** — descárgalo.
+   - Guarda ese archivo en `prospeccion/credentials/oauth_client_secret.json`
+     (esa carpeta está en `.gitignore`, nunca se sube al repo).
 
 ## 2. Crear el Google Sheet de seguimiento
 
-1. Crea un Google Sheet nuevo (puede llamarse "Prospección Mompossina").
+1. Crea un Google Sheet nuevo (puede llamarse "Prospección Mompossina") con
+   tu propia cuenta de Google.
 2. Crea (o renombra) una pestaña llamada `Leads` (o el nombre que prefieras,
    solo asegúrate de ponerlo en `.env` en `GOOGLE_SHEET_TAB_NAME`).
-3. Comparte el Sheet como **Editor** con el email de la cuenta de servicio
-   del paso anterior (algo como
-   `prospeccion@mompossina-prospeccion.iam.gserviceaccount.com`, lo
-   encuentras dentro del archivo JSON descargado, campo `client_email`).
-4. Copia el ID del Sheet desde la URL:
+3. Copia el ID del Sheet desde la URL:
    `https://docs.google.com/spreadsheets/d/ESTE_ID_AQUI/edit`.
+
+No hace falta compartir el Sheet con nadie más: como el script se conecta
+con tu propia cuenta de Google (ver paso 4 más abajo), si tú puedes editar
+el Sheet, el script también puede.
 
 La herramienta crea automáticamente la fila de encabezados la primera vez
 que escribe en la hoja (columnas: Fecha, Categoria, Nombre Negocio,
@@ -84,11 +99,19 @@ pip install -r requirements.txt
 
 cp .env.example .env
 # Edita .env y completa:
-#   GOOGLE_PLACES_API_KEY=       (paso 1.4)
-#   GOOGLE_SERVICE_ACCOUNT_FILE=./credentials/service_account.json
-#   GOOGLE_SHEET_ID=             (paso 2.4)
+#   GOOGLE_PLACES_API_KEY=                  (paso 1.4)
+#   GOOGLE_OAUTH_CLIENT_SECRET_FILE=./credentials/oauth_client_secret.json  (paso 1.5)
+#   GOOGLE_OAUTH_TOKEN_FILE=./credentials/token.json  (se crea solo, no lo toques)
+#   GOOGLE_SHEET_ID=                        (paso 2.3)
 #   GOOGLE_SHEET_TAB_NAME=Leads
 ```
+
+**Nota sobre el primer login:** la primera vez que corras `python -m src.main`
+(sin `--dry-run`, o cualquier corrida que escriba al Sheet) se va a abrir tu
+navegador pidiéndote iniciar sesión con Google y aceptar el permiso de
+Sheets. Después de eso queda guardado un token local que se renueva solo —
+no te lo vuelve a pedir salvo que borres `credentials/token.json` o revoques
+el acceso desde tu cuenta de Google.
 
 ## 4. Correr la herramienta
 

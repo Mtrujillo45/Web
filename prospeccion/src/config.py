@@ -32,7 +32,8 @@ class SearchConfig:
 @dataclass
 class Credentials:
     places_api_key: str | None
-    service_account_file: str | None
+    oauth_client_secret_file: str | None
+    oauth_token_file: str
     sheet_id: str | None
     sheet_tab_name: str
 
@@ -57,7 +58,10 @@ def load_credentials(env_file: Path | None = None) -> Credentials:
     load_dotenv(env_file or PROJECT_ROOT / ".env")
     return Credentials(
         places_api_key=os.getenv("GOOGLE_PLACES_API_KEY") or None,
-        service_account_file=os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE") or None,
+        oauth_client_secret_file=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_FILE") or None,
+        oauth_token_file=os.getenv(
+            "GOOGLE_OAUTH_TOKEN_FILE", str(PROJECT_ROOT / "credentials" / "token.json")
+        ),
         sheet_id=os.getenv("GOOGLE_SHEET_ID") or None,
         sheet_tab_name=os.getenv("GOOGLE_SHEET_TAB_NAME", "Leads"),
     )

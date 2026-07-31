@@ -144,14 +144,14 @@ def run(argv=None) -> int:
         print("Modo --dry-run: no se escribió en Google Sheets.")
         return 0
 
-    if not (creds.service_account_file and creds.sheet_id):
+    if not (creds.oauth_client_secret_file and creds.sheet_id):
         print(
-            "Aviso: faltan GOOGLE_SERVICE_ACCOUNT_FILE o GOOGLE_SHEET_ID en .env, "
+            "Aviso: faltan GOOGLE_OAUTH_CLIENT_SECRET_FILE o GOOGLE_SHEET_ID en .env, "
             "así que no se pudo escribir en Google Sheets (los datos igual quedaron en el CSV)."
         )
         return 0
 
-    service = sheets_client.get_sheets_service(creds.service_account_file)
+    service = sheets_client.get_sheets_service(creds.oauth_client_secret_file, creds.oauth_token_file)
     added = sheets_client.append_leads(service, creds.sheet_id, creds.sheet_tab_name, leads)
     print(f"Google Sheets: {added} leads nuevos agregados (se saltaron los duplicados por Place ID).")
 

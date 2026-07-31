@@ -1,0 +1,22 @@
+{
+  "places": [
+    {
+      "id": "ChIJ_test_place_id_1",
+      "displayName": {"text": "Sample Swim Boutique", "languageCode": "en"},
+      "formattedAddress": "123 Ocean Dr, Miami Beach, FL 33139, USA",
+      "internationalPhoneNumber": "+1 305-555-0100",
+      "websiteUri": "https://example-swim-boutique.test",
+      "businessStatus": "OPERATIONAL",
+      "rating": 4.6,
+      "types": ["clothing_store", "store"]
+    },
+    {
+      "id": "ChIJ_test_place_id_2",
+      "displayName": {"text": "Sin Sitio Web Boutique", "languageCode": "en"},
+      "formattedAddress": "456 Collins Ave, Miami Beach, FL 33139, USA",
+      "businessStatus": "OPERATIONAL",
+      "rating": 4.2,
+      "types": ["clothing_store", "store"]
+    }
+  ]
+}

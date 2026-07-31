@@ -1,0 +1,61 @@
+# Configuración de búsqueda de prospectos para Mompossina
+# Editar libremente: agregar/quitar categorías, ciudades o ajustar límites.
+
+# Frases de búsqueda por categoría de producto.
+# Cada frase se combina con cada ciudad de "cities" (ej. "swimwear boutique in Miami, FL").
+categories:
+  swimwear:
+    queries:
+      - "swimwear boutique"
+      - "bikini boutique store"
+      - "swimwear wholesale distributor"
+  resortwear:
+    queries:
+      - "resortwear boutique"
+      - "resort wear clothing store"
+  moda_blusas_mesh:
+    queries:
+      - "women's fashion boutique"
+      - "contemporary women's clothing boutique"
+  sleepwear:
+    queries:
+      - "lingerie and sleepwear boutique"
+      - "sleepwear store"
+  accesorios:
+    queries:
+      - "women's fashion accessories boutique"
+  mayoristas_distribuidores:
+    queries:
+      - "fashion wholesale distributor"
+      - "apparel import wholesale supplier"
+
+# Ciudades objetivo, fase 1: sur de Florida (hub logístico de importación
+# de swimwear/resortwear desde Latinoamérica, y zona de clientes actuales),
+# más un par de ciudades grandes para probar expansión.
+cities:
+  - "Miami, FL"
+  - "Miami Beach, FL"
+  - "Aventura, FL"
+  - "Sunny Isles Beach, FL"
+  - "North Miami, FL"
+  - "Coral Gables, FL"
+  - "Doral, FL"
+  - "Fort Lauderdale, FL"
+  - "Boca Raton, FL"
+  - "Orlando, FL"
+  - "Tampa, FL"
+
+# Tope de llamadas a la API de Google Places por corrida.
+# Cada combinación categoría x ciudad puede consumir varias llamadas (paginación).
+# Empezar bajo y subir una vez se valide el costo real en la consola de Google Cloud.
+max_api_requests_per_run: 50
+
+# Máximo de resultados a pedir por cada combinación categoría x ciudad (máx. 20 por página en la API).
+max_results_per_query: 20
+
+# Pausa entre requests de enriquecimiento de sitios web (segundos), para ser respetuosos con los servidores de terceros.
+enrichment_delay_seconds: 2
+
+# User-Agent usado al visitar sitios web de negocios para buscar el email de contacto.
+# Debe ser identificable y honesto.
+enrichment_user_agent: "MompossinaProspectingBot/1.0 (+contacto: ventas@mompossina.com)"

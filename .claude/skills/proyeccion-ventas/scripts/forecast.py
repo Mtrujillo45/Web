@@ -37,6 +37,10 @@ si se omite, el dashboard solo muestra totales):
 
 Formato de --wholesale-pipeline (opcional, pedidos B2B esperados no facturados aún):
   [{"label": "Casa Viva — segunda reposición", "amount": 10000000, "certainty": "media"}]
+
+--anchor-date (opcional): evita doble conteo cuando el dashboard muestra "ya
+vendido" en vivo (incluye el día de hoy, parcial) junto a esta proyección. Ver
+--help para el detalle.
 """
 import json
 import math
@@ -469,6 +473,13 @@ def main():
     ap.add_argument("--products", help="Ruta a JSON de referencias para desglose")
     ap.add_argument("--wholesale-known", type=float, default=0.0)
     ap.add_argument("--wholesale-pipeline", help="Ruta a JSON de pipeline mayorista esperado")
+    ap.add_argument("--anchor-date", help=(
+        "Fecha (YYYY-MM-DD) desde la que arranca a contar la proyección (día 1 = anchor-date + 1). "
+        "Por defecto es la última fecha de --daily. Úsala cuando 'hoy' ya tiene ventas reales "
+        "parciales que se muestran aparte como 'ya vendido' (dashboard en vivo): si no la separas, "
+        "el día de hoy queda contado DOS VECES — como venta real Y como día 1 de la proyección. "
+        "Poniendo --anchor-date en 'hoy' (aunque --daily solo tenga días completos hasta ayer), la "
+        "curva se sigue ajustando con los días completos, pero la proyección arranca en mañana."))
     ap.add_argument("--title", default=None)
     ap.add_argument("--subtitle", default=None)
     args = ap.parse_args()
@@ -488,7 +499,7 @@ def main():
     total_revenue_to_date = sum(d["revenue"] for d in daily)
     avg_ticket = total_revenue_to_date / total_units_to_date if total_units_to_date else 0
 
-    last_date = datetime.strptime(daily[-1]["date"], "%Y-%m-%d")
+    last_date = datetime.strptime(args.anchor_date, "%Y-%m-%d") if args.anchor_date else datetime.strptime(daily[-1]["date"], "%Y-%m-%d")
 
     # Cada escenario ajusta su PROPIO piso (y por tanto su propio tau) — no un
     # piso único compartido — así conservador/base/optimista se separan de

@@ -310,8 +310,8 @@
 
   <section id="forecast">
     <div class="sec-head">
-      <h2>Proyección de venta · 24 jul → 16 ago</h2>
-      <span class="sec-note">Recalibrado 1 ago tarde · online proyectado arranca 2 ago (no duplica el 1 ago, ya contado en "ya vendido") · piso variable por escenario + mayorista con pipeline</span>
+      <h2>Proyección de venta · 24 jul → 9 ago (cierre Feria de las Flores)</h2>
+      <span class="sec-note">Recalibrado 2 ago tarde · online proyectado arranca 3 ago (no duplica el 2 ago, ya contado en "ya vendido") · horizonte cortado en el 9 ago a pedido · piso variable por escenario + mayorista con pipeline</span>
     </div>
     <div class="kpis" id="fcGrand"></div>
     <div class="fc-scen" id="fcScen"></div>
@@ -721,44 +721,44 @@
 
 
   // ---- Timestamp ----
-  // ===== Proyección / Forecast (RECALIBRADO 1 ago tarde — motor forecast.py, skill proyeccion-ventas) =====
-  // Curva ajustada por regresión sobre 8 días reales completos (24–31 jul), con UNIDADES
+  // ===== Proyección / Forecast (RECALIBRADO 2 ago tarde — motor forecast.py, skill proyeccion-ventas) =====
+  // Curva ajustada por regresión sobre 10 días reales (24 jul-2 ago), con UNIDADES
   // deduplicadas (1 kit = 1 unidad, no 3 líneas — bug corregido en aggregate_daily.py). Cada
   // escenario ajusta su PROPIO piso (conservador 40% / base 55% / optimista 70% del promedio
-  // reciente) Y su propio tau. NO incluye multiplicador de Feria de las Flores — pídelo aparte
-  // si quieres modelarlo.
+  // reciente) Y su propio tau. NO incluye multiplicador de Feria de las Flores — solo se acotó
+  // el horizonte hasta su cierre (9 ago), a pedido explícito.
   //
-  // IMPORTANTE — fix de doble conteo: la proyección arranca el 2 AGO, no el 1 ago. El 1 ago ya
+  // IMPORTANTE — fix de doble conteo: la proyección arranca el 3 AGO, no el 2 ago. El 2 ago ya
   // se cuenta como venta real en "Ya vendido" (recuadro de arriba, en vivo); si la proyección
-  // también empezara a contar desde el 1 ago, ese día se sumaría dos veces. Se usa
-  // --anchor-date=2026-08-01 en forecast.py: la curva se sigue ajustando con los 8 días
-  // completos (24-31 jul), pero el conteo de la proyección arranca en el día siguiente al ancla.
+  // también empezara a contar desde el 2 ago, ese día se sumaría dos veces. Se usa
+  // --anchor-date=2026-08-02 en forecast.py: la curva se sigue ajustando con los 10 días
+  // de historia (24 jul-2 ago), pero el conteo de la proyección arranca en el día siguiente al
+  // ancla, y el horizonte se corta en el 9 ago (--horizon-days 7) para no proyectar más allá de
+  // la Feria de las Flores.
   const FORECAST = {
     scenarios: [
-      { name:"Conservador", units:908, rev:137043603, d:"Piso 40% del promedio reciente (~32,5 u/día), τ≈14,5 d. Asume que la meseta de régimen permanente es bastante más baja que el ritmo de esta semana." },
-      { name:"Base (esperado)", units:1020, rev:153961637, base:true, d:"Piso 55% (~44,6 u/día), τ≈11,2 d — ajuste por regresión sobre los 8 días reales desde el pico (25 jul). Confianza media." },
-      { name:"Optimista", units:1079, rev:162822947, d:"Piso 70% (~56,8 u/día), τ≈7,1 d. Asume que el ritmo se estabiliza cerca de lo visto esta semana en vez de seguir cayendo." },
+      { name:"Conservador", units:293, rev:43400619, d:"Piso 40% del promedio reciente (~26,9 u/día), τ≈8,9 d. Asume que la meseta de régimen permanente es bastante más baja que el ritmo de esta semana." },
+      { name:"Base (esperado)", units:327, rev:48392758, base:true, d:"Piso 55% (~37,0 u/día), τ≈6,6 d — ajuste por regresión sobre los 9 días reales desde el pico (25 jul). Confianza alta." },
+      { name:"Optimista", units:353, rev:52269884, d:"Piso 70% (~47,1 u/día), τ≈3,9 d. Asume que el ritmo se estabiliza cerca de lo visto esta semana en vez de seguir cayendo." },
     ],
     weeks: [
-      { label:"Semana · 2–8 ago", units:533, rev:80479425, tag:"Proyección desde el 2 ago (no duplica el 1 ago, ya contado como vendido)" },
-      { label:"Semana · 9–15 ago", units:431, rev:64991207, tag:"Meseta cerca del piso base (~44,6 u/día)" },
-      { label:"Cierre · 16 ago", units:56, rev:8491005, tag:"Cierre de ventana (15 días proyectados)" },
+      { label:"Semana · 3–9 ago", units:327, rev:48392758, tag:"Proyección desde el 3 ago (no duplica el 2 ago, ya contado como vendido) · corte en el cierre de la Feria de las Flores (9 ago)" },
     ],
-    // Prorrateo por mezcla histórica de ingreso a la fecha (714 und deduplicadas · $106.857.600 con
-    // IVA al 1 ago, 5:46pm), topado a inventario disponible donde aplica.
+    // Prorrateo por mezcla histórica de ingreso a la fecha (783 und deduplicadas · $115.868.700 con
+    // IVA al 2 ago, 10:29pm), topado a inventario disponible donde aplica.
     products: [
-      { name:"🎀 Kit · Mesh", units:325, rev:49021385 },
-      { name:"Medellín Mi Amor Mesh Shirt", units:278, rev:41923754 },
-      { name:"🎀 Kit · T‑Shirt", units:114, rev:17228307 },
-      { name:"Un Guarito T‑Shirt", units:72, rev:10854295 },
-      { name:"Bloom Mesh Shirt", units:52, rev:7867440 },
-      { name:"Abanico Medellín Mi Amor", units:51, rev:7682686 },
-      { name:"Medellín Mi Amor Headkerchief", units:34, rev:5142319 },
-      { name:"Eterna Primavera Mesh Shirt", units:33, rev:5034546 },
-      { name:"Primavera Charm", units:9, rev:1358431, cap:"capado: demanda proyectada &gt; stock (9 und, sin reposición)" },
-      { name:"🍾 Kit Nuevo · Mesh", units:22, rev:3371760 },
-      { name:"🍾 Kit Nuevo · T‑Shirt", units:9, rev:1293278 },
-      { name:"Eterna Primavera T‑Shirt", units:1, rev:184754 },
+      { name:"🎀 Kit · Mesh", units:102, rev:15041776 },
+      { name:"Medellín Mi Amor Mesh Shirt", units:88, rev:13083176 },
+      { name:"🎀 Kit · T‑Shirt", units:36, rev:5303314 },
+      { name:"Un Guarito T‑Shirt", units:23, rev:3431627 },
+      { name:"Bloom Mesh Shirt", units:19, rev:2874917 },
+      { name:"Abanico Medellín Mi Amor", units:17, rev:2512262 },
+      { name:"Medellín Mi Amor Headkerchief", units:12, rev:1742139 },
+      { name:"Eterna Primavera Mesh Shirt", units:11, rev:1584282 },
+      { name:"Primavera Charm", units:8, rev:1183844, cap:"capado: demanda proyectada &gt; stock (8 und, sin reposición)" },
+      { name:"🍾 Kit Nuevo · Mesh", units:7, rev:1056220 },
+      { name:"🍾 Kit Nuevo · T‑Shirt", units:3, rev:377173 },
+      { name:"Eterna Primavera T‑Shirt", units:0, rev:54490 },
     ],
     // Mayorista NO se proyecta con curva (son pedidos puntuales, no un goteo diario):
     // se suma lo ya facturado/confirmado. Pipeline en $0: los 2 pedidos que se estimaban
@@ -777,9 +777,9 @@
   const fcWsTotal = fcWs.known + fcWsPipelineTotal;
   const fcOnlineBase = FORECAST.scenarios.find(s=>s.base).rev;
   document.getElementById('fcGrand').innerHTML = [
-    { lab:"En línea proyectado (escenario base)", val:cop(fcOnlineBase), meta:"2 ago → 16 ago, 15 días (no incluye el 1 ago)" },
+    { lab:"En línea proyectado (escenario base)", val:cop(fcOnlineBase), meta:"3 ago → 9 ago, 7 días (no incluye el 2 ago) · corte en cierre Feria de las Flores" },
     { lab:"Mayorista (confirmado + pipeline)", val:cop(fcWsTotal), meta:`${cop(fcWs.known)} confirmado + ${cop(fcWsPipelineTotal)} pipeline`, bloom:true },
-    { lab:"Total proyectado hacia adelante", val:cop(fcOnlineBase+fcWsTotal), meta:"2 ago→16 ago (online) + mayorista · NO incluye lo ya vendido (ver recuadro arriba)" },
+    { lab:"Total proyectado hacia adelante", val:cop(fcOnlineBase+fcWsTotal), meta:"3 ago→9 ago (online) + mayorista · NO incluye lo ya vendido (ver recuadro arriba)" },
   ].map(k=>`
     <div class="kpi ${k.bloom?'bloom':''}">
       <div class="klabel">${k.lab}</div>
@@ -799,7 +799,7 @@
   document.getElementById('fcWeekly').innerHTML = `<table>
     <thead><tr><th>Semana (escenario base)</th><th>Hito</th><th>Unidades</th><th>Ingresos (con IVA)</th></tr></thead>
     <tbody>${FORECAST.weeks.map(w=>`<tr class="fcweek"><td>${w.label}</td><td>${w.tag}</td><td>${num(w.units)}</td><td>${cop(w.rev)}</td></tr>`).join('')}</tbody>
-    <tfoot><tr><td>Total ventana (15 días, 2-16 ago)</td><td>—</td><td>${num(fcWkTot.units)}</td><td>${cop(fcWkTot.rev)}</td></tr></tfoot>
+    <tfoot><tr><td>Total ventana (7 días, 3-9 ago)</td><td>—</td><td>${num(fcWkTot.units)}</td><td>${cop(fcWkTot.rev)}</td></tr></tfoot>
   </table>`;
 
   const fcPrTot = FORECAST.products.reduce((a,p)=>({units:a.units+p.units, rev:a.rev+p.rev}),{units:0,rev:0});
@@ -819,26 +819,28 @@
   </table>`;
 
   document.getElementById('fcAssume').innerHTML = `
-    <h4>Supuestos del modelo · recalibrado 1 ago tarde con motor forecast.py (skill proyeccion-ventas)</h4>
+    <h4>Supuestos del modelo · recalibrado 2 ago tarde con motor forecast.py (skill proyeccion-ventas)</h4>
     <ul>
-      <li><b>Fix de doble conteo (reaplicado):</b> la proyección de abajo arranca el <b>2 ago</b>, no el 1 ago. El 1 ago ya está contado como venta real en el recuadro "Ya vendido" de arriba (se actualiza en vivo); si la proyección también empezara a contar desde el 1 ago, ese día se sumaría dos veces. La curva se sigue ajustando con los 8 días completos (24-31 jul) — solo se corrigió desde qué día arranca a <i>sumar</i> la proyección (<code>forecast.py --anchor-date</code>). Este ajuste hay que repetirlo cada vez que se recorra el skill, porque "hoy" avanza un día cada vez.</li>
-      <li><b>Base de cálculo:</b> venta diaria <b>real</b> de 8 días completos (24–31 jul), con <b>unidades deduplicadas</b> (1 kit = 1 unidad, no 3 líneas): 111 · 122 (pico, 25 jul) · 79 · 74 · 68 · 61 · 75 · 89 und/día. El ajuste ya NO es a ojo — <b>forecast.py</b> hace una regresión log-lineal sobre todos los días desde el pico, no solo el primero y el último.</li>
-      <li><b>Los 3 escenarios varían el piso</b> de venta (40% / 55% / 70% del promedio reciente) Y τ (cada uno se reajusta a su propio piso) — así se separan de verdad: conservador ~32,5 u/día (τ≈14,5 d), base ~44,6 u/día (τ≈11,2 d), optimista ~56,8 u/día (τ≈7,1 d). El repunte del 31 jul (89 und) suaviza la caída medida y alarga τ frente a la corrida anterior — es una curva más optimista sobre cuánto dura la venta, no un cambio de metodología.</li>
-      <li><b>Confianza del ajuste (base): media</b> (7 días de caída medidos desde el pico). Mejora sola cada vez que se corre el skill con un día más de venta real.</li>
-      <li><b>Sin evento marcado:</b> esta corrida <b>no incluye</b> el multiplicador de Feria de las Flores u otro evento — pídelo aparte con sus fechas y multiplicador si quieres volver a modelarlo.</li>
-      <li><b>Ticket promedio:</b> $149.660/u (mezcla real acumulada, 714 und deduplicadas · $106.857.600 con IVA al 1 ago, 5:46pm).</li>
-      <li><b>Inventario:</b> en el escenario base, ninguna referencia grande queda topada por stock — solo <b>Primavera Charm</b> (9 und, sin reposición) capa la demanda proyectada. Aparte, <b>Un Guarito XL</b> ya está sobrevendida (quedan -2) — revisar esa talla ya.</li>
-      <li><b>Mayorista — confirmado ($68.047.595, sin cambios desde la última actualización):</b> actualizado 1 ago con las proformas reales de Wanita y Casa Viva. Cambios: <b>RFEL8216</b> y <b>RFEL8193</b> ya pagadas; <b>RFEL8217</b> (los 137 und que antes estaban en consignación) ya tiene número de factura y Wanita la está pagando a plazos — pasó de "consignación, no cuenta" a <b>venta facturada</b>; se corrigió el split Kit Mesh/Kit Un Guarito de la Proforma 280726MEDM (Casa Viva) que estaba mal repartido (10/10/10 y 2/2/2, no 6/6/6 cada uno — el total de esa factura no cambió); se sumaron 3 pedidos nuevos: Proforma 310726MEDMW (Eterna Primavera, Wanita), Proforma 010826MEDMW (Wanita, aún sin abonos, arranca a pagarse cuando se cancele la RFEL8217) y Proforma 310726MEDM (Casa Viva) — todas las de Casa Viva son venta en firme — ver tabla de pedidos abajo.</li>
-      <li><b>Mayorista — pipeline: $0.</b> Los 2 pedidos que se estimaban como "reposición esperada antes del 6 ago" (uno de Casa Viva, uno de Wanita) ya llegaron como pedidos reales y están contados en el confirmado — no se duplican.</li>
-      <li><b>Sin consignación activa.</b> La consignación anterior con Wanita (137 und, $13.008.494) se resolvió: ya tiene factura (RFEL8217) y pasó a venta facturada.</li>
-      <li><b>Sin verificar:</b> la <b>Proforma 290726MEDM</b> (Casa Viva, 29 jul, $8.339.644) no aparece en el archivo de proformas más reciente que compartiste — se mantiene en el registro tal como estaba, pero vale la pena que la confirmes.</li>
-      <li><b>Supuesto aplicado (a confirmar):</b> la hoja "ETERNA PENDIENTES · JULIO 31" (Wanita) se registró como pedido confirmado pendiente de factura, igual que los demás — si "PENDIENTES" significaba algo distinto (p.ej. pendiente de confirmar, no pendiente de facturar), avísame para corregirlo.</li>
+      <li><b>Horizonte limitado a la Feria de las Flores (nuevo):</b> por pedido explícito, esta corrida <b>solo proyecta hasta el domingo 9 de agosto</b> (cierre de la Feria de las Flores en Medellín), no hasta el fin de campaña. Seguramente haya venta la semana siguiente, pero deliberadamente no se cuenta todavía — se puede volver a extender el horizonte cuando haya más claridad de cómo sigue el ritmo después de la feria.</li>
+      <li><b>Fix de doble conteo (reaplicado):</b> la proyección de abajo arranca el <b>3 ago</b>, no el 2 ago. El 2 ago ya está contado como venta real en el recuadro "Ya vendido" de arriba (se actualiza en vivo); si la proyección también empezara a contar desde el 2 ago, ese día se sumaría dos veces. La curva se sigue ajustando con los 10 días completos de historia (24 jul-2 ago) — solo se corrigió desde qué día arranca a <i>sumar</i> la proyección (<code>forecast.py --anchor-date</code>). Este ajuste hay que repetirlo cada vez que se recorra el skill, porque "hoy" avanza un día cada vez.</li>
+      <li><b>Base de cálculo:</b> venta diaria <b>real</b> de 10 días (24 jul–2 ago), con <b>unidades deduplicadas</b> (1 kit = 1 unidad, no 3 líneas): 111 · 122 (pico, 25 jul) · 79 · 74 · 68 · 61 · 75 · 89 · 50 · 54 und/día. El ajuste ya NO es a ojo — <b>forecast.py</b> hace una regresión log-lineal sobre todos los días desde el pico, no solo el primero y el último.</li>
+      <li><b>Los 3 escenarios varían el piso</b> de venta (40% / 55% / 70% del promedio reciente) Y τ (cada uno se reajusta a su propio piso) — así se separan de verdad: conservador ~26,9 u/día (τ≈8,9 d), base ~37,0 u/día (τ≈6,6 d), optimista ~47,1 u/día (τ≈3,9 d). La caída marcada de 1-2 ago (50 y 54 und/día, frente a ~75-89 la semana previa) acorta τ frente a la corrida anterior — el modelo ahora ve una caída más pronunciada, consistente con datos reales, no un cambio de metodología.</li>
+      <li><b>Confianza del ajuste (base): alta</b> (9 días de caída medidos desde el pico — subió de "media" en la corrida anterior). Mejora sola cada vez que se corre el skill con un día más de venta real.</li>
+      <li><b>Sin evento marcado:</b> esta corrida <b>no incluye</b> un multiplicador de la Feria de las Flores (no se pidió uno) — solo se acotó el horizonte hasta su fecha de cierre. Si quieres modelar un repunte/caída de ritmo por la feria, dame los multiplicadores esperados.</li>
+      <li><b>Ticket promedio:</b> $147.980/u (mezcla real de los 10 días de la curva, 783 und deduplicadas · $115.868.700 con IVA).</li>
+      <li><b>Inventario:</b> en el escenario base, ninguna referencia grande queda topada por stock — solo <b>Primavera Charm</b> (8 und, sin reposición) capa la demanda proyectada. Aparte, del refresco de Shopify de hoy: <b>Un Guarito XL</b> sigue sobrevendida (quedan -2), y ahora también entraron en crítico <b>Medellín Mi Amor Mesh Shirt XL</b> (quedan 3, vendiendo fuerte) y <b>Bloom Mesh Shirt XL</b> (quedan 6, vendiendo) — revisar reposición de esas tallas.</li>
+      <li><b>Mayorista — confirmado ($68.047.595, sin cambios esta corrida):</b> mismas 9 facturas/proformas de la última actualización (RFEL8216, RFEL8193, RFEL8217, y las proformas de Eterna, Ago1 y CV31) — no llegó información mayorista nueva en esta corrida.</li>
+      <li><b>Mayorista — pipeline: $0.</b> Sin pedidos adicionales esperados registrados por ahora.</li>
+      <li><b>Sin consignación activa.</b></li>
+      <li><b>Sin verificar (pendiente de corridas anteriores):</b> la <b>Proforma 290726MEDM</b> (Casa Viva, 29 jul, $8.339.644) sigue sin poder confirmarse contra el archivo de proformas más reciente — se mantiene en el registro tal como estaba.</li>
       <li><b>No es una promesa:</b> modelo sensible a la ejecución real (pauta, UGC, eventos, disponibilidad de inventario, y a que el mayorista efectivamente reponga). Se recalibra con más días de curva real.</li>
     </ul>`;
 
   // ===== Recuadro de cierre estimado (el número maestro) =====
-  // OJO: los $154M del escenario base de "Proyección de venta" son SOLO lo que falta
-  // por vender de aquí al 16 ago — NO incluyen lo que ya se vendió (24 jul-1 ago). Este
+  // OJO: los $48,4M del escenario base de "Proyección de venta" son SOLO lo que falta
+  // por vender del 3 al 9 ago (horizonte cortado a pedido en el cierre de la Feria de
+  // las Flores) — NO incluyen lo que ya se vendió (24 jul-2 ago) NI la venta esperada
+  // después del 9 ago (que existirá, pero deliberadamente no se proyecta todavía). Este
   // recuadro existe para que ese número no se confunda con el total de la campaña.
   (function(){
     const yaVendidoOnline = totals.revenue;
@@ -846,20 +848,20 @@
     const mayorista = fcWsTotal;
     const totalCierre = yaVendidoOnline + proyectadoOnline + mayorista;
     document.getElementById('closeBanner').innerHTML = `
-      <div class="cb-eyebrow">💰 Total estimado al cierre de la campaña · 24 jul → 16 ago 2026</div>
+      <div class="cb-eyebrow">💰 Total estimado hasta el 9 ago (cierre Feria de las Flores) · 24 jul → 9 ago 2026</div>
       <div class="cb-total">${cop(totalCierre)}</div>
-      <div class="cb-sub">En línea (ya vendido + proyectado, escenario base) + mayorista (confirmado, sin pipeline pendiente).${CONSIGNMENT?` No incluye consignación (${cop(CONSIGNMENT.total)}, aún no vendida).`:''}</div>
+      <div class="cb-sub">En línea (ya vendido + proyectado hasta el 9 ago, escenario base) + mayorista (confirmado, sin pipeline pendiente). No incluye venta esperada después del 9 ago (seguirá habiendo, no se cuenta todavía).${CONSIGNMENT?` No incluye consignación (${cop(CONSIGNMENT.total)}, aún no vendida).`:''}</div>
       <div class="cb-parts">
         <div class="cb-part">
           <div class="cb-lab">Ya vendido (en línea)</div>
           <div class="cb-val">${cop(yaVendidoOnline)}</div>
-          <div class="cb-meta">${num(totals.units)} und · 24 jul-1 ago</div>
+          <div class="cb-meta">${num(totals.units)} und · 24 jul-2 ago</div>
         </div>
         <div class="cb-op">+</div>
         <div class="cb-part">
           <div class="cb-lab">Proyectado (en línea, resto)</div>
           <div class="cb-val">${cop(proyectadoOnline)}</div>
-          <div class="cb-meta">escenario base · 2 ago→16 ago</div>
+          <div class="cb-meta">escenario base · 3 ago→9 ago</div>
         </div>
         <div class="cb-op">+</div>
         <div class="cb-part">
@@ -871,7 +873,7 @@
         <div class="cb-part cb-final">
           <div class="cb-lab">Total estimado</div>
           <div class="cb-val">${cop(totalCierre)}</div>
-          <div class="cb-meta">cierre de campaña</div>
+          <div class="cb-meta">hasta el 9 ago (Feria de las Flores)</div>
         </div>
       </div>`;
   })();

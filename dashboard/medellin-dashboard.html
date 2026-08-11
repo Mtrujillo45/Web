@@ -581,8 +581,14 @@
   //  línea "Cosmetiquera" nueva — 16 und sueltas, no ligadas a ningún kit —, cobro gradual saldo
   //  $3.509.126); un pedido de 50 Abanicos del 5 ago bajo el mismo N.° de proforma que RFEL8237
   //  pero sin conciliar todavía (pendiente RFEL, se cuenta aparte); y una proforma nueva del 10
-  //  ago (173 und, $13.039.420, varias tallas aún "en producción", sin RFEL ni abonos). Queda
-  //  pendiente el excel actualizado de Casa Viva.
+  //  ago (173 und, $13.039.420, varias tallas aún "en producción", sin RFEL ni abonos).
+  // 2026-08-10 (mismo día, excel de Casa Viva): "Proforma 030826MEDM" se formalizó como RFEL8230
+  //  (mismos 108 und/$9.442.440, sin cambios). Nuevo: RFEL8247 — 8 ago, primera vez que Casa Viva
+  //  pide Eterna Primavera Mesh Shirt (15 und) y también aparece Cosmetiquera suelta (10 und,
+  //  mismo precio que en Wanita: $38.430 con IVA). Nuevo: RFEL8246 (5 ago, 33 und). Nueva: proforma
+  //  pendiente del 10 ago (41 und, $3.595.130, sin RFEL) — mismo criterio que las pendientes de
+  //  Wanita, se cuenta como "Confirmada (pendiente factura)". Con esto queda completa la
+  //  reconciliación mayorista de los dos clientes para el cierre de campaña.
   const WHOLESALE_INVOICES = [
     { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8186", date:"27 jul 2026", pay:"Crédito (pagada)", campUnits:93, campTotal:8907990 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"RFEL 8193", date:"28 jul 2026", pay:"Crédito (pagada)", campUnits:132, campTotal:11091961 },
@@ -593,36 +599,39 @@
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"Proforma 310726MEDMW · Eterna Primavera · pendiente RFEL", date:"31 jul 2026", pay:"Transferencia", campUnits:30, campTotal:2518206 },
     { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8224", date:"31 jul 2026", pay:"Transferencia", campUnits:56, campTotal:4434063 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"RFEL 8231", date:"3 ago 2026", pay:"Transferencia (pagada)", campUnits:95, campTotal:7428300 },
-    { client:"CASA VIVA (18 Razones S.A.S.)", number:"Proforma 030826MEDM · pendiente RFEL", date:"3 ago 2026", pay:"Transferencia", campUnits:108, campTotal:9442440 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8230", date:"3 ago 2026", pay:"Transferencia", campUnits:108, campTotal:9442440 },
     { client:"FALABELLA (concesión retail)", number:"Reporte concesiones 28 jul-3 ago", date:"28 jul-3 ago 2026", pay:"Concesión (liquidación diferida)", campUnits:77, campTotal:9524642 },
     { client:"CRISTALINA SWIMWEAR (Luz Andrea Ochoa Garcés)", number:"Proforma 250726SURT · pendiente RFEL", date:"25 jul 2026", pay:"Transferencia", campUnits:6, campTotal:587580 },
     { client:"CRISTALINA SWIMWEAR (Luz Andrea Ochoa Garcés)", number:"Proforma 050826SURT · pendiente RFEL", date:"5 ago 2026", pay:"Transferencia", campUnits:14, campTotal:1245020 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"RFEL 8237", date:"5 ago 2026", pay:"Cobro a plazos (saldo $3.509.126)", campUnits:137, campTotal:10555620 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"Proforma 050826MEDMW (abanicos) · pendiente RFEL", date:"5 ago 2026", pay:"Transferencia (sin conciliar)", campUnits:50, campTotal:2096500 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"Proforma 100826MEDMW · pendiente RFEL", date:"10 ago 2026", pay:"Transferencia (sin abonos, en producción parcial)", campUnits:173, campTotal:13039420 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8246", date:"5 ago 2026", pay:"Transferencia", campUnits:33, campTotal:3805690 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8247", date:"8 ago 2026", pay:"Transferencia", campUnits:84, campTotal:7638120 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"Proforma 100826MEDM · pendiente RFEL", date:"10 ago 2026", pay:"Transferencia", campUnits:41, campTotal:3595130 },
   ];
 
   const WHOLESALE_PRODUCTS = [
-    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", sold:557, revenue:51901368,
-      sizes:[{z:"XS",sold:20},{z:"S",sold:211},{z:"M",sold:183},{z:"L",sold:107},{z:"XL",sold:36}] },
-    { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment", sold:189, revenue:15763379,
-      sizes:[{z:"XS",sold:14},{z:"S",sold:73},{z:"M",sold:73},{z:"L",sold:28},{z:"XL",sold:1}] },
-    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", sold:124, revenue:5302315,
-      sizes:[{z:"Única",sold:124}] },
-    { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment", sold:158, revenue:13892082,
-      sizes:[{z:"XS",sold:2},{z:"S",sold:59},{z:"M",sold:69},{z:"L",sold:26},{z:"XL",sold:2}] },
-    { name:"Kit · Mesh", mono:"🎀", kind:"kit", sold:78, revenue:12552516,
-      sizes:[{z:"S",sold:26},{z:"M",sold:26},{z:"L",sold:26}] },
-    { name:"Kit · T‑Shirt", mono:"🎀", kind:"kit", sold:42, revenue:6759048,
-      sizes:[{z:"S",sold:14},{z:"M",sold:14},{z:"L",sold:14}] },
-    { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment", sold:38, revenue:3469526,
-      sizes:[{z:"S",sold:12},{z:"M",sold:15},{z:"L",sold:11}] },
+    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", sold:592, revenue:55328918,
+      sizes:[{z:"XS",sold:20},{z:"S",sold:211},{z:"M",sold:198},{z:"L",sold:117},{z:"XL",sold:46}] },
+    { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment", sold:217, revenue:18309419,
+      sizes:[{z:"XS",sold:14},{z:"S",sold:83},{z:"M",sold:91},{z:"L",sold:28},{z:"XL",sold:1}] },
+    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", sold:152, revenue:6574355,
+      sizes:[{z:"Única",sold:152}] },
+    { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment", sold:171, revenue:15165172,
+      sizes:[{z:"XS",sold:2},{z:"S",sold:62},{z:"M",sold:75},{z:"L",sold:30},{z:"XL",sold:2}] },
+    { name:"Kit · Mesh", mono:"🎀", kind:"kit", sold:101, revenue:16253906,
+      sizes:[{z:"S",sold:39},{z:"M",sold:36},{z:"L",sold:26}] },
+    { name:"Kit · T‑Shirt", mono:"🎀", kind:"kit", sold:48, revenue:7724628,
+      sizes:[{z:"S",sold:17},{z:"M",sold:17},{z:"L",sold:14}] },
+    { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment", sold:53, revenue:4938476,
+      sizes:[{z:"S",sold:17},{z:"M",sold:20},{z:"L",sold:16}] },
     { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory", sold:78, revenue:3413640,
       sizes:[{z:"Única",sold:78}] },
     { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment", sold:1, revenue:90930,
       sizes:[{z:"M",sold:1}] },
-    { name:"Cosmetiquera", mono:"CQ", kind:"accessory", sold:16, revenue:614880,
-      sizes:[{z:"Única",sold:16}] },
+    { name:"Cosmetiquera", mono:"CQ", kind:"accessory", sold:26, revenue:999180,
+      sizes:[{z:"Única",sold:26}] },
   ];
 
   // Ya NO hay consignación activa: RFEL8217 (la mercancía que estaba en consignación,

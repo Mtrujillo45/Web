@@ -263,12 +263,33 @@
 
   <div class="close-banner" id="closeBanner"></div>
 
-  <div class="kpis" id="kpis"></div>
-  <div class="ivabar" id="ivabar"></div>
+  <section id="closing">
+    <div class="sec-head">
+      <h2>Resumen de cierre · en línea + mayorista <span class="count g">informe Fábrica de Licores</span></h2>
+      <span class="sec-note">Consolidado de los dos canales · campaña cerrada, sin proyección — solo venta real registrada a la fecha</span>
+    </div>
+    <div class="kpis" id="closeKpis"></div>
+    <div class="ivabar" id="closeIvabar"></div>
+
+    <div class="sec-head" style="margin-top:22px">
+      <h2 style="font-size:16px">Ranking de ventas · en línea + mayorista (combinado) <span class="count">unidades</span></h2>
+      <span class="sec-note">🎀 kit · suma en línea + mayorista por referencia · barra = unidades · etiqueta = ingresos con IVA</span>
+    </div>
+    <div class="panel" id="closeRank"></div>
+  </section>
+
+  <section id="online">
+    <div class="sec-head">
+      <h2>Canal en línea <span class="count g">Shopify</span></h2>
+      <span class="sec-note">Tienda Shopify · pedidos pagados, netos de reembolsos · precio de venta al público con IVA incluido</span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="ivabar" id="ivabar"></div>
+  </section>
 
   <section>
     <div class="sec-head">
-      <h2>Ranking de ventas <span class="count">unidades</span></h2>
+      <h2>Ranking de ventas · Shopify (en línea) <span class="count">unidades</span></h2>
       <span class="sec-note">🎀 kit · barra = unidades · etiqueta = ingresos con IVA</span>
     </div>
     <div class="panel" id="rank"></div>
@@ -276,7 +297,7 @@
 
   <section>
     <div class="sec-head">
-      <h2>Kits <span class="count" id="kitCount"></span></h2>
+      <h2>Kits <span class="count" id="kitCount"></span> <span class="sec-note">— Shopify (en línea)</span></h2>
       <span class="sec-note">🎀 Kit clásico = prenda + abanico + botella · 🍾 Kit nuevo = prenda + botella + cosmetiquera (sin abanico)</span>
     </div>
     <div class="grid two" id="kitsGrid"></div>
@@ -284,7 +305,7 @@
 
   <section>
     <div class="sec-head">
-      <h2>Productos individuales <span class="count g" id="indCount"></span></h2>
+      <h2>Productos individuales <span class="count g" id="indCount"></span> <span class="sec-note">— Shopify (en línea)</span></h2>
       <button class="btn ghost" id="toggleTable" type="button">Ver tabla</button>
     </div>
     <div class="grid" id="grid"></div>
@@ -293,7 +314,7 @@
 
   <section>
     <div class="sec-head">
-      <h2>Alertas de inventario</h2>
+      <h2>Alertas de inventario <span class="sec-note">— Shopify (en línea)</span></h2>
       <span class="sec-note">Agotados y en riesgo · umbral crítico ≤ 15 und.</span>
     </div>
     <div class="alerts" id="alerts"></div>
@@ -308,38 +329,23 @@
     <div class="ivabar" id="wsIvabar"></div>
 
     <div class="sec-head" style="margin-top:22px">
-      <h2 style="font-size:16px">Ranking de ventas mayorista <span class="count">unidades</span></h2>
+      <h2 style="font-size:16px">Ranking de ventas · Mayorista <span class="count">unidades</span></h2>
       <span class="sec-note">🎀 kit · barra = unidades · etiqueta = ingresos con IVA</span>
     </div>
     <div class="panel" id="wsRank"></div>
 
     <div class="sec-head" style="margin-top:22px">
-      <h2 style="font-size:16px">Kits <span class="count" id="wsKitCount"></span></h2>
+      <h2 style="font-size:16px">Kits <span class="count" id="wsKitCount"></span> <span class="sec-note">— Mayorista</span></h2>
     </div>
     <div class="grid two" id="wsKitsGrid"></div>
 
     <div class="sec-head" style="margin-top:22px">
-      <h2 style="font-size:16px">Productos individuales <span class="count g" id="wsIndCount"></span></h2>
+      <h2 style="font-size:16px">Productos individuales <span class="count g" id="wsIndCount"></span> <span class="sec-note">— Mayorista</span></h2>
     </div>
     <div class="grid" id="wsGrid"></div>
 
     <div class="tbl-wrap" id="wsInvoices" style="margin-top:22px"></div>
     <div id="wsConsignment"></div>
-  </section>
-
-  <section id="closing">
-    <div class="sec-head">
-      <h2>Resumen de cierre · en línea + mayorista <span class="count g">informe Fábrica de Licores</span></h2>
-      <span class="sec-note">Consolidado de los dos canales · campaña cerrada, sin proyección — solo venta real registrada a la fecha</span>
-    </div>
-    <div class="kpis" id="closeKpis"></div>
-    <div class="ivabar" id="closeIvabar"></div>
-
-    <div class="sec-head" style="margin-top:22px">
-      <h2 style="font-size:16px">Ranking de ventas combinado <span class="count">unidades</span></h2>
-      <span class="sec-note">🎀 kit · suma en línea + mayorista por referencia · barra = unidades · etiqueta = ingresos con IVA</span>
-    </div>
-    <div class="panel" id="closeRank"></div>
   </section>
 
   <footer>

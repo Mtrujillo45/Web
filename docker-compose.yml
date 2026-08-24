@@ -26,6 +26,9 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/mompossina_pedidos
       SESSION_SECRET: ${SESSION_SECRET:-cambia-este-valor-en-produccion}
       STORAGE_DRIVER: local
+      SEED_COMERCIAL_PASSWORD: ${SEED_COMERCIAL_PASSWORD:-cambiar123}
+      SEED_PRODUCCION_PASSWORD: ${SEED_PRODUCCION_PASSWORD:-cambiar123}
+      SEED_DEMO_CLIENT: ${SEED_DEMO_CLIENT:-false}
     ports:
       - "3000:3000"
     volumes:

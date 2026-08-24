@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireEmpresaAprobada } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { Card, Badge } from "@/components/ui";
+import { formatearPrecio } from "@/lib/pricing";
 
 export default async function HistoricoPage() {
   const { empresa } = await requireEmpresaAprobada();
@@ -36,7 +37,7 @@ export default async function HistoricoPage() {
                 <div>
                   <p className="font-medium text-brand-800">{pedido.drop.nombre}</p>
                   <p className="text-sm text-brand-700">
-                    {unidades} unidades &middot; ${valor.toFixed(2)} USD
+                    {unidades} unidades &middot; {formatearPrecio(valor, pedido.moneda)}
                   </p>
                 </div>
                 <Badge tono={pedido.estado === "ENVIADO" ? "exito" : "advertencia"}>

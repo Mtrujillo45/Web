@@ -12,14 +12,19 @@ import {
 const esquemaMapeo = z.object({
   hoja: z.string(),
   filaEncabezado: z.number().int().positive(),
-  columnas: z.object({
-    referencia: z.number().int().min(0),
-    nombreReferencia: z.number().int().min(0),
-    talla: z.number().int().min(0),
-    precioUsd: z.number().int().min(0),
-    sku: z.number().int().min(0).optional(),
-    fotoColumna: z.number().int().min(0).optional(),
-  }),
+  columnas: z
+    .object({
+      referencia: z.number().int().min(0),
+      nombreReferencia: z.number().int().min(0),
+      talla: z.number().int().min(0),
+      precioUsd: z.number().int().min(0).optional(),
+      precioCop: z.number().int().min(0).optional(),
+      sku: z.number().int().min(0).optional(),
+      fotoColumna: z.number().int().min(0).optional(),
+    })
+    .refine((c) => c.precioUsd != null || c.precioCop != null, {
+      message: "Debes mapear al menos una columna de precio (USD o COP)",
+    }),
 });
 
 export async function POST(
@@ -51,7 +56,10 @@ export async function POST(
   }
   const datosMapeo = esquemaMapeo.safeParse(mapeoJson);
   if (!datosMapeo.success) {
-    return NextResponse.json({ error: "Selecciona todas las columnas obligatorias" }, { status: 400 });
+    return NextResponse.json(
+      { error: datosMapeo.error.issues[0]?.message ?? "Selecciona todas las columnas obligatorias" },
+      { status: 400 }
+    );
   }
 
   const buffer = Buffer.from(await archivo.arrayBuffer());

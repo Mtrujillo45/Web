@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { calcularPrecioCliente, validarMoq, validarDisponibilidad } from "@/lib/pricing";
+import {
+  calcularPrecioCliente,
+  precioBasePorMoneda,
+  validarMoq,
+  validarDisponibilidad,
+} from "@/lib/pricing";
 import { obtenerContextoPedido, dropCerrado } from "@/lib/pedido-contexto";
+import { formatearPrecio } from "@/lib/pricing";
+import { enviarCorreo } from "@/lib/email";
 
 const esquema = z.object({
   dropId: z.string(),
@@ -40,40 +47,46 @@ export async function POST(req: NextRequest) {
   }
 
   const porcentaje = empresa.condicion?.porcentajeDescuento ?? 0;
+  const moneda = empresa.condicion?.moneda ?? "USD";
 
-  // Guarda siempre lo que el cliente intentó enviar, aunque falle la validación,
-  // para que no pierda lo que escribió.
+  const lineasConCantidad = lineas.filter((l) => l.cantidad > 0);
+  const lineasSinPrecio = lineasConCantidad.filter(
+    (l) => precioBasePorMoneda(variantesPorId.get(l.varianteId)!, moneda) == null
+  );
+  const lineasConPrecio = lineasConCantidad.filter(
+    (l) => precioBasePorMoneda(variantesPorId.get(l.varianteId)!, moneda) != null
+  );
+
+  // Guarda siempre lo que el cliente intentó enviar (lo que sí tiene precio en su moneda),
+  // aunque falle la validación, para que no pierda lo que escribió.
   const pedido = await prisma.$transaction(async (tx) => {
     const pedido = await tx.pedido.upsert({
       where: { empresaId_dropId: { empresaId: empresa.id, dropId } },
-      update: { estado: "BORRADOR" },
-      create: { empresaId: empresa.id, dropId, estado: "BORRADOR" },
+      update: { estado: "BORRADOR", moneda },
+      create: { empresaId: empresa.id, dropId, estado: "BORRADOR", moneda },
     });
     await tx.lineaPedido.deleteMany({ where: { pedidoId: pedido.id } });
-    const lineasConCantidad = lineas.filter((l) => l.cantidad > 0);
-    if (lineasConCantidad.length > 0) {
+    if (lineasConPrecio.length > 0) {
       await tx.lineaPedido.createMany({
-        data: lineasConCantidad.map((l) => ({
+        data: lineasConPrecio.map((l) => ({
           pedidoId: pedido.id,
           varianteId: l.varianteId,
           cantidad: l.cantidad,
           precioUnitarioAplicado: calcularPrecioCliente(
-            variantesPorId.get(l.varianteId)!.precioBaseUsd,
+            precioBasePorMoneda(variantesPorId.get(l.varianteId)!, moneda),
             porcentaje
-          ),
+          )!,
         })),
       });
     }
     return pedido;
   });
 
-  const lineaCantidades = lineas
-    .filter((l) => l.cantidad > 0)
-    .map((l) => ({
-      varianteId: l.varianteId,
-      productoId: variantesPorId.get(l.varianteId)!.productoId,
-      cantidad: l.cantidad,
-    }));
+  const lineaCantidades = lineasConPrecio.map((l) => ({
+    varianteId: l.varianteId,
+    productoId: variantesPorId.get(l.varianteId)!.productoId,
+    cantidad: l.cantidad,
+  }));
 
   const productosMap = new Map(
     variantes.map((v) => [
@@ -102,6 +115,11 @@ export async function POST(req: NextRequest) {
 
   const errores = [...erroresMoq, ...erroresDisponibilidad].map((e) => e.mensaje);
 
+  if (lineasSinPrecio.length > 0) {
+    const skus = lineasSinPrecio.map((l) => variantesPorId.get(l.varianteId)!.sku).join(", ");
+    errores.push(`Estas referencias no tienen precio cargado en ${moneda} y no se incluyeron: ${skus}`);
+  }
+
   if (lineaCantidades.length === 0) {
     errores.push("Agrega al menos una unidad antes de enviar el pedido.");
   }
@@ -113,9 +131,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const esPrimerEnvio = pedido.fechaEnvio == null;
+
   await prisma.pedido.update({
     where: { id: pedido.id },
     data: { estado: "ENVIADO", fechaEnvio: new Date(), enviadoPorId: sesion.sub },
+  });
+
+  const totalUnidades = lineaCantidades.reduce((acc, l) => acc + l.cantidad, 0);
+  const totalValor = lineasConPrecio.reduce((acc, l) => {
+    const precio = calcularPrecioCliente(
+      precioBasePorMoneda(variantesPorId.get(l.varianteId)!, moneda),
+      porcentaje
+    )!;
+    return acc + precio * l.cantidad;
+  }, 0);
+
+  await enviarCorreo({
+    to: "comercial@mompossina.com",
+    subject: `${esPrimerEnvio ? "Nuevo pedido" : "Pedido actualizado"}: ${empresa.nombreComercial} — ${drop.nombre}`,
+    html: `
+      <p>${esPrimerEnvio ? "Se envió un nuevo pedido" : "Un cliente actualizó su pedido enviado"}:</p>
+      <ul>
+        <li><strong>Cliente:</strong> ${empresa.nombreComercial}</li>
+        <li><strong>Drop:</strong> ${drop.nombre}</li>
+        <li><strong>Unidades:</strong> ${totalUnidades}</li>
+        <li><strong>Valor:</strong> ${formatearPrecio(totalValor, moneda)}</li>
+      </ul>
+      <p><a href="${req.nextUrl.origin}/admin/drops/${dropId}/consolidado">Ver consolidado</a></p>
+    `,
   });
 
   return NextResponse.json({ ok: true });

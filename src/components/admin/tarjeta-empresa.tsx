@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Badge, Field, Input, Alerta } from "@/components/ui";
+import { Button, Card, Badge, Field, Input, Select, Alerta } from "@/components/ui";
 
 type Empresa = {
   id: string;
@@ -14,7 +14,12 @@ type Empresa = {
   telefono: string | null;
   emailContacto: string;
   estado: "PENDIENTE" | "APROBADO" | "RECHAZADO" | "SUSPENDIDO";
-  condicion: { porcentajeDescuento: number; moqTotalPedido: number | null; terminosPago: string | null } | null;
+  condicion: {
+    porcentajeDescuento: number;
+    moneda: "USD" | "COP";
+    moqTotalPedido: number | null;
+    terminosPago: string | null;
+  } | null;
 };
 
 const TONO_ESTADO = {
@@ -29,6 +34,7 @@ export function TarjetaEmpresa({ empresa }: { empresa: Empresa }) {
   const [porcentajeDescuento, setPorcentajeDescuento] = useState(
     empresa.condicion?.porcentajeDescuento?.toString() ?? "0"
   );
+  const [moneda, setMoneda] = useState<"USD" | "COP">(empresa.condicion?.moneda ?? "USD");
   const [moqTotalPedido, setMoqTotalPedido] = useState(
     empresa.condicion?.moqTotalPedido?.toString() ?? ""
   );
@@ -39,6 +45,7 @@ export function TarjetaEmpresa({ empresa }: { empresa: Empresa }) {
   function payloadCondicion() {
     return {
       porcentajeDescuento: Number(porcentajeDescuento) || 0,
+      moneda,
       moqTotalPedido: moqTotalPedido ? Number(moqTotalPedido) : null,
       terminosPago: terminosPago || undefined,
     };
@@ -114,7 +121,7 @@ export function TarjetaEmpresa({ empresa }: { empresa: Empresa }) {
       )}
 
       {(empresa.estado === "PENDIENTE" || empresa.estado === "APROBADO") && (
-        <div className="grid grid-cols-1 gap-3 border-t border-brand-100 pt-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 border-t border-brand-100 pt-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="% de descuento">
             <Input
               type="number"
@@ -123,6 +130,12 @@ export function TarjetaEmpresa({ empresa }: { empresa: Empresa }) {
               value={porcentajeDescuento}
               onChange={(e) => setPorcentajeDescuento(e.target.value)}
             />
+          </Field>
+          <Field label="Moneda de la lista de precios">
+            <Select value={moneda} onChange={(e) => setMoneda(e.target.value as "USD" | "COP")}>
+              <option value="USD">USD (cliente internacional)</option>
+              <option value="COP">COP (cliente nacional)</option>
+            </Select>
           </Field>
           <Field label="Mínimo total del pedido (unidades, opcional)">
             <Input

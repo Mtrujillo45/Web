@@ -5,6 +5,7 @@ import { requireRolApi } from "@/lib/api-guards";
 
 const esquema = z.object({
   porcentajeDescuento: z.number().min(0).max(100),
+  moneda: z.enum(["USD", "COP"]).default("USD"),
   moqTotalPedido: z.number().int().positive().nullable().optional(),
   terminosPago: z.string().optional(),
 });
@@ -27,12 +28,14 @@ export async function PATCH(
     where: { empresaId: id },
     update: {
       porcentajeDescuento: datos.data.porcentajeDescuento,
+      moneda: datos.data.moneda,
       moqTotalPedido: datos.data.moqTotalPedido ?? null,
       terminosPago: datos.data.terminosPago || null,
     },
     create: {
       empresaId: id,
       porcentajeDescuento: datos.data.porcentajeDescuento,
+      moneda: datos.data.moneda,
       moqTotalPedido: datos.data.moqTotalPedido ?? null,
       terminosPago: datos.data.terminosPago || null,
     },

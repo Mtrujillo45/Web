@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireEmpresaAprobada } from "@/lib/guards";
 import { prisma } from "@/lib/db";
-import { calcularPrecioCliente } from "@/lib/pricing";
+import { calcularPrecioCliente, precioBasePorMoneda } from "@/lib/pricing";
 import { PedidoForm } from "@/components/cliente/pedido-form";
 
 export default async function PedidoPage({
@@ -30,6 +30,7 @@ export default async function PedidoPage({
   });
 
   const porcentajeDescuento = empresa.condicion?.porcentajeDescuento ?? 0;
+  const moneda = empresa.condicion?.moneda ?? "USD";
   const soloLectura = drop.estado === "CERRADO" || new Date() > drop.fechaLimite;
 
   const productos = drop.productos.map((producto) => ({
@@ -42,7 +43,7 @@ export default async function PedidoPage({
       id: v.id,
       sku: v.sku,
       talla: v.talla,
-      precioCliente: calcularPrecioCliente(v.precioBaseUsd, porcentajeDescuento),
+      precioCliente: calcularPrecioCliente(precioBasePorMoneda(v, moneda), porcentajeDescuento),
       cantidadActual:
         pedido?.lineas.find((l) => l.varianteId === v.id)?.cantidad ?? 0,
     })),
@@ -65,6 +66,7 @@ export default async function PedidoPage({
       <PedidoForm
         dropId={drop.id}
         productos={productos}
+        moneda={moneda}
         moqTotalPedido={empresa.condicion?.moqTotalPedido ?? null}
         soloLectura={soloLectura}
         estadoPedido={pedido?.estado ?? "BORRADOR"}

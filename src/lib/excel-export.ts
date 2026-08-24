@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import type { Moneda } from "@prisma/client";
 
 export type FilaConsolidado = {
   referencia: string;
@@ -6,16 +7,18 @@ export type FilaConsolidado = {
   sku: string;
   talla: string;
   totalUnidades: number;
-  precioBaseUsd: number;
+  valorUsd: number;
+  valorCop: number;
 };
 
 export type FilaPorCliente = {
   empresa: string;
+  moneda: Moneda;
   referencia: string;
   sku: string;
   talla: string;
   cantidad: number;
-  precioUnitarioUsd: number;
+  precioUnitario: number;
 };
 
 /** Genera el Excel de consolidado de un drop: totales por SKU/talla + detalle por cliente. */
@@ -32,31 +35,29 @@ export async function generarExcelConsolidado(params: {
     { header: "SKU", key: "sku", width: 18 },
     { header: "Talla", key: "talla", width: 10 },
     { header: "Total unidades", key: "totalUnidades", width: 16 },
-    { header: "Precio base USD", key: "precioBaseUsd", width: 16 },
-    { header: "Valor total USD", key: "valorTotalUsd", width: 16 },
+    { header: "Valor total USD", key: "valorUsd", width: 16 },
+    { header: "Valor total COP", key: "valorCop", width: 18 },
   ];
   for (const fila of params.consolidado) {
-    hojaConsolidado.addRow({
-      ...fila,
-      valorTotalUsd: Math.round(fila.totalUnidades * fila.precioBaseUsd * 100) / 100,
-    });
+    hojaConsolidado.addRow(fila);
   }
   hojaConsolidado.getRow(1).font = { bold: true };
 
   const hojaPorCliente = workbook.addWorksheet("Por cliente");
   hojaPorCliente.columns = [
     { header: "Cliente", key: "empresa", width: 28 },
+    { header: "Moneda", key: "moneda", width: 10 },
     { header: "Referencia", key: "referencia", width: 18 },
     { header: "SKU", key: "sku", width: 18 },
     { header: "Talla", key: "talla", width: 10 },
     { header: "Cantidad", key: "cantidad", width: 12 },
-    { header: "Precio unitario USD", key: "precioUnitarioUsd", width: 18 },
-    { header: "Valor USD", key: "valorUsd", width: 14 },
+    { header: "Precio unitario", key: "precioUnitario", width: 16 },
+    { header: "Valor", key: "valor", width: 14 },
   ];
   for (const fila of params.porCliente) {
     hojaPorCliente.addRow({
       ...fila,
-      valorUsd: Math.round(fila.cantidad * fila.precioUnitarioUsd * 100) / 100,
+      valor: Math.round(fila.cantidad * fila.precioUnitario * 100) / 100,
     });
   }
   hojaPorCliente.getRow(1).font = { bold: true };

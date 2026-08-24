@@ -3,12 +3,13 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Alerta, Badge, Input } from "@/components/ui";
+import { formatearPrecio } from "@/lib/pricing";
 
 type Variante = {
   id: string;
   sku: string;
   talla: string;
-  precioCliente: number;
+  precioCliente: number | null;
   cantidadActual: number;
 };
 
@@ -24,12 +25,14 @@ type Producto = {
 export function PedidoForm({
   dropId,
   productos,
+  moneda,
   moqTotalPedido,
   soloLectura,
   estadoPedido,
 }: {
   dropId: string;
   productos: Producto[];
+  moneda: "USD" | "COP";
   moqTotalPedido: number | null;
   soloLectura: boolean;
   estadoPedido: "BORRADOR" | "ENVIADO";
@@ -54,7 +57,7 @@ export function PedidoForm({
       for (const v of p.variantes) {
         const cantidad = cantidades[v.id] ?? 0;
         unidades += cantidad;
-        valor += cantidad * v.precioCliente;
+        valor += cantidad * (v.precioCliente ?? 0);
       }
     }
     return { unidades, valor: Math.round(valor * 100) / 100 };
@@ -171,11 +174,13 @@ export function PedidoForm({
                 {producto.variantes.map((v) => (
                   <div key={v.id} className="flex flex-col items-center gap-1">
                     <span className="text-xs font-medium text-brand-700">{v.talla}</span>
-                    <span className="text-xs text-brand-700">${v.precioCliente.toFixed(2)}</span>
+                    <span className="text-xs text-brand-700">
+                      {v.precioCliente != null ? formatearPrecio(v.precioCliente, moneda) : "Sin precio"}
+                    </span>
                     <Input
                       type="number"
                       min={0}
-                      disabled={soloLectura}
+                      disabled={soloLectura || v.precioCliente == null}
                       className="w-16 text-center"
                       value={cantidades[v.id] ?? 0}
                       onChange={(e) => actualizarCantidad(v.id, e.target.value)}
@@ -193,7 +198,10 @@ export function PedidoForm({
         <div>
           <p className="text-sm text-brand-700">
             Total: <span className="font-semibold text-brand-800">{totales.unidades} unidades</span>{" "}
-            &middot; <span className="font-semibold text-brand-800">${totales.valor.toFixed(2)} USD</span>
+            &middot;{" "}
+            <span className="font-semibold text-brand-800">
+              {formatearPrecio(totales.valor, moneda)}
+            </span>
           </p>
           {moqTotalPedido && (
             <p className="text-xs text-brand-700">Mínimo total del pedido: {moqTotalPedido} unidades</p>

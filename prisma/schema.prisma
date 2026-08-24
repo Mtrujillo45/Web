@@ -31,6 +31,11 @@ enum EstadoPedido {
   ENVIADO
 }
 
+enum Moneda {
+  USD
+  COP
+}
+
 model Empresa {
   id               String        @id @default(cuid())
   nombreComercial  String
@@ -75,6 +80,7 @@ model CondicionComercial {
   empresaId          String   @unique
   empresa            Empresa  @relation(fields: [empresaId], references: [id])
   porcentajeDescuento Decimal @default(0) @db.Decimal(5, 2)
+  moneda             Moneda   @default(USD)
   moqTotalPedido     Int?
   terminosPago       String?
   actualizadoEn      DateTime @updatedAt
@@ -115,14 +121,16 @@ model Variante {
   id                  String  @id @default(cuid())
   productoId          String
   producto            Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  sku                 String  @unique
+  sku                 String
   talla               String
-  precioBaseUsd       Decimal @db.Decimal(10, 2)
+  precioBaseUsd       Decimal? @db.Decimal(10, 2)
+  precioBaseCop       Decimal? @db.Decimal(14, 2)
   disponibilidadLimite Int?
 
   lineasPedido        LineaPedido[]
 
   @@index([productoId])
+  @@index([sku])
 }
 
 model Pedido {
@@ -132,6 +140,7 @@ model Pedido {
   dropId          String
   drop            Drop         @relation(fields: [dropId], references: [id])
   estado          EstadoPedido @default(BORRADOR)
+  moneda          Moneda       @default(USD)
   fechaUltimaEdicion DateTime  @updatedAt
   fechaEnvio      DateTime?
   enviadoPorId    String?
@@ -151,7 +160,7 @@ model LineaPedido {
   varianteId             String
   variante               Variante @relation(fields: [varianteId], references: [id])
   cantidad               Int
-  precioUnitarioAplicado Decimal  @db.Decimal(10, 2)
+  precioUnitarioAplicado Decimal  @db.Decimal(14, 2)
 
   @@unique([pedidoId, varianteId])
 }

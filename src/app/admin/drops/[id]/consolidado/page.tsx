@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireRolPagina } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { obtenerDatosConsolidado } from "@/lib/consolidado";
+import { formatearPrecio } from "@/lib/pricing";
 import { Card, Badge } from "@/components/ui";
 
 export default async function ConsolidadoPage({
@@ -16,10 +17,10 @@ export default async function ConsolidadoPage({
   const drop = await prisma.drop.findUnique({ where: { id } });
   if (!drop) notFound();
 
-  const { consolidado, resumenPorCliente, pendientesDeEnvio } = await obtenerDatosConsolidado(id);
+  const { consolidado, resumenPorCliente, totalesPorMoneda, pendientesDeEnvio } =
+    await obtenerDatosConsolidado(id);
 
   const totalUnidades = consolidado.reduce((acc, f) => acc + f.totalUnidades, 0);
-  const totalValor = consolidado.reduce((acc, f) => acc + f.totalUnidades * f.precioBaseUsd, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -36,14 +37,22 @@ export default async function ConsolidadoPage({
         </a>
       </div>
 
-      <Card className="flex gap-8">
+      <Card className="flex flex-wrap gap-8">
         <div>
           <p className="text-xs uppercase text-brand-700">Total unidades enviadas</p>
           <p className="text-2xl font-semibold text-brand-800">{totalUnidades}</p>
         </div>
         <div>
-          <p className="text-xs uppercase text-brand-700">Valor total (a precio base)</p>
-          <p className="text-2xl font-semibold text-brand-800">${totalValor.toFixed(2)}</p>
+          <p className="text-xs uppercase text-brand-700">Valor total USD</p>
+          <p className="text-2xl font-semibold text-brand-800">
+            {formatearPrecio(totalesPorMoneda.USD, "USD")}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs uppercase text-brand-700">Valor total COP</p>
+          <p className="text-2xl font-semibold text-brand-800">
+            {formatearPrecio(totalesPorMoneda.COP, "COP")}
+          </p>
         </div>
       </Card>
 
@@ -61,12 +70,13 @@ export default async function ConsolidadoPage({
                 <th className="px-4 py-2">Talla</th>
                 <th className="px-4 py-2 text-right">Unidades</th>
                 <th className="px-4 py-2 text-right">Valor USD</th>
+                <th className="px-4 py-2 text-right">Valor COP</th>
               </tr>
             </thead>
             <tbody>
               {consolidado.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-brand-700">
+                  <td colSpan={7} className="px-4 py-6 text-center text-brand-700">
                     Todavía no hay pedidos enviados para este drop.
                   </td>
                 </tr>
@@ -79,7 +89,10 @@ export default async function ConsolidadoPage({
                   <td className="px-4 py-2">{fila.talla}</td>
                   <td className="px-4 py-2 text-right">{fila.totalUnidades}</td>
                   <td className="px-4 py-2 text-right">
-                    ${(fila.totalUnidades * fila.precioBaseUsd).toFixed(2)}
+                    {fila.valorUsd > 0 ? formatearPrecio(fila.valorUsd, "USD") : "—"}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    {fila.valorCop > 0 ? formatearPrecio(fila.valorCop, "COP") : "—"}
                   </td>
                 </tr>
               ))}
@@ -102,7 +115,7 @@ export default async function ConsolidadoPage({
             <Card key={r.empresa} className="flex items-center justify-between">
               <p className="font-medium text-brand-800">{r.empresa}</p>
               <p className="text-sm text-brand-700">
-                {r.unidades} unidades &middot; ${r.valor.toFixed(2)} USD
+                {r.unidades} unidades &middot; {formatearPrecio(r.valor, r.moneda)}
               </p>
             </Card>
           ))}

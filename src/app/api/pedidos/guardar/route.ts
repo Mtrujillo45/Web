@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { calcularPrecioCliente } from "@/lib/pricing";
+import { calcularPrecioCliente, precioBasePorMoneda } from "@/lib/pricing";
 import { obtenerContextoPedido, dropCerrado } from "@/lib/pedido-contexto";
 
 const esquema = z.object({
@@ -35,15 +35,27 @@ export async function POST(req: NextRequest) {
   }
 
   const porcentaje = empresa.condicion?.porcentajeDescuento ?? 0;
+  const moneda = empresa.condicion?.moneda ?? "USD";
+  const lineasConCantidad = lineas.filter((l) => l.cantidad > 0);
+
+  const sinPrecio = lineasConCantidad.filter(
+    (l) => precioBasePorMoneda(variantesPorId.get(l.varianteId)!, moneda) == null
+  );
+  if (sinPrecio.length > 0) {
+    const skus = sinPrecio.map((l) => variantesPorId.get(l.varianteId)!.sku).join(", ");
+    return NextResponse.json(
+      { error: `Estas referencias no tienen precio cargado en ${moneda}: ${skus}` },
+      { status: 400 }
+    );
+  }
 
   await prisma.$transaction(async (tx) => {
     const pedido = await tx.pedido.upsert({
       where: { empresaId_dropId: { empresaId: empresa.id, dropId } },
-      update: { estado: "BORRADOR" },
-      create: { empresaId: empresa.id, dropId, estado: "BORRADOR" },
+      update: { estado: "BORRADOR", moneda },
+      create: { empresaId: empresa.id, dropId, estado: "BORRADOR", moneda },
     });
     await tx.lineaPedido.deleteMany({ where: { pedidoId: pedido.id } });
-    const lineasConCantidad = lineas.filter((l) => l.cantidad > 0);
     if (lineasConCantidad.length > 0) {
       await tx.lineaPedido.createMany({
         data: lineasConCantidad.map((l) => ({
@@ -51,9 +63,9 @@ export async function POST(req: NextRequest) {
           varianteId: l.varianteId,
           cantidad: l.cantidad,
           precioUnitarioAplicado: calcularPrecioCliente(
-            variantesPorId.get(l.varianteId)!.precioBaseUsd,
+            precioBasePorMoneda(variantesPorId.get(l.varianteId)!, moneda),
             porcentaje
-          ),
+          )!,
         })),
       });
     }

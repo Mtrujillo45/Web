@@ -24,6 +24,7 @@ export default async function ClientesPage() {
     condicion: e.condicion
       ? {
           porcentajeDescuento: Number(e.condicion.porcentajeDescuento),
+          moneda: e.condicion.moneda,
           moqTotalPedido: e.condicion.moqTotalPedido,
           terminosPago: e.condicion.terminosPago,
         }

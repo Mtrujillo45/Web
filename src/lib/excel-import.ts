@@ -84,7 +84,8 @@ const SINONIMOS: Record<string, string[]> = {
   nombreReferencia: ["description", "descripcion", "descripción", "nombre", "producto", "style name"],
   sku: ["sku"],
   talla: ["size", "talla", "tamaño"],
-  precioUsd: ["whls", "wholesale", "precio", "price", "usd", "fob", "fca"],
+  precioUsd: ["whls", "wholesale", "usd", "fob", "fca"],
+  precioCop: ["cop", "pesos"],
   fotoColumna: ["photo", "foto", "imagen", "picture", "image"],
 };
 
@@ -116,7 +117,8 @@ export type MapeoColumnas = {
   referencia: number;
   nombreReferencia: number;
   talla: number;
-  precioUsd: number;
+  precioUsd?: number;
+  precioCop?: number;
   sku?: number;
   fotoColumna?: number;
 };
@@ -127,7 +129,8 @@ export type FilaCatalogo = {
   nombreReferencia: string;
   sku: string;
   talla: string;
-  precioUsd: number;
+  precioUsd: number | null;
+  precioCop: number | null;
 };
 
 export type FilaInvalida = { numeroFila: number; errores: string[] };
@@ -140,7 +143,19 @@ function slug(texto: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-/** Aplica el mapeo de columnas a las filas de datos (después del encabezado) y valida cada una. */
+function parsearPrecio(texto: string): number | null {
+  if (!texto) return null;
+  const normalizado = texto.replace(/[^0-9.,-]/g, "").replace(",", ".");
+  const valor = Number(normalizado);
+  return !normalizado || Number.isNaN(valor) || valor <= 0 ? null : valor;
+}
+
+/**
+ * Aplica el mapeo de columnas a las filas de datos (después del encabezado) y valida cada una.
+ * El precio USD y el precio COP son independientes y ambos opcionales: basta con que al menos
+ * uno de los dos se haya podido leer en una fila para que sea válida (así un mismo drop puede
+ * servir catálogo a clientes internacionales y nacionales con un solo import).
+ */
 export function mapearYValidarFilas(
   filas: FilaExcel[],
   mapeo: MapeoColumnas
@@ -157,16 +172,15 @@ export function mapearYValidarFilas(
     const referencia = obtener(mapeo.referencia);
     const nombreReferencia = obtener(mapeo.nombreReferencia);
     const talla = obtener(mapeo.talla);
-    const precioTexto = obtener(mapeo.precioUsd);
     const skuExplicito = mapeo.sku != null ? obtener(mapeo.sku) : "";
 
     if (!referencia) errores.push("Referencia vacía");
     if (!talla) errores.push("Talla vacía");
 
-    const precioNormalizado = precioTexto.replace(/[^0-9.,-]/g, "").replace(",", ".");
-    const precioUsd = Number(precioNormalizado);
-    if (!precioTexto || Number.isNaN(precioUsd) || precioUsd <= 0) {
-      errores.push("Precio inválido (debe ser un número mayor a 0)");
+    const precioUsd = mapeo.precioUsd != null ? parsearPrecio(obtener(mapeo.precioUsd)) : null;
+    const precioCop = mapeo.precioCop != null ? parsearPrecio(obtener(mapeo.precioCop)) : null;
+    if (precioUsd == null && precioCop == null) {
+      errores.push("No se encontró un precio válido (USD o COP) para esta fila");
     }
 
     if (errores.length > 0) {
@@ -188,6 +202,7 @@ export function mapearYValidarFilas(
       sku,
       talla,
       precioUsd,
+      precioCop,
     });
   }
 
@@ -244,6 +259,7 @@ export async function crearCatalogoDesdeFilas(
           sku: f.sku,
           talla: f.talla,
           precioBaseUsd: f.precioUsd,
+          precioBaseCop: f.precioCop,
         })),
       });
     }

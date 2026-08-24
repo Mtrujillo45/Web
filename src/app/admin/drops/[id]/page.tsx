@@ -4,6 +4,7 @@ import { requireRolPagina } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { Card, Badge, Button } from "@/components/ui";
 import { AccionesDrop } from "@/components/admin/acciones-drop";
+import { formatearPrecio } from "@/lib/pricing";
 
 const TONO_ESTADO = { BORRADOR: "neutral", ACTIVO: "exito", CERRADO: "peligro" } as const;
 
@@ -86,9 +87,16 @@ export default async function DropDetallePage({
                   {producto.moqReferencia ? ` · mínimo ${producto.moqReferencia} u.` : ""}
                 </p>
               </div>
-              <p className="text-sm text-brand-700">
-                ${Number(producto.variantes[0]?.precioBaseUsd ?? 0).toFixed(2)} c/u
-              </p>
+              <div className="text-right text-sm text-brand-700">
+                {producto.variantes[0]?.precioBaseUsd != null && (
+                  <p>{formatearPrecio(Number(producto.variantes[0].precioBaseUsd), "USD")}</p>
+                )}
+                {producto.variantes[0]?.precioBaseCop != null && (
+                  <p>{formatearPrecio(Number(producto.variantes[0].precioBaseCop), "COP")}</p>
+                )}
+                {producto.variantes[0]?.precioBaseUsd == null &&
+                  producto.variantes[0]?.precioBaseCop == null && <p>Sin precio</p>}
+              </div>
             </Card>
           ))}
         </div>

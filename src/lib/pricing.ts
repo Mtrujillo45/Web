@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Moneda, Prisma, PrismaClient } from "@prisma/client";
 
 type Decimalish = Prisma.Decimal | number | string;
 
@@ -6,15 +6,36 @@ function aNumero(valor: Decimalish): number {
   return typeof valor === "object" ? Number(valor.toString()) : Number(valor);
 }
 
-/** Precio final que ve un cliente: precio base menos su % de descuento propio. */
+/** Precio base de una variante en la moneda pedida (null si no se cargó precio en esa moneda). */
+export function precioBasePorMoneda(
+  variante: { precioBaseUsd: Decimalish | null; precioBaseCop: Decimalish | null },
+  moneda: Moneda
+): number | null {
+  const valor = moneda === "USD" ? variante.precioBaseUsd : variante.precioBaseCop;
+  return valor == null ? null : aNumero(valor);
+}
+
+/**
+ * Precio final que ve un cliente: precio base (en su moneda) menos su % de descuento propio.
+ * Devuelve null si no hay precio cargado en esa moneda para la variante.
+ */
 export function calcularPrecioCliente(
-  precioBaseUsd: Decimalish,
+  precioBase: Decimalish | null,
   porcentajeDescuento: Decimalish
-): number {
-  const base = aNumero(precioBaseUsd);
+): number | null {
+  if (precioBase == null) return null;
+  const base = aNumero(precioBase);
   const descuento = aNumero(porcentajeDescuento);
   const precio = base * (1 - descuento / 100);
   return Math.round(precio * 100) / 100;
+}
+
+/** Formatea un monto con su moneda de forma inequívoca para clientes internacionales (nada de "c/u"). */
+export function formatearPrecio(monto: number, moneda: Moneda): string {
+  if (moneda === "COP") {
+    return `$${Math.round(monto).toLocaleString("es-CO")} COP`;
+  }
+  return `$${monto.toFixed(2)} USD`;
 }
 
 export type LineaCantidad = {

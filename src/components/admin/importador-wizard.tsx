@@ -11,7 +11,14 @@ type HojaAnalizada = {
   filaEncabezadoSugerida: number;
   mapeoSugerido: Partial<Record<CampoMapeo, number>>;
 };
-type CampoMapeo = "referencia" | "nombreReferencia" | "talla" | "precioUsd" | "sku" | "fotoColumna";
+type CampoMapeo =
+  | "referencia"
+  | "nombreReferencia"
+  | "talla"
+  | "precioUsd"
+  | "precioCop"
+  | "sku"
+  | "fotoColumna";
 
 type ResultadoImport = {
   referenciasCreadas: number;
@@ -23,7 +30,10 @@ const CAMPOS_OBLIGATORIOS: { campo: CampoMapeo; etiqueta: string }[] = [
   { campo: "referencia", etiqueta: "Referencia" },
   { campo: "nombreReferencia", etiqueta: "Nombre de la referencia" },
   { campo: "talla", etiqueta: "Talla" },
-  { campo: "precioUsd", etiqueta: "Precio USD" },
+];
+const CAMPOS_PRECIO: { campo: CampoMapeo; etiqueta: string }[] = [
+  { campo: "precioUsd", etiqueta: "Precio USD (clientes internacionales)" },
+  { campo: "precioCop", etiqueta: "Precio COP (clientes nacionales)" },
 ];
 const CAMPOS_OPCIONALES: { campo: CampoMapeo; etiqueta: string }[] = [
   { campo: "sku", etiqueta: "SKU (si no existe, se genera automáticamente)" },
@@ -90,7 +100,7 @@ export function ImportadorWizard({ dropId }: { dropId: string }) {
     columnas.referencia != null &&
     columnas.nombreReferencia != null &&
     columnas.talla != null &&
-    columnas.precioUsd != null;
+    (columnas.precioUsd != null || columnas.precioCop != null);
 
   async function importar() {
     if (!archivo || !listoParaImportar) return;
@@ -238,6 +248,32 @@ export function ImportadorWizard({ dropId }: { dropId: string }) {
                 </Field>
               ))}
             </div>
+
+            <p className="mb-3 mt-6 text-sm font-medium text-brand-800">
+              Precio — mapea al menos una moneda (puedes mapear ambas si el archivo las trae)
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {CAMPOS_PRECIO.map(({ campo, etiqueta }) => (
+                <Field key={campo} label={etiqueta}>
+                  <Select
+                    value={columnas[campo] ?? ""}
+                    onChange={(e) =>
+                      setColumnas((c) => ({
+                        ...c,
+                        [campo]: e.target.value === "" ? undefined : Number(e.target.value),
+                      }))
+                    }
+                  >
+                    <option value="">-- ninguna --</option>
+                    {encabezados.map((texto, idx) => (
+                      <option key={idx} value={idx}>
+                        Col {idx + 1}: {texto || "(vacío)"}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              ))}
+            </div>
           </Card>
 
           <Card>
@@ -252,7 +288,8 @@ export function ImportadorWizard({ dropId }: { dropId: string }) {
                     <th className="px-2 py-1">Referencia</th>
                     <th className="px-2 py-1">Nombre</th>
                     <th className="px-2 py-1">Talla</th>
-                    <th className="px-2 py-1">Precio</th>
+                    <th className="px-2 py-1">Precio USD</th>
+                    <th className="px-2 py-1">Precio COP</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -272,6 +309,9 @@ export function ImportadorWizard({ dropId }: { dropId: string }) {
                       </td>
                       <td className="px-2 py-1">
                         {columnas.precioUsd != null ? fila.celdas[columnas.precioUsd] : "—"}
+                      </td>
+                      <td className="px-2 py-1">
+                        {columnas.precioCop != null ? fila.celdas[columnas.precioCop] : "—"}
                       </td>
                     </tr>
                   ))}

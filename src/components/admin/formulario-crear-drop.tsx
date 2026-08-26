@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Field, Input, Alerta } from "@/components/ui";
+import { datetimeLocalABogota } from "@/lib/tiempo";
 
 export function FormularioCrearDrop() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export function FormularioCrearDrop() {
       const res = await fetch("/api/admin/drops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, fechaLimite: new Date(fechaLimite).toISOString() }),
+        body: JSON.stringify({ nombre, fechaLimite: datetimeLocalABogota(fechaLimite).toISOString() }),
       });
       const data = await res.json();
       if (!res.ok) return setError(data.error ?? "No se pudo crear el drop");
@@ -52,7 +53,7 @@ export function FormularioCrearDrop() {
           </Field>
         </div>
         <div className="flex-1">
-          <Field label="Fecha límite de pedidos">
+          <Field label="Fecha límite de pedidos (hora Bogotá)">
             <Input
               type="datetime-local"
               required

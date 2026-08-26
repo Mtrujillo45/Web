@@ -23,6 +23,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      TZ: America/Bogota
       DATABASE_URL: postgresql://postgres:postgres@db:5432/mompossina_pedidos
       SESSION_SECRET: ${SESSION_SECRET:-cambia-este-valor-en-produccion}
       STORAGE_DRIVER: local

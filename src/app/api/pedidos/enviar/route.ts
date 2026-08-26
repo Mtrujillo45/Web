@@ -7,12 +7,12 @@ import {
   validarMoq,
   validarDisponibilidad,
 } from "@/lib/pricing";
-import { obtenerContextoPedido, dropCerrado } from "@/lib/pedido-contexto";
+import { obtenerContextoDePedido, dropCerrado } from "@/lib/pedido-contexto";
 import { formatearPrecio } from "@/lib/pricing";
 import { enviarCorreo } from "@/lib/email";
 
 const esquema = z.object({
-  dropId: z.string(),
+  pedidoId: z.string(),
   lineas: z.array(z.object({ varianteId: z.string(), cantidad: z.number().int().min(0) })),
 });
 
@@ -22,11 +22,11 @@ export async function POST(req: NextRequest) {
   if (!datos.success) {
     return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   }
-  const { dropId, lineas } = datos.data;
+  const { pedidoId, lineas } = datos.data;
 
-  const contexto = await obtenerContextoPedido(dropId);
+  const contexto = await obtenerContextoDePedido(pedidoId);
   if ("error" in contexto) return contexto.error;
-  const { sesion, empresa, drop } = contexto;
+  const { sesion, empresa, drop, pedido } = contexto;
 
   if (dropCerrado(drop)) {
     return NextResponse.json(
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   const variantes = await prisma.variante.findMany({
-    where: { producto: { dropId } },
+    where: { producto: { dropId: drop.id } },
     include: { producto: true },
   });
   const variantesPorId = new Map(variantes.map((v) => [v.id, v]));
@@ -59,12 +59,8 @@ export async function POST(req: NextRequest) {
 
   // Guarda siempre lo que el cliente intentó enviar (lo que sí tiene precio en su moneda),
   // aunque falle la validación, para que no pierda lo que escribió.
-  const pedido = await prisma.$transaction(async (tx) => {
-    const pedido = await tx.pedido.upsert({
-      where: { empresaId_dropId: { empresaId: empresa.id, dropId } },
-      update: { estado: "BORRADOR", moneda },
-      create: { empresaId: empresa.id, dropId, estado: "BORRADOR", moneda },
-    });
+  await prisma.$transaction(async (tx) => {
+    await tx.pedido.update({ where: { id: pedido.id }, data: { moneda } });
     await tx.lineaPedido.deleteMany({ where: { pedidoId: pedido.id } });
     if (lineasConPrecio.length > 0) {
       await tx.lineaPedido.createMany({
@@ -79,7 +75,6 @@ export async function POST(req: NextRequest) {
         })),
       });
     }
-    return pedido;
   });
 
   const lineaCantidades = lineasConPrecio.map((l) => ({
@@ -108,7 +103,7 @@ export async function POST(req: NextRequest) {
     ])
   );
   const erroresDisponibilidad = await validarDisponibilidad(prisma, {
-    empresaId: empresa.id,
+    pedidoId: pedido.id,
     lineas: lineaCantidades,
     variantes: variantesMap,
   });
@@ -132,6 +127,11 @@ export async function POST(req: NextRequest) {
   }
 
   const esPrimerEnvio = pedido.fechaEnvio == null;
+  const esRestock =
+    esPrimerEnvio &&
+    (await prisma.pedido.count({
+      where: { empresaId: empresa.id, dropId: drop.id, estado: "ENVIADO", id: { not: pedido.id } },
+    })) > 0;
 
   await prisma.pedido.update({
     where: { id: pedido.id },
@@ -147,18 +147,30 @@ export async function POST(req: NextRequest) {
     return acc + precio * l.cantidad;
   }, 0);
 
+  const asunto = esPrimerEnvio
+    ? esRestock
+      ? "Pedido adicional (restock)"
+      : "Nuevo pedido"
+    : "Pedido actualizado";
+
   await enviarCorreo({
     to: "comercial@mompossina.com",
-    subject: `${esPrimerEnvio ? "Nuevo pedido" : "Pedido actualizado"}: ${empresa.nombreComercial} — ${drop.nombre}`,
+    subject: `${asunto}: ${empresa.nombreComercial} — ${drop.nombre}`,
     html: `
-      <p>${esPrimerEnvio ? "Se envió un nuevo pedido" : "Un cliente actualizó su pedido enviado"}:</p>
+      <p>${
+        esPrimerEnvio
+          ? esRestock
+            ? "Un cliente envió un pedido adicional (restock) sobre un drop en el que ya había pedido"
+            : "Se envió un nuevo pedido"
+          : "Un cliente actualizó su pedido enviado"
+      }:</p>
       <ul>
         <li><strong>Cliente:</strong> ${empresa.nombreComercial}</li>
         <li><strong>Drop:</strong> ${drop.nombre}</li>
         <li><strong>Unidades:</strong> ${totalUnidades}</li>
         <li><strong>Valor:</strong> ${formatearPrecio(totalValor, moneda)}</li>
       </ul>
-      <p><a href="${req.nextUrl.origin}/admin/drops/${dropId}/consolidado">Ver consolidado</a></p>
+      <p><a href="${req.nextUrl.origin}/admin/drops/${drop.id}/consolidado">Ver consolidado</a></p>
     `,
   });
 

@@ -73,6 +73,7 @@ model Usuario {
   empresasAprobadas Empresa[] @relation("EmpresasAprobadas")
   dropsCreados      Drop[]    @relation("DropsCreadosPor")
   pedidosEnviados   Pedido[]  @relation("PedidosEnviadosPor")
+  pedidosBloqueados Pedido[]  @relation("PedidosBloqueadosPor")
 }
 
 model CondicionComercial {
@@ -141,6 +142,10 @@ model Pedido {
   drop            Drop         @relation(fields: [dropId], references: [id])
   estado          EstadoPedido @default(BORRADOR)
   moneda          Moneda       @default(USD)
+  bloqueado       Boolean      @default(false)
+  bloqueadoEn     DateTime?
+  bloqueadoPorId  String?
+  bloqueadoPor    Usuario?     @relation("PedidosBloqueadosPor", fields: [bloqueadoPorId], references: [id])
   fechaUltimaEdicion DateTime  @updatedAt
   fechaEnvio      DateTime?
   enviadoPorId    String?
@@ -149,7 +154,7 @@ model Pedido {
 
   lineas          LineaPedido[]
 
-  @@unique([empresaId, dropId])
+  @@index([empresaId, dropId])
   @@index([dropId, estado])
 }
 

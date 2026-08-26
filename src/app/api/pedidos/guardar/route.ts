@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { calcularPrecioCliente, precioBasePorMoneda } from "@/lib/pricing";
-import { obtenerContextoPedido, dropCerrado } from "@/lib/pedido-contexto";
+import { obtenerContextoDePedido, dropCerrado } from "@/lib/pedido-contexto";
 
 const esquema = z.object({
-  dropId: z.string(),
+  pedidoId: z.string(),
   lineas: z.array(z.object({ varianteId: z.string(), cantidad: z.number().int().min(0) })),
 });
 
@@ -15,11 +15,11 @@ export async function POST(req: NextRequest) {
   if (!datos.success) {
     return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   }
-  const { dropId, lineas } = datos.data;
+  const { pedidoId, lineas } = datos.data;
 
-  const contexto = await obtenerContextoPedido(dropId);
+  const contexto = await obtenerContextoDePedido(pedidoId);
   if ("error" in contexto) return contexto.error;
-  const { empresa, drop } = contexto;
+  const { empresa, drop, pedido } = contexto;
 
   if (dropCerrado(drop)) {
     return NextResponse.json({ error: "Este drop ya cerró, no se puede editar" }, { status: 403 });
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   const varianteIds = lineas.map((l) => l.varianteId);
   const variantes = await prisma.variante.findMany({
-    where: { id: { in: varianteIds }, producto: { dropId } },
+    where: { id: { in: varianteIds }, producto: { dropId: drop.id } },
   });
   const variantesPorId = new Map(variantes.map((v) => [v.id, v]));
   if (variantes.length !== new Set(varianteIds).size) {
@@ -50,11 +50,7 @@ export async function POST(req: NextRequest) {
   }
 
   await prisma.$transaction(async (tx) => {
-    const pedido = await tx.pedido.upsert({
-      where: { empresaId_dropId: { empresaId: empresa.id, dropId } },
-      update: { estado: "BORRADOR", moneda },
-      create: { empresaId: empresa.id, dropId, estado: "BORRADOR", moneda },
-    });
+    await tx.pedido.update({ where: { id: pedido.id }, data: { estado: "BORRADOR" } });
     await tx.lineaPedido.deleteMany({ where: { pedidoId: pedido.id } });
     if (lineasConCantidad.length > 0) {
       await tx.lineaPedido.createMany({

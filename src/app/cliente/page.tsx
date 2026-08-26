@@ -3,10 +3,7 @@ import { requireEmpresaAprobada } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { Card, Badge, Button } from "@/components/ui";
 import { BotonCerrarSesion } from "@/components/boton-cerrar-sesion";
-
-function formatearFecha(fecha: Date) {
-  return new Intl.DateTimeFormat("es-CO", { dateStyle: "long" }).format(fecha);
-}
+import { formatearFechaBogota } from "@/lib/tiempo";
 
 export default async function ClientePage() {
   const { empresa } = await requireEmpresaAprobada();
@@ -19,7 +16,12 @@ export default async function ClientePage() {
   const pedidos = await prisma.pedido.findMany({
     where: { empresaId: empresa.id, drop: { estado: "ACTIVO" } },
   });
-  const pedidoPorDrop = new Map(pedidos.map((p) => [p.dropId, p]));
+  const pedidosPorDrop = new Map<string, typeof pedidos>();
+  for (const p of pedidos) {
+    const lista = pedidosPorDrop.get(p.dropId) ?? [];
+    lista.push(p);
+    pedidosPorDrop.set(p.dropId, lista);
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
@@ -41,24 +43,29 @@ export default async function ClientePage() {
           </Card>
         )}
         {dropsActivos.map((drop) => {
-          const pedido = pedidoPorDrop.get(drop.id);
+          const pedidosDelDrop = pedidosPorDrop.get(drop.id) ?? [];
+          const enviados = pedidosDelDrop.filter((p) => p.estado === "ENVIADO").length;
           return (
             <Card key={drop.id} className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-brand-800">{drop.nombre}</p>
                 <p className="text-sm text-brand-700">
-                  Cierra el {formatearFecha(drop.fechaLimite)}
+                  Cierra el {formatearFechaBogota(drop.fechaLimite, { dateStyle: "long" })}
                 </p>
-                {pedido && (
-                  <div className="mt-1">
-                    <Badge tono={pedido.estado === "ENVIADO" ? "exito" : "advertencia"}>
-                      {pedido.estado === "ENVIADO" ? "Pedido enviado" : "Borrador sin enviar"}
+                {pedidosDelDrop.length > 0 && (
+                  <div className="mt-1 flex items-center gap-2">
+                    <Badge tono={enviados > 0 ? "exito" : "advertencia"}>
+                      {pedidosDelDrop.length === 1
+                        ? enviados > 0
+                          ? "Pedido enviado"
+                          : "Borrador sin enviar"
+                        : `${pedidosDelDrop.length} pedidos (${enviados} enviados)`}
                     </Badge>
                   </div>
                 )}
               </div>
               <Link href={`/cliente/pedido/${drop.id}`}>
-                <Button>{pedido ? "Ver / editar pedido" : "Armar pedido"}</Button>
+                <Button>{pedidosDelDrop.length > 0 ? "Ver pedidos" : "Armar pedido"}</Button>
               </Link>
             </Card>
           );
@@ -66,7 +73,7 @@ export default async function ClientePage() {
       </div>
 
       <Link href="/cliente/historico" className="text-sm font-medium text-brand-800 underline">
-        Ver histórico de pedidos
+        Ver histórico y total de mis pedidos
       </Link>
     </main>
   );

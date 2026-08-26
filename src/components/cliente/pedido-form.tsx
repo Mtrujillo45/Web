@@ -23,18 +23,20 @@ type Producto = {
 };
 
 export function PedidoForm({
-  dropId,
+  pedidoId,
   productos,
   moneda,
   moqTotalPedido,
   soloLectura,
+  motivoSoloLectura,
   estadoPedido,
 }: {
-  dropId: string;
+  pedidoId: string;
   productos: Producto[];
   moneda: "USD" | "COP";
   moqTotalPedido: number | null;
   soloLectura: boolean;
+  motivoSoloLectura?: "cerrado" | "bloqueado" | null;
   estadoPedido: "BORRADOR" | "ENVIADO";
 }) {
   const router = useRouter();
@@ -82,7 +84,7 @@ export function PedidoForm({
       const res = await fetch("/api/pedidos/guardar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dropId, lineas: construirLineas() }),
+        body: JSON.stringify({ pedidoId, lineas: construirLineas() }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -104,7 +106,7 @@ export function PedidoForm({
       const res = await fetch("/api/pedidos/enviar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dropId, lineas: construirLineas() }),
+        body: JSON.stringify({ pedidoId, lineas: construirLineas() }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -121,7 +123,13 @@ export function PedidoForm({
 
   return (
     <div className="flex flex-col gap-6">
-      {soloLectura && (
+      {soloLectura && motivoSoloLectura === "bloqueado" && (
+        <Alerta tipo="error">
+          Este pedido fue bloqueado por el equipo Mompossina porque ya está en producción o trámite.
+          Ya no se puede modificar.
+        </Alerta>
+      )}
+      {soloLectura && motivoSoloLectura === "cerrado" && (
         <Alerta tipo="error">Este drop ya cerró. El pedido quedó en modo solo lectura.</Alerta>
       )}
       {!soloLectura && (
@@ -194,29 +202,32 @@ export function PedidoForm({
         ))}
       </div>
 
-      <Card className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-brand-700">
-            Total: <span className="font-semibold text-brand-800">{totales.unidades} unidades</span>{" "}
-            &middot;{" "}
-            <span className="font-semibold text-brand-800">
-              {formatearPrecio(totales.valor, moneda)}
-            </span>
-          </p>
-          {moqTotalPedido && (
-            <p className="text-xs text-brand-700">Mínimo total del pedido: {moqTotalPedido} unidades</p>
+      <Card className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-brand-700">
+              Total: <span className="font-semibold text-brand-800">{totales.unidades} unidades</span>{" "}
+              &middot;{" "}
+              <span className="font-semibold text-brand-800">
+                {formatearPrecio(totales.valor, moneda)}
+              </span>
+            </p>
+            {moqTotalPedido && (
+              <p className="text-xs text-brand-700">Mínimo total del pedido: {moqTotalPedido} unidades</p>
+            )}
+          </div>
+          {!soloLectura && (
+            <div className="flex gap-3">
+              <Button variant="secondary" disabled={guardando || enviando} onClick={guardar}>
+                {guardando ? "Guardando..." : "Guardar borrador"}
+              </Button>
+              <Button disabled={guardando || enviando} onClick={enviar}>
+                {enviando ? "Enviando..." : "Enviar pedido"}
+              </Button>
+            </div>
           )}
         </div>
-        {!soloLectura && (
-          <div className="flex gap-3">
-            <Button variant="secondary" disabled={guardando || enviando} onClick={guardar}>
-              {guardando ? "Guardando..." : "Guardar borrador"}
-            </Button>
-            <Button disabled={guardando || enviando} onClick={enviar}>
-              {enviando ? "Enviando..." : "Enviar pedido"}
-            </Button>
-          </div>
-        )}
+        {mensaje && <Alerta tipo={mensaje.tipo}>{mensaje.texto}</Alerta>}
       </Card>
     </div>
   );

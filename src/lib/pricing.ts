@@ -89,13 +89,13 @@ export function validarMoq(params: {
 /**
  * Valida disponibilidad opcional por variante (SKU+talla): si no tiene tope definido,
  * es venta anticipada sin bloqueo. Si tiene tope, no debe superarse sumando lo ya
- * enviado por OTRAS empresas más lo que esta empresa envía ahora (su envío anterior
- * en este drop, si lo hay, queda reemplazado, no sumado).
+ * enviado en TODOS los demás pedidos (de esta u otras empresas) más lo que este
+ * pedido envía ahora (su propio envío anterior, si lo hay, queda reemplazado, no sumado).
  */
 export async function validarDisponibilidad(
   tx: Prisma.TransactionClient | PrismaClient,
   params: {
-    empresaId: string;
+    pedidoId: string;
     lineas: LineaCantidad[];
     variantes: Map<string, { sku: string; talla: string; disponibilidadLimite: number | null }>;
   }
@@ -115,7 +115,7 @@ export async function validarDisponibilidad(
         varianteId: linea.varianteId,
         pedido: {
           estado: "ENVIADO",
-          empresaId: { not: params.empresaId },
+          id: { not: params.pedidoId },
         },
       },
     });

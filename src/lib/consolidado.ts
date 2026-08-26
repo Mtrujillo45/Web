@@ -79,11 +79,66 @@ export async function obtenerDatosConsolidado(dropId: string) {
   const totalesPorMoneda: Record<Moneda, number> = { USD: 0, COP: 0 };
   for (const r of resumenPorCliente) totalesPorMoneda[r.moneda] += r.valor;
 
+  // Detalle por pedido enviado (no solo agregado por cliente), para poder bloquear
+  // pedidos individuales que ya están en producción.
+  type PedidoResumen = {
+    id: string;
+    empresaId: string;
+    empresa: string;
+    moneda: Moneda;
+    bloqueado: boolean;
+    fechaEnvio: Date | null;
+    unidades: number;
+    valor: number;
+  };
+  const pedidosMap = new Map<string, PedidoResumen>();
+  for (const l of lineas) {
+    const actual = pedidosMap.get(l.pedidoId) ?? {
+      id: l.pedido.id,
+      empresaId: l.pedido.empresaId,
+      empresa: l.pedido.empresa.nombreComercial,
+      moneda: l.pedido.moneda,
+      bloqueado: l.pedido.bloqueado,
+      fechaEnvio: l.pedido.fechaEnvio,
+      unidades: 0,
+      valor: 0,
+    };
+    actual.unidades += l.cantidad;
+    actual.valor += l.cantidad * Number(l.precioUnitarioAplicado);
+    pedidosMap.set(l.pedidoId, actual);
+  }
+  const pedidosPorClienteMap = new Map<
+    string,
+    { empresaId: string; empresa: string; pedidos: PedidoResumen[] }
+  >();
+  for (const pedido of pedidosMap.values()) {
+    const actual = pedidosPorClienteMap.get(pedido.empresaId) ?? {
+      empresaId: pedido.empresaId,
+      empresa: pedido.empresa,
+      pedidos: [],
+    };
+    actual.pedidos.push(pedido);
+    pedidosPorClienteMap.set(pedido.empresaId, actual);
+  }
+  const pedidosPorCliente = Array.from(pedidosPorClienteMap.values())
+    .map((c) => ({
+      ...c,
+      pedidos: c.pedidos.sort((a, b) => (a.fechaEnvio?.getTime() ?? 0) - (b.fechaEnvio?.getTime() ?? 0)),
+    }))
+    .sort((a, b) => a.empresa.localeCompare(b.empresa));
+
   const empresasConEnviado = new Set(lineas.map((l) => l.pedido.empresaId));
   const aprobadas = await prisma.empresa.findMany({ where: { estado: "APROBADO" } });
   const pendientesDeEnvio = aprobadas
     .filter((e) => !empresasConEnviado.has(e.id))
     .map((e) => e.nombreComercial);
 
-  return { consolidado, porCliente, resumenPorCliente, totalesPorMoneda, pendientesDeEnvio };
+  return {
+    consolidado,
+    porCliente,
+    resumenPorCliente,
+    totalesPorMoneda,
+    pendientesDeEnvio,
+    pedidosPorCliente,
+  };
 }

@@ -4,7 +4,10 @@ import { requireRolPagina } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { obtenerDatosConsolidado } from "@/lib/consolidado";
 import { formatearPrecio } from "@/lib/pricing";
+import { formatearFechaBogota } from "@/lib/tiempo";
 import { Card, Badge } from "@/components/ui";
+import { BotonBloqueoPedido } from "@/components/admin/boton-bloqueo-pedido";
+import { BotonBloqueoMasivo } from "@/components/admin/boton-bloqueo-masivo";
 
 export default async function ConsolidadoPage({
   params,
@@ -12,12 +15,12 @@ export default async function ConsolidadoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  await requireRolPagina(["COMERCIAL", "PRODUCCION"]);
+  const sesion = await requireRolPagina(["COMERCIAL", "PRODUCCION"]);
 
   const drop = await prisma.drop.findUnique({ where: { id } });
   if (!drop) notFound();
 
-  const { consolidado, resumenPorCliente, totalesPorMoneda, pendientesDeEnvio } =
+  const { consolidado, totalesPorMoneda, pendientesDeEnvio, pedidosPorCliente } =
     await obtenerDatosConsolidado(id);
 
   const totalUnidades = consolidado.reduce((acc, f) => acc + f.totalUnidades, 0);
@@ -105,20 +108,61 @@ export default async function ConsolidadoPage({
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-brand-700">
           Por cliente
         </h2>
-        <div className="flex flex-col gap-3">
-          {resumenPorCliente.length === 0 && (
+        <div className="flex flex-col gap-4">
+          {pedidosPorCliente.length === 0 && (
             <Card>
               <p className="text-sm text-brand-700">Ningún cliente ha enviado pedido todavía.</p>
             </Card>
           )}
-          {resumenPorCliente.map((r) => (
-            <Card key={r.empresa} className="flex items-center justify-between">
-              <p className="font-medium text-brand-800">{r.empresa}</p>
-              <p className="text-sm text-brand-700">
-                {r.unidades} unidades &middot; {formatearPrecio(r.valor, r.moneda)}
-              </p>
-            </Card>
-          ))}
+          {pedidosPorCliente.map((cliente) => {
+            const unidadesTotal = cliente.pedidos.reduce((acc, p) => acc + p.unidades, 0);
+            const algunoDesbloqueado = cliente.pedidos.some((p) => !p.bloqueado);
+            return (
+              <Card key={cliente.empresaId} className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-brand-800">{cliente.empresa}</p>
+                    <p className="text-xs text-brand-700">
+                      {cliente.pedidos.length} pedido{cliente.pedidos.length === 1 ? "" : "s"} &middot;{" "}
+                      {unidadesTotal} unidades en total
+                    </p>
+                  </div>
+                  {sesion.rol === "COMERCIAL" && cliente.pedidos.length > 1 && (
+                    <BotonBloqueoMasivo
+                      empresaId={cliente.empresaId}
+                      dropId={id}
+                      algunoDesbloqueado={algunoDesbloqueado}
+                    />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {cliente.pedidos.map((pedido) => (
+                    <div
+                      key={pedido.id}
+                      className="flex items-center justify-between rounded-md border border-brand-100 px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm text-brand-700">
+                          {pedido.unidades} unidades &middot; {formatearPrecio(pedido.valor, pedido.moneda)}
+                        </p>
+                        {pedido.fechaEnvio && (
+                          <p className="text-xs text-brand-700">
+                            Enviado el {formatearFechaBogota(pedido.fechaEnvio)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {pedido.bloqueado && <Badge tono="peligro">Bloqueado</Badge>}
+                        {sesion.rol === "COMERCIAL" && (
+                          <BotonBloqueoPedido pedidoId={pedido.id} bloqueado={pedido.bloqueado} />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
 

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { Card, Badge, Button } from "@/components/ui";
 import { AccionesDrop } from "@/components/admin/acciones-drop";
 import { formatearPrecio } from "@/lib/pricing";
+import { dropCerrado } from "@/lib/pedido-contexto";
+import { formatearFechaBogota } from "@/lib/tiempo";
 
 const TONO_ESTADO = { BORRADOR: "neutral", ACTIVO: "exito", CERRADO: "peligro" } as const;
 
@@ -36,12 +38,7 @@ export default async function DropDetallePage({
             <h1 className="text-xl font-semibold text-brand-800">{drop.nombre}</h1>
             <Badge tono={TONO_ESTADO[drop.estado]}>{drop.estado}</Badge>
           </div>
-          <p className="text-sm text-brand-700">
-            Cierra el{" "}
-            {new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeStyle: "short" }).format(
-              drop.fechaLimite
-            )}
-          </p>
+          <p className="text-sm text-brand-700">Cierra el {formatearFechaBogota(drop.fechaLimite)}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex gap-3">
@@ -55,7 +52,12 @@ export default async function DropDetallePage({
             </Link>
           </div>
           {sesion.rol === "COMERCIAL" && (
-            <AccionesDrop dropId={drop.id} estado={drop.estado} tieneProductos={drop.productos.length > 0} />
+            <AccionesDrop
+              dropId={drop.id}
+              estado={drop.estado}
+              tieneProductos={drop.productos.length > 0}
+              cerrado={dropCerrado(drop)}
+            />
           )}
         </div>
       </div>

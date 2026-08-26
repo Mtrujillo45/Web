@@ -3,6 +3,7 @@ import { requireRolPagina } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { Card, Badge } from "@/components/ui";
 import { FormularioCrearDrop } from "@/components/admin/formulario-crear-drop";
+import { formatearFechaBogota } from "@/lib/tiempo";
 
 const TONO_ESTADO = { BORRADOR: "neutral", ACTIVO: "exito", CERRADO: "peligro" } as const;
 
@@ -31,8 +32,7 @@ export default async function DropsPage() {
                 <p className="font-medium text-brand-800">{drop.nombre}</p>
                 <p className="text-sm text-brand-700">
                   {drop._count.productos} referencias &middot; {drop._count.pedidos} pedidos &middot;
-                  cierra el{" "}
-                  {new Intl.DateTimeFormat("es-CO", { dateStyle: "medium" }).format(drop.fechaLimite)}
+                  cierra el {formatearFechaBogota(drop.fechaLimite, { dateStyle: "medium" })}
                 </p>
               </div>
               <Badge tono={TONO_ESTADO[drop.estado]}>{drop.estado}</Badge>

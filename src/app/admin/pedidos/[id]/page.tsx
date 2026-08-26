@@ -139,39 +139,13 @@ export default async function PedidoDetalleAdminPage({
         </div>
       )}
 
-      {sesion.rol === "COMERCIAL" ? (
-        <FormularioLogistica
-          pedidoId={pedido.id}
-          transportadora={pedido.transportadora}
-          numeroGuia={pedido.numeroGuia}
-          linkSeguimiento={pedido.linkSeguimiento}
-          guiaUrl={pedido.guiaUrl}
-        />
-      ) : (
-        (pedido.transportadora || pedido.numeroGuia || pedido.linkSeguimiento || pedido.guiaUrl) && (
-          <Card className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-700">
-              Información logística
-            </h2>
-            {pedido.transportadora && (
-              <p className="text-sm text-brand-700">Transportadora: {pedido.transportadora}</p>
-            )}
-            {pedido.numeroGuia && (
-              <p className="text-sm text-brand-700">Número de guía: {pedido.numeroGuia}</p>
-            )}
-            {pedido.linkSeguimiento && (
-              <a href={pedido.linkSeguimiento} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-brand-700 underline">
-                Link de seguimiento
-              </a>
-            )}
-            {pedido.guiaUrl && (
-              <a href={pedido.guiaUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-brand-700 underline">
-                Ver guía adjunta
-              </a>
-            )}
-          </Card>
-        )
-      )}
+      <FormularioLogistica
+        pedidoId={pedido.id}
+        transportadora={pedido.transportadora}
+        numeroGuia={pedido.numeroGuia}
+        linkSeguimiento={pedido.linkSeguimiento}
+        guiaUrl={pedido.guiaUrl}
+      />
 
       {pedido.historial.length > 0 && (
         <div>

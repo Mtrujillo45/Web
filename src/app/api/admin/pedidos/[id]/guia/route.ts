@@ -18,7 +18,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const acceso = await requireRolApi(["COMERCIAL"]);
+  const acceso = await requireRolApi(["COMERCIAL", "PRODUCCION"]);
   if (acceso.error) return acceso.error;
   const { id } = await params;
 

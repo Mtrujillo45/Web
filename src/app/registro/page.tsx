@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Field, Input, Alerta } from "@/components/ui";
+import { Logo } from "@/components/logo";
 
 const CAMPOS_INICIALES = {
   nombreComercial: "",
@@ -53,6 +54,7 @@ export default function RegistroPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center px-4 py-10">
+      <Logo className="mb-8 h-10" />
       <Card className="w-full">
         <h1 className="mb-1 text-xl font-semibold text-brand-800">Registrar mi empresa</h1>
         <p className="mb-6 text-sm text-brand-700">

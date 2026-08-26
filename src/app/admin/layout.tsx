@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRolPagina } from "@/lib/guards";
 import { BotonCerrarSesion } from "@/components/boton-cerrar-sesion";
+import { Logo } from "@/components/logo";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const sesion = await requireRolPagina(["COMERCIAL", "PRODUCCION"]);
@@ -10,8 +11,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <header className="border-b border-brand-100 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <nav className="flex items-center gap-6">
-            <Link href="/admin" className="font-semibold text-brand-800">
-              Mompossina admin
+            <Link href="/admin" className="flex items-center gap-2">
+              <Logo className="h-6" />
+              <span className="font-semibold text-brand-800">Admin</span>
             </Link>
             {sesion.rol === "COMERCIAL" && (
               <>

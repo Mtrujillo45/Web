@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Field, Input, Alerta } from "@/components/ui";
+import { Logo } from "@/components/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-4">
+      <Logo className="mb-8 h-10" />
       <Card className="w-full">
         <h1 className="mb-6 text-xl font-semibold text-brand-800">Ingresar</h1>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">

@@ -2,6 +2,7 @@ import { requireRolPagina } from "@/lib/guards";
 import { prisma } from "@/lib/db";
 import { formatearPrecio } from "@/lib/pricing";
 import { formatearFechaBogota, inicioDiaBogota, finDiaBogota } from "@/lib/tiempo";
+import Link from "next/link";
 import { Card, Select, Input, Button, Field } from "@/components/ui";
 import type { Moneda } from "@prisma/client";
 
@@ -39,7 +40,7 @@ export default async function DashboardPage({
   const unidadesPorMoneda: Record<Moneda, number> = { USD: 0, COP: 0 };
   const rankingMap = new Map<
     string,
-    { empresa: string; unidades: number; valorUsd: number; valorCop: number; pedidos: number }
+    { empresaId: string; empresa: string; unidades: number; valorUsd: number; valorCop: number; pedidos: number }
   >();
 
   for (const pedido of pedidos) {
@@ -49,6 +50,7 @@ export default async function DashboardPage({
     unidadesPorMoneda[pedido.moneda] += unidades;
 
     const actual = rankingMap.get(pedido.empresaId) ?? {
+      empresaId: pedido.empresaId,
       empresa: pedido.empresa.nombreComercial,
       unidades: 0,
       valorUsd: 0,
@@ -65,6 +67,16 @@ export default async function DashboardPage({
   const ranking = Array.from(rankingMap.values()).sort((a, b) => b.unidades - a.unidades);
   const totalPedidos = pedidos.length;
   const totalUnidades = unidadesPorMoneda.USD + unidadesPorMoneda.COP;
+
+  function linkAPedidos(empresaId?: string) {
+    const params = new URLSearchParams();
+    if (filtros.desde) params.set("desde", filtros.desde);
+    if (filtros.hasta) params.set("hasta", filtros.hasta);
+    if (filtros.dropId) params.set("dropId", filtros.dropId);
+    if (empresaId) params.set("empresaId", empresaId);
+    params.set("estado", "ENVIADO");
+    return `/admin/pedidos?${params.toString()}`;
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -115,6 +127,10 @@ export default async function DashboardPage({
         </form>
       </Card>
 
+      <Link href={linkAPedidos(filtros.empresaId)}>
+        <Button variant="secondary">Ver estos pedidos en detalle</Button>
+      </Link>
+
       <Card className="flex flex-wrap gap-8">
         <div>
           <p className="text-xs uppercase text-brand-700">Pedidos enviados</p>
@@ -151,18 +167,19 @@ export default async function DashboardPage({
                 <th className="px-4 py-2 text-right">Unidades</th>
                 <th className="px-4 py-2 text-right">Valor USD</th>
                 <th className="px-4 py-2 text-right">Valor COP</th>
+                <th className="px-4 py-2"></th>
               </tr>
             </thead>
             <tbody>
               {ranking.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-brand-700">
+                  <td colSpan={6} className="px-4 py-6 text-center text-brand-700">
                     No hay pedidos enviados con estos filtros.
                   </td>
                 </tr>
               )}
               {ranking.map((r) => (
-                <tr key={r.empresa} className="border-t border-brand-100">
+                <tr key={r.empresaId} className="border-t border-brand-100">
                   <td className="px-4 py-2">{r.empresa}</td>
                   <td className="px-4 py-2 text-right">{r.pedidos}</td>
                   <td className="px-4 py-2 text-right">{r.unidades}</td>
@@ -171,6 +188,11 @@ export default async function DashboardPage({
                   </td>
                   <td className="px-4 py-2 text-right">
                     {r.valorCop > 0 ? formatearPrecio(r.valorCop, "COP") : "—"}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <Link href={linkAPedidos(r.empresaId)} className="text-sm font-medium text-brand-700 underline">
+                      Ver pedidos
+                    </Link>
                   </td>
                 </tr>
               ))}

@@ -74,6 +74,7 @@ model Usuario {
   dropsCreados      Drop[]    @relation("DropsCreadosPor")
   pedidosEnviados   Pedido[]  @relation("PedidosEnviadosPor")
   pedidosBloqueados Pedido[]  @relation("PedidosBloqueadosPor")
+  pedidosEditados   Pedido[]  @relation("PedidosEditadosPor")
 }
 
 model CondicionComercial {
@@ -151,6 +152,17 @@ model Pedido {
   enviadoPorId    String?
   enviadoPor      Usuario?     @relation("PedidosEnviadosPor", fields: [enviadoPorId], references: [id])
   creadoEn        DateTime     @default(now())
+
+  // Información logística del despacho (opcional, la ingresa comercial).
+  transportadora    String?
+  numeroGuia        String?
+  guiaUrl           String?
+  linkSeguimiento   String?
+
+  // Auditoría de ediciones manuales desde el panel admin (cantidades o logística).
+  editadoEn         DateTime?
+  editadoPorId      String?
+  editadoPor        Usuario?  @relation("PedidosEditadosPor", fields: [editadoPorId], references: [id])
 
   lineas          LineaPedido[]
 

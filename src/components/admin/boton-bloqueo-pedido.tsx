@@ -24,7 +24,7 @@ export function BotonBloqueoPedido({ pedidoId, bloqueado }: { pedidoId: string; 
 
   return (
     <Button variant={bloqueado ? "secondary" : "danger"} disabled={enviando} onClick={alternar}>
-      {enviando ? "..." : bloqueado ? "Desbloquear" : "Bloquear"}
+      {enviando ? "..." : bloqueado ? "Reabrir pedido" : "Cerrar pedido"}
     </Button>
   );
 }

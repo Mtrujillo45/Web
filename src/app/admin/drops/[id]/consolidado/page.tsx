@@ -152,7 +152,13 @@ export default async function ConsolidadoPage({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {pedido.bloqueado && <Badge tono="peligro">Bloqueado</Badge>}
+                        {pedido.bloqueado && <Badge tono="peligro">Cerrado</Badge>}
+                        <Link
+                          href={`/admin/pedidos/${pedido.id}`}
+                          className="text-sm font-medium text-brand-700 underline"
+                        >
+                          Ver detalle
+                        </Link>
                         {sesion.rol === "COMERCIAL" && (
                           <BotonBloqueoPedido pedidoId={pedido.id} bloqueado={pedido.bloqueado} />
                         )}

@@ -32,7 +32,7 @@ export function BotonBloqueoMasivo({
 
   return (
     <Button variant="secondary" disabled={enviando} onClick={alternar}>
-      {enviando ? "..." : algunoDesbloqueado ? "Bloquear todos" : "Desbloquear todos"}
+      {enviando ? "..." : algunoDesbloqueado ? "Cerrar todos" : "Reabrir todos"}
     </Button>
   );
 }

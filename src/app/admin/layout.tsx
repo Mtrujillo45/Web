@@ -30,6 +30,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 Consolidados
               </Link>
             )}
+            <Link href="/admin/pedidos" className="text-sm text-brand-700 hover:text-brand-800">
+              Pedidos
+            </Link>
             <Link href="/admin/dashboard" className="text-sm text-brand-700 hover:text-brand-800">
               Dashboard
             </Link>

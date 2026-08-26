@@ -21,10 +21,22 @@ export type FilaPorCliente = {
   precioUnitario: number;
 };
 
+export type FilaLogistica = {
+  empresa: string;
+  moneda: Moneda;
+  unidades: number;
+  valor: number;
+  transportadora: string;
+  numeroGuia: string;
+  linkSeguimiento: string;
+  guiaAdjunta: string;
+};
+
 /** Genera el Excel de consolidado de un drop: totales por SKU/talla + detalle por cliente. */
 export async function generarExcelConsolidado(params: {
   consolidado: FilaConsolidado[];
   porCliente: FilaPorCliente[];
+  logistica: FilaLogistica[];
 }): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
 
@@ -61,6 +73,22 @@ export async function generarExcelConsolidado(params: {
     });
   }
   hojaPorCliente.getRow(1).font = { bold: true };
+
+  const hojaLogistica = workbook.addWorksheet("Logística");
+  hojaLogistica.columns = [
+    { header: "Cliente", key: "empresa", width: 28 },
+    { header: "Moneda", key: "moneda", width: 10 },
+    { header: "Unidades", key: "unidades", width: 12 },
+    { header: "Valor", key: "valor", width: 14 },
+    { header: "Transportadora", key: "transportadora", width: 22 },
+    { header: "Número de guía", key: "numeroGuia", width: 20 },
+    { header: "Link de seguimiento", key: "linkSeguimiento", width: 40 },
+    { header: "Guía adjunta", key: "guiaAdjunta", width: 14 },
+  ];
+  for (const fila of params.logistica) {
+    hojaLogistica.addRow(fila);
+  }
+  hojaLogistica.getRow(1).font = { bold: true };
 
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);

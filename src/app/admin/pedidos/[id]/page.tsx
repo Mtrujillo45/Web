@@ -30,9 +30,12 @@ export default async function PedidoDetalleAdminPage({
         },
       },
       lineas: true,
+      historial: { orderBy: { creadoEn: "desc" }, include: { editadoPor: true } },
     },
   });
   if (!pedido) notFound();
+
+  type CambioLinea = { sku: string; talla: string; cantidadAntes: number; cantidadDespues: number };
 
   const porcentajeDescuento = pedido.empresa.condicion?.porcentajeDescuento ?? 0;
 
@@ -168,6 +171,30 @@ export default async function PedidoDetalleAdminPage({
             )}
           </Card>
         )
+      )}
+
+      {pedido.historial.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-brand-700">
+            Historial de cambios de cantidades
+          </h2>
+          <div className="flex flex-col gap-3">
+            {pedido.historial.map((h) => (
+              <Card key={h.id} className="text-sm">
+                <p className="mb-1 text-xs text-brand-700">
+                  {formatearFechaBogota(h.creadoEn)} &middot; {h.editadoPor.nombre}
+                </p>
+                <ul className="list-disc pl-4 text-brand-800">
+                  {(h.cambios as unknown as CambioLinea[]).map((c, i) => (
+                    <li key={i}>
+                      {c.sku} (talla {c.talla}): {c.cantidadAntes} &rarr; {c.cantidadDespues}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -30,16 +30,16 @@ export async function PATCH(
 
   const pedido = await prisma.pedido.findUnique({
     where: { id },
-    include: { empresa: { include: { condicion: true } } },
+    include: { empresa: { include: { condicion: true } }, lineas: true },
   });
   if (!pedido) return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
 
   const varianteIds = datos.data.lineas.map((l) => l.varianteId);
-  const variantes = await prisma.variante.findMany({
-    where: { id: { in: varianteIds }, producto: { dropId: pedido.dropId } },
+  const todasLasVariantesDelDrop = await prisma.variante.findMany({
+    where: { producto: { dropId: pedido.dropId } },
   });
-  const variantesPorId = new Map(variantes.map((v) => [v.id, v]));
-  if (variantes.length !== new Set(varianteIds).size) {
+  const variantesPorId = new Map(todasLasVariantesDelDrop.map((v) => [v.id, v]));
+  if (varianteIds.some((vid) => !variantesPorId.has(vid))) {
     return NextResponse.json({ error: "Alguna referencia no pertenece a este drop" }, { status: 400 });
   }
 
@@ -56,6 +56,21 @@ export async function PATCH(
       { status: 400 }
     );
   }
+
+  const cantidadAntesPorVariante = new Map(pedido.lineas.map((l) => [l.varianteId, l.cantidad]));
+  const cantidadDespuesPorVariante = new Map(datos.data.lineas.map((l) => [l.varianteId, l.cantidad]));
+  const varianteIdsAfectadas = new Set([
+    ...cantidadAntesPorVariante.keys(),
+    ...cantidadDespuesPorVariante.keys(),
+  ]);
+  const cambios = Array.from(varianteIdsAfectadas)
+    .map((varianteId) => ({
+      sku: variantesPorId.get(varianteId)?.sku ?? varianteId,
+      talla: variantesPorId.get(varianteId)?.talla ?? "",
+      cantidadAntes: cantidadAntesPorVariante.get(varianteId) ?? 0,
+      cantidadDespues: cantidadDespuesPorVariante.get(varianteId) ?? 0,
+    }))
+    .filter((c) => c.cantidadAntes !== c.cantidadDespues);
 
   await prisma.$transaction(async (tx) => {
     await tx.lineaPedido.deleteMany({ where: { pedidoId: pedido.id } });
@@ -76,6 +91,11 @@ export async function PATCH(
       where: { id: pedido.id },
       data: { editadoEn: new Date(), editadoPorId: acceso.sesion.sub },
     });
+    if (cambios.length > 0) {
+      await tx.historialPedido.create({
+        data: { pedidoId: pedido.id, editadoPorId: acceso.sesion.sub, cambios },
+      });
+    }
   });
 
   return NextResponse.json({ ok: true });

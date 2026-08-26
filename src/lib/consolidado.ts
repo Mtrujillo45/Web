@@ -11,7 +11,10 @@ export async function obtenerDatosConsolidado(dropId: string) {
 
   const lineas = await prisma.lineaPedido.findMany({
     where: { pedido: { dropId, estado: "ENVIADO" } },
-    include: { variante: { include: { producto: true } }, pedido: { include: { empresa: true } } },
+    include: {
+      variante: { include: { producto: true } },
+      pedido: { include: { empresa: true } },
+    },
   });
 
   // Unidades por variante: siempre unificadas (no importa la moneda) porque a producción
@@ -90,6 +93,10 @@ export async function obtenerDatosConsolidado(dropId: string) {
     fechaEnvio: Date | null;
     unidades: number;
     valor: number;
+    transportadora: string | null;
+    numeroGuia: string | null;
+    linkSeguimiento: string | null;
+    guiaUrl: string | null;
   };
   const pedidosMap = new Map<string, PedidoResumen>();
   for (const l of lineas) {
@@ -102,6 +109,10 @@ export async function obtenerDatosConsolidado(dropId: string) {
       fechaEnvio: l.pedido.fechaEnvio,
       unidades: 0,
       valor: 0,
+      transportadora: l.pedido.transportadora,
+      numeroGuia: l.pedido.numeroGuia,
+      linkSeguimiento: l.pedido.linkSeguimiento,
+      guiaUrl: l.pedido.guiaUrl,
     };
     actual.unidades += l.cantidad;
     actual.valor += l.cantidad * Number(l.precioUnitarioAplicado);
@@ -127,6 +138,19 @@ export async function obtenerDatosConsolidado(dropId: string) {
     }))
     .sort((a, b) => a.empresa.localeCompare(b.empresa));
 
+  const logistica = Array.from(pedidosMap.values())
+    .map((p) => ({
+      empresa: p.empresa,
+      moneda: p.moneda,
+      unidades: p.unidades,
+      valor: p.valor,
+      transportadora: p.transportadora ?? "",
+      numeroGuia: p.numeroGuia ?? "",
+      linkSeguimiento: p.linkSeguimiento ?? "",
+      guiaAdjunta: p.guiaUrl ? "Sí" : "No",
+    }))
+    .sort((a, b) => a.empresa.localeCompare(b.empresa));
+
   const empresasConEnviado = new Set(lineas.map((l) => l.pedido.empresaId));
   const aprobadas = await prisma.empresa.findMany({ where: { estado: "APROBADO" } });
   const pendientesDeEnvio = aprobadas
@@ -140,5 +164,6 @@ export async function obtenerDatosConsolidado(dropId: string) {
     totalesPorMoneda,
     pendientesDeEnvio,
     pedidosPorCliente,
+    logistica,
   };
 }

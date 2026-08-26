@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireRolApi } from "@/lib/api-guards";
 import { guardarImagen } from "@/lib/storage";
+import { tieneInfoLogistica } from "@/lib/logistica";
+import { enviarCorreo } from "@/lib/email";
 
 const EXTENSIONES_PERMITIDAS: Record<string, string> = {
   "application/pdf": "pdf",
@@ -20,7 +22,10 @@ export async function POST(
   if (acceso.error) return acceso.error;
   const { id } = await params;
 
-  const pedido = await prisma.pedido.findUnique({ where: { id } });
+  const pedido = await prisma.pedido.findUnique({
+    where: { id },
+    include: { empresa: true, drop: true },
+  });
   if (!pedido) return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
 
   const form = await req.formData().catch(() => null);
@@ -42,10 +47,23 @@ export async function POST(
   const buffer = Buffer.from(await archivo.arrayBuffer());
   const guiaUrl = await guardarImagen(buffer, extension);
 
+  const teniaInfoAntes = tieneInfoLogistica(pedido);
+
   await prisma.pedido.update({
     where: { id },
     data: { guiaUrl, editadoEn: new Date(), editadoPorId: acceso.sesion.sub },
   });
+
+  if (!teniaInfoAntes) {
+    await enviarCorreo({
+      to: pedido.empresa.emailContacto,
+      subject: `Tu pedido de Mompossina fue despachado — ${pedido.drop.nombre}`,
+      html: `
+        <p>¡Tu pedido de <strong>${pedido.drop.nombre}</strong> ya está en camino!</p>
+        <p><a href="${req.nextUrl.origin}${guiaUrl}">Ver la guía de despacho</a></p>
+      `,
+    });
+  }
 
   return NextResponse.json({ ok: true, guiaUrl });
 }

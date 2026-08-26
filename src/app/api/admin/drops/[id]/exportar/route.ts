@@ -15,8 +15,8 @@ export async function GET(
   const drop = await prisma.drop.findUnique({ where: { id } });
   if (!drop) return NextResponse.json({ error: "Drop no encontrado" }, { status: 404 });
 
-  const { consolidado, porCliente } = await obtenerDatosConsolidado(id);
-  const buffer = await generarExcelConsolidado({ consolidado, porCliente });
+  const { consolidado, porCliente, logistica } = await obtenerDatosConsolidado(id);
+  const buffer = await generarExcelConsolidado({ consolidado, porCliente, logistica });
 
   const nombreArchivo = `consolidado-${drop.nombre.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.xlsx`;
 

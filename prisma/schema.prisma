@@ -75,6 +75,7 @@ model Usuario {
   pedidosEnviados   Pedido[]  @relation("PedidosEnviadosPor")
   pedidosBloqueados Pedido[]  @relation("PedidosBloqueadosPor")
   pedidosEditados   Pedido[]  @relation("PedidosEditadosPor")
+  historialesPedido HistorialPedido[]
 }
 
 model CondicionComercial {
@@ -165,9 +166,24 @@ model Pedido {
   editadoPor        Usuario?  @relation("PedidosEditadosPor", fields: [editadoPorId], references: [id])
 
   lineas          LineaPedido[]
+  historial       HistorialPedido[]
 
   @@index([empresaId, dropId])
   @@index([dropId, estado])
+}
+
+/// Registro de cada corrección manual de cantidades hecha desde el panel admin,
+/// para poder ver qué cambió, cuándo y quién lo hizo.
+model HistorialPedido {
+  id           String   @id @default(cuid())
+  pedidoId     String
+  pedido       Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  editadoPorId String
+  editadoPor   Usuario  @relation(fields: [editadoPorId], references: [id])
+  creadoEn     DateTime @default(now())
+  cambios      Json
+
+  @@index([pedidoId])
 }
 
 model LineaPedido {

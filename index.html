@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Medellín Mi Amor — Monitor de ventas en vivo</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
-<style>*{box-sizing:border-box}html,body{margin:0;padding:0}</style>
-</head>
-<body>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #F5F7F2;
@@ -236,6 +232,8 @@
   #mayorista tbody tr.nc td:nth-child(2)::after { content: ""; }
   #mayorista tfoot tr:first-child td { color: var(--bloom-ink); font-weight: 700; }
 </style>
+</head>
+<body>
 
 <header>
   <div class="head-inner">
@@ -361,7 +359,7 @@
 </div>
 
 <script>
-  const GENERATED_AT = "2026-08-21T06:13:06-05:00";
+  const GENERATED_AT = "2026-08-27T11:07:44-05:00";
   const ALERT_CRIT = 15; // stock <= 15 = crítico; stock 0 = agotado (quiebre)
   const IVA_RATE = 0.19; // tienda con IVA INCLUIDO: ingresos = precio de venta al público (con IVA)
 
@@ -370,48 +368,48 @@
   // <<<PRODUCTS_START>>> (auto-generado por compute.py — no editar a mano)
   const PRODUCTS = [
     { name:"Kit · T‑Shirt", full:"Kit Medellín Mi Amor · T‑Shirt", mono:"🎀", kind:"kit",
-      price:229900, revenue:22760100, buildable:88,
+      price:229900, revenue:23541760, buildable:75,
       note:"Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:51,sold:6},{z:"S",stock:22,sold:27},{z:"M",stock:16,sold:37},{z:"L",stock:-1,sold:18},{z:"XL",stock:0,sold:11}] },
+      sizes:[{z:"XS",stock:48,sold:7},{z:"S",stock:21,sold:28},{z:"M",stock:5,sold:39},{z:"L",stock:0,sold:18},{z:"XL",stock:1,sold:11}] },
     { name:"Kit · Mesh", full:"Kit Medellín Mi Amor · Mesh", mono:"🎀", kind:"kit",
-      price:229900, revenue:53796600, buildable:78,
+      price:229900, revenue:54210420, buildable:51,
       note:"Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:30,sold:13},{z:"S",stock:52,sold:58},{z:"M",stock:-1,sold:84},{z:"L",stock:-3,sold:52},{z:"XL",stock:0,sold:27}] },
+      sizes:[{z:"XS",stock:29,sold:13},{z:"S",stock:22,sold:59},{z:"M",stock:-2,sold:84},{z:"L",stock:2,sold:53},{z:"XL",stock:0,sold:27}] },
     { name:"Kit Nuevo · T‑Shirt", full:"Kit Nuevo Medellín Mi Amor · T‑Shirt", mono:"🍾", kind:"kit",
-      price:179900, revenue:1978900, buildable:88,
+      price:179900, revenue:1978900, buildable:75,
       note:"Un Guarito + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Un Guarito».",
-      sizes:[{z:"XS",stock:51,sold:2},{z:"S",stock:22,sold:5},{z:"M",stock:16,sold:3},{z:"L",stock:-1,sold:1},{z:"XL",stock:0,sold:0}] },
+      sizes:[{z:"XS",stock:48,sold:2},{z:"S",stock:21,sold:5},{z:"M",stock:5,sold:3},{z:"L",stock:0,sold:1},{z:"XL",stock:1,sold:0}] },
     { name:"Kit Nuevo · Mesh", full:"Kit Nuevo Medellín Mi Amor · Mesh", mono:"🍾", kind:"kit",
-      price:179900, revenue:4497500, buildable:78,
+      price:179900, revenue:4497500, buildable:51,
       note:"Mesh Shirt + Botella + Cosmetiquera (sin abanico). Inventario compartido con «Mesh Shirt».",
-      sizes:[{z:"XS",stock:30,sold:1},{z:"S",stock:52,sold:9},{z:"M",stock:-1,sold:7},{z:"L",stock:-3,sold:8},{z:"XL",stock:0,sold:0}] },
+      sizes:[{z:"XS",stock:29,sold:1},{z:"S",stock:22,sold:9},{z:"M",stock:-2,sold:7},{z:"L",stock:2,sold:8},{z:"XL",stock:0,sold:0}] },
     { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment",
-      price:129900, revenue:16107600,
+      price:129900, revenue:16367400,
       note:"Inventario compartido con Kit T‑Shirt. El stock XL bajo es parcial: hay producción en camino.",
-      sizes:[{z:"XS",stock:51,sold:18},{z:"S",stock:22,sold:31},{z:"M",stock:16,sold:53},{z:"L",stock:-1,sold:17},{z:"XL",stock:0,sold:5}] },
+      sizes:[{z:"XS",stock:48,sold:18},{z:"S",stock:21,sold:31},{z:"M",stock:5,sold:55},{z:"L",stock:0,sold:17},{z:"XL",stock:1,sold:5}] },
     { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment",
-      price:139900, revenue:44628100,
+      price:139900, revenue:46167000,
       note:"Inventario compartido con Kit Mesh. Reposición en producción.",
-      sizes:[{z:"XS",stock:30,sold:26},{z:"S",stock:52,sold:80},{z:"M",stock:-1,sold:120},{z:"L",stock:-3,sold:54},{z:"XL",stock:0,sold:39}] },
+      sizes:[{z:"XS",stock:29,sold:27},{z:"S",stock:22,sold:87},{z:"M",stock:-2,sold:121},{z:"L",stock:2,sold:55},{z:"XL",stock:0,sold:40}] },
     { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory",
-      price:59900, revenue:9164700,
+      price:59900, revenue:9404300,
       note:"También se incluye 1 abanico dentro de cada kit (no contado aquí).",
-      sizes:[{z:"Única",stock:470,sold:153}] },
+      sizes:[{z:"Única",stock:460,sold:157}] },
     { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment",
-      price:139900, revenue:15948600,
-      sizes:[{z:"XS",stock:4,sold:11},{z:"S",stock:-1,sold:20},{z:"M",stock:24,sold:35},{z:"L",stock:-1,sold:33},{z:"XL",stock:0,sold:15}] },
+      price:139900, revenue:16648100,
+      sizes:[{z:"XS",stock:0,sold:11},{z:"S",stock:0,sold:20},{z:"M",stock:9,sold:40},{z:"L",stock:0,sold:33},{z:"XL",stock:0,sold:15}] },
     { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment",
-      price:139900, revenue:9093500,
-      sizes:[{z:"XS",stock:26,sold:4},{z:"S",stock:67,sold:16},{z:"M",stock:97,sold:26},{z:"L",stock:34,sold:14},{z:"XL",stock:19,sold:5}] },
+      price:139900, revenue:10912200,
+      sizes:[{z:"XS",stock:26,sold:4},{z:"S",stock:63,sold:20},{z:"M",stock:91,sold:33},{z:"L",stock:32,sold:16},{z:"XL",stock:19,sold:5}] },
     { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment",
       price:129900, revenue:909300,
       sizes:[{z:"XS",stock:12,sold:3},{z:"S",stock:23,sold:2},{z:"M",stock:33,sold:2},{z:"L",stock:10,sold:0},{z:"XL",stock:2,sold:0}] },
     { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory",
-      price:64900, revenue:7917800,
-      sizes:[{z:"Única",stock:10,sold:122}] },
+      price:64900, revenue:8631700,
+      sizes:[{z:"Única",stock:0,sold:133}] },
     { name:"Primavera Charm", mono:"PC", kind:"accessory",
-      price:143900, revenue:7338900,
-      sizes:[{z:"Única",stock:39,sold:51}] },
+      price:143900, revenue:7482800,
+      sizes:[{z:"Única",stock:54,sold:52}] },
   ];
   // <<<PRODUCTS_END>>>
 
@@ -618,28 +616,34 @@
     { client:"CRISTALINA SWIMWEAR (Luz Andrea Ochoa Garcés)", number:"Proforma 050826SURT · pendiente RFEL", date:"5 ago 2026", pay:"Transferencia", campUnits:14, campTotal:1245020 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"RFEL 8237", date:"5 ago 2026", pay:"Cobro a plazos (saldo $3.509.126)", campUnits:137, campTotal:10555620 },
     { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"Proforma 050826MEDMW (abanicos) · pendiente RFEL", date:"5 ago 2026", pay:"Transferencia (sin conciliar)", campUnits:50, campTotal:2096500 },
-    { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"Proforma 100826MEDMW · pendiente RFEL", date:"10 ago 2026", pay:"Transferencia (sin abonos, en producción parcial)", campUnits:173, campTotal:13039420 },
+    { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"RFEL 8245", date:"10 ago 2026", pay:"Cobro a plazos (saldo $3.581.550)", campUnits:173, campTotal:13039420 },
     { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8246", date:"5 ago 2026", pay:"Transferencia", campUnits:33, campTotal:3805690 },
     { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8247", date:"8 ago 2026", pay:"Transferencia", campUnits:84, campTotal:7638120 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8260", date:"12 ago 2026", pay:"Transferencia", campUnits:2, campTotal:195860 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8261", date:"18 ago 2026", pay:"Transferencia", campUnits:1, campTotal:160930 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8267", date:"20 ago 2026", pay:"Transferencia", campUnits:6, campTotal:965580 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8281", date:"21 ago 2026", pay:"Transferencia", campUnits:9, campTotal:566370 },
+    { client:"CASA VIVA (18 Razones S.A.S.)", number:"RFEL 8282", date:"25 ago 2026", pay:"Transferencia", campUnits:20, campTotal:1591100 },
+    { client:"CREEMOS QUE TODO ES POSIBLE SAS (Wanita)", number:"Proforma 260826MEDMW · pendiente RFEL", date:"26 ago 2026", pay:"Transferencia (sin abonos)", campUnits:88, campTotal:5160220 },
   ];
 
   const WHOLESALE_PRODUCTS = [
-    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", sold:572, revenue:53370318,
-      sizes:[{z:"XS",sold:20},{z:"S",sold:211},{z:"M",sold:198},{z:"L",sold:107},{z:"XL",sold:36}] },
-    { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment", sold:217, revenue:18309419,
-      sizes:[{z:"XS",sold:14},{z:"S",sold:83},{z:"M",sold:91},{z:"L",sold:28},{z:"XL",sold:1}] },
-    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", sold:144, revenue:6210915,
-      sizes:[{z:"Única",sold:144}] },
-    { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment", sold:158, revenue:13892082,
-      sizes:[{z:"XS",sold:2},{z:"S",sold:59},{z:"M",sold:69},{z:"L",sold:26},{z:"XL",sold:2}] },
-    { name:"Kit · Mesh", mono:"🎀", kind:"kit", sold:101, revenue:16253906,
-      sizes:[{z:"S",sold:39},{z:"M",sold:36},{z:"L",sold:26}] },
-    { name:"Kit · T‑Shirt", mono:"🎀", kind:"kit", sold:48, revenue:7724628,
-      sizes:[{z:"S",sold:17},{z:"M",sold:17},{z:"L",sold:14}] },
+    { name:"Medellín Mi Amor Mesh Shirt", mono:"MM", kind:"garment", sold:588, revenue:54937198,
+      sizes:[{z:"XS",sold:20},{z:"S",sold:227},{z:"M",sold:198},{z:"L",sold:107},{z:"XL",sold:36}] },
+    { name:"Un Guarito T‑Shirt", mono:"UG", kind:"garment", sold:238, revenue:19946159,
+      sizes:[{z:"XS",sold:19},{z:"S",sold:91},{z:"M",sold:99},{z:"L",sold:28},{z:"XL",sold:1}] },
+    { name:"Medellín Mi Amor Headkerchief", mono:"HK", kind:"accessory", sold:157, revenue:6801505,
+      sizes:[{z:"Única",sold:157}] },
+    { name:"Bloom Mesh Shirt", mono:"BL", kind:"garment", sold:177, revenue:15514922,
+      sizes:[{z:"XS",sold:9},{z:"S",sold:59},{z:"M",sold:81},{z:"L",sold:26},{z:"XL",sold:2}] },
+    { name:"Kit · Mesh", mono:"🎀", kind:"kit", sold:104, revenue:16736696,
+      sizes:[{z:"S",sold:42},{z:"M",sold:36},{z:"L",sold:26}] },
+    { name:"Kit · T‑Shirt", mono:"🎀", kind:"kit", sold:52, revenue:8368348,
+      sizes:[{z:"S",sold:17},{z:"M",sold:21},{z:"L",sold:14}] },
     { name:"Eterna Primavera Mesh Shirt", mono:"EM", kind:"garment", sold:53, revenue:4938476,
       sizes:[{z:"S",sold:17},{z:"M",sold:20},{z:"L",sold:16}] },
-    { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory", sold:78, revenue:3413640,
-      sizes:[{z:"Única",sold:78}] },
+    { name:"Abanico Medellín Mi Amor", mono:"AB", kind:"accessory", sold:128, revenue:5510140,
+      sizes:[{z:"Única",sold:128}] },
     { name:"Eterna Primavera T‑Shirt", mono:"ET", kind:"garment", sold:1, revenue:90930,
       sizes:[{z:"M",sold:1}] },
     { name:"Cosmetiquera", mono:"CQ", kind:"accessory", sold:26, revenue:999180,
@@ -864,6 +868,4 @@
     root.setAttribute('data-theme', cur==='dark' ? 'light' : 'dark');
   });
 </script>
-
-</body>
-</html>
+</body></html>

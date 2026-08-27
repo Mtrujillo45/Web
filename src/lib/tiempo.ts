@@ -32,3 +32,9 @@ export function inicioDiaBogota(fechaYYYYMMDD: string): Date {
 export function finDiaBogota(fechaYYYYMMDD: string): Date {
   return new Date(`${fechaYYYYMMDD}T23:59:59.999${OFFSET_BOGOTA}`);
 }
+
+/** Días de calendario que faltan para una fecha límite (puede ser negativo si ya pasó). */
+export function diasHastaCierre(fechaLimite: Date): number {
+  const msPorDia = 1000 * 60 * 60 * 24;
+  return Math.ceil((fechaLimite.getTime() - Date.now()) / msPorDia);
+}

@@ -8,6 +8,7 @@ import { formatearFechaBogota } from "@/lib/tiempo";
 import { tieneInfoLogistica } from "@/lib/logistica";
 import { PedidoForm } from "@/components/cliente/pedido-form";
 import { Card } from "@/components/ui";
+import { BadgeCierre } from "@/components/cliente/badge-cierre";
 
 export default async function PedidoDetallePage({
   params,
@@ -72,7 +73,10 @@ export default async function PedidoDetallePage({
       <h1 className="mb-1 text-xl font-semibold text-brand-800">
         {drop.nombre} — Pedido #{numeroPedido}
       </h1>
-      <p className="mb-6 text-sm text-brand-700">Cierra el {formatearFechaBogota(drop.fechaLimite)}</p>
+      <div className="mb-6 flex items-center gap-2">
+        <p className="text-sm text-brand-700">Cierra el {formatearFechaBogota(drop.fechaLimite)}</p>
+        {!cerrado && <BadgeCierre fechaLimite={drop.fechaLimite} />}
+      </div>
       {tieneInfoLogistica(pedido) && (
         <Card className="mb-6 flex flex-col gap-2">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-700">

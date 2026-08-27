@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { Card, Badge, Button } from "@/components/ui";
 import { BotonCerrarSesion } from "@/components/boton-cerrar-sesion";
 import { formatearFechaBogota } from "@/lib/tiempo";
+import { BadgeCierre } from "@/components/cliente/badge-cierre";
 
 export default async function ClientePage() {
   const { empresa } = await requireEmpresaAprobada();
@@ -52,8 +53,9 @@ export default async function ClientePage() {
                 <p className="text-sm text-brand-700">
                   Cierra el {formatearFechaBogota(drop.fechaLimite, { dateStyle: "long" })}
                 </p>
-                {pedidosDelDrop.length > 0 && (
-                  <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <BadgeCierre fechaLimite={drop.fechaLimite} />
+                  {pedidosDelDrop.length > 0 && (
                     <Badge tono={enviados > 0 ? "exito" : "advertencia"}>
                       {pedidosDelDrop.length === 1
                         ? enviados > 0
@@ -61,8 +63,8 @@ export default async function ClientePage() {
                           : "Borrador sin enviar"
                         : `${pedidosDelDrop.length} pedidos (${enviados} enviados)`}
                     </Badge>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               <Link href={`/cliente/pedido/${drop.id}`}>
                 <Button>{pedidosDelDrop.length > 0 ? "Ver pedidos" : "Armar pedido"}</Button>

@@ -65,12 +65,24 @@ export default async function HistoricoPage({
 
   const hayFiltros = Boolean(filtros.desde || filtros.hasta || filtros.dropId || filtros.estado);
 
+  const queryExport = new URLSearchParams();
+  if (filtros.desde) queryExport.set("desde", filtros.desde);
+  if (filtros.hasta) queryExport.set("hasta", filtros.hasta);
+  if (filtros.dropId) queryExport.set("dropId", filtros.dropId);
+  if (filtros.estado) queryExport.set("estado", filtros.estado);
+  const urlExport = `/api/cliente/historico/exportar${queryExport.toString() ? `?${queryExport.toString()}` : ""}`;
+
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <Link href="/cliente" className="mb-6 inline-block text-sm font-medium text-brand-700 underline">
         &larr; Volver
       </Link>
-      <h1 className="mb-6 text-xl font-semibold text-brand-800">Histórico y total de pedidos</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-brand-800">Histórico y total de pedidos</h1>
+        <a href={urlExport}>
+          <Button variant="secondary">Descargar Excel</Button>
+        </a>
+      </div>
 
       <Card className="mb-6">
         <form className="flex flex-wrap items-end gap-4" method="GET">

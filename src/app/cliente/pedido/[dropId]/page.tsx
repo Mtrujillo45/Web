@@ -7,6 +7,7 @@ import { formatearFechaBogota } from "@/lib/tiempo";
 import { formatearPrecio } from "@/lib/pricing";
 import { Card, Badge } from "@/components/ui";
 import { BotonNuevoPedido } from "@/components/cliente/boton-nuevo-pedido";
+import { BadgeCierre } from "@/components/cliente/badge-cierre";
 
 export default async function PedidosDelDropPage({
   params,
@@ -35,7 +36,10 @@ export default async function PedidosDelDropPage({
         </Link>
       </div>
       <h1 className="mb-1 text-xl font-semibold text-brand-800">{drop.nombre}</h1>
-      <p className="mb-6 text-sm text-brand-700">Cierra el {formatearFechaBogota(drop.fechaLimite)}</p>
+      <div className="mb-6 flex items-center gap-2">
+        <p className="text-sm text-brand-700">Cierra el {formatearFechaBogota(drop.fechaLimite)}</p>
+        {!cerrado && <BadgeCierre fechaLimite={drop.fechaLimite} />}
+      </div>
 
       {cerrado && (
         <Card className="mb-6">
@@ -85,7 +89,7 @@ export default async function PedidosDelDropPage({
                     <Badge tono={pedido.estado === "ENVIADO" ? "exito" : "advertencia"}>
                       {pedido.estado === "ENVIADO" ? "Enviado" : "Borrador"}
                     </Badge>
-                    {pedido.bloqueado && <Badge tono="peligro">Bloqueado</Badge>}
+                    {pedido.bloqueado && <Badge tono="peligro">Cerrado</Badge>}
                   </div>
                 </Card>
               </Link>

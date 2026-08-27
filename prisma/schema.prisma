@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoEmpresa {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+  SUSPENDIDO
+}
+
+enum Rol {
+  CLIENTE
+  COMERCIAL
+  PRODUCCION
+}
+
+enum EstadoDrop {
+  BORRADOR
+  ACTIVO
+  CERRADO
+}
+
+enum EstadoPedido {
+  BORRADOR
+  ENVIADO
+}
+
+enum Moneda {
+  USD
+  COP
+}
+
+model Empresa {
+  id               String        @id @default(cuid())
+  nombreComercial  String
+  razonSocial      String?
+  nitOCedula       String
+  pais             String
+  ciudad           String?
+  telefono         String?
+  emailContacto    String
+  estado           EstadoEmpresa @default(PENDIENTE)
+  notasInternas    String?
+  creadoEn         DateTime      @default(now())
+  aprobadoEn       DateTime?
+  aprobadoPorId    String?
+  aprobadoPor      Usuario?      @relation("EmpresasAprobadas", fields: [aprobadoPorId], references: [id])
+
+  usuarios         Usuario[]     @relation("UsuariosDeEmpresa")
+  condicion        CondicionComercial?
+  pedidos          Pedido[]
+
+  @@index([estado])
+}
+
+model Usuario {
+  id            String   @id @default(cuid())
+  empresaId     String?
+  empresa       Empresa? @relation("UsuariosDeEmpresa", fields: [empresaId], references: [id])
+  nombre        String
+  email         String   @unique
+  passwordHash  String
+  rol           Rol
+  activo        Boolean  @default(true)
+  creadoEn      DateTime @default(now())
+
+  empresasAprobadas Empresa[] @relation("EmpresasAprobadas")
+  dropsCreados      Drop[]    @relation("DropsCreadosPor")
+  pedidosEnviados   Pedido[]  @relation("PedidosEnviadosPor")
+  pedidosBloqueados Pedido[]  @relation("PedidosBloqueadosPor")
+  pedidosEditados   Pedido[]  @relation("PedidosEditadosPor")
+  historialesPedido HistorialPedido[]
+}
+
+model CondicionComercial {
+  id                 String   @id @default(cuid())
+  empresaId          String   @unique
+  empresa            Empresa  @relation(fields: [empresaId], references: [id])
+  porcentajeDescuento Decimal @default(0) @db.Decimal(5, 2)
+  moneda             Moneda   @default(USD)
+  moqTotalPedido     Int?
+  terminosPago       String?
+  actualizadoEn      DateTime @updatedAt
+}
+
+model Drop {
+  id            String     @id @default(cuid())
+  nombre        String
+  fechaApertura DateTime   @default(now())
+  fechaLimite   DateTime
+  estado        EstadoDrop @default(BORRADOR)
+  creadoPorId   String
+  creadoPor     Usuario    @relation("DropsCreadosPor", fields: [creadoPorId], references: [id])
+  creadoEn      DateTime   @default(now())
+
+  productos     Producto[]
+  pedidos       Pedido[]
+
+  @@index([estado])
+}
+
+model Producto {
+  id             String   @id @default(cuid())
+  dropId         String
+  drop           Drop     @relation(fields: [dropId], references: [id], onDelete: Cascade)
+  referencia     String
+  nombreReferencia String
+  fotoUrl        String?
+  moqReferencia  Int?
+  creadoEn       DateTime @default(now())
+
+  variantes      Variante[]
+
+  @@index([dropId])
+}
+
+model Variante {
+  id                  String  @id @default(cuid())
+  productoId          String
+  producto            Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  sku                 String
+  talla               String
+  precioBaseUsd       Decimal? @db.Decimal(10, 2)
+  precioBaseCop       Decimal? @db.Decimal(14, 2)
+  disponibilidadLimite Int?
+
+  lineasPedido        LineaPedido[]
+
+  @@index([productoId])
+  @@index([sku])
+}
+
+model Pedido {
+  id              String       @id @default(cuid())
+  empresaId       String
+  empresa         Empresa      @relation(fields: [empresaId], references: [id])
+  dropId          String
+  drop            Drop         @relation(fields: [dropId], references: [id])
+  estado          EstadoPedido @default(BORRADOR)
+  moneda          Moneda       @default(USD)
+  bloqueado       Boolean      @default(false)
+  bloqueadoEn     DateTime?
+  bloqueadoPorId  String?
+  bloqueadoPor    Usuario?     @relation("PedidosBloqueadosPor", fields: [bloqueadoPorId], references: [id])
+  fechaUltimaEdicion DateTime  @updatedAt
+  fechaEnvio      DateTime?
+  enviadoPorId    String?
+  enviadoPor      Usuario?     @relation("PedidosEnviadosPor", fields: [enviadoPorId], references: [id])
+  creadoEn        DateTime     @default(now())
+
+  // Información logística del despacho (opcional, la ingresa comercial).
+  transportadora    String?
+  numeroGuia        String?
+  guiaUrl           String?
+  linkSeguimiento   String?
+
+  // Auditoría de ediciones manuales desde el panel admin (cantidades o logística).
+  editadoEn         DateTime?
+  editadoPorId      String?
+  editadoPor        Usuario?  @relation("PedidosEditadosPor", fields: [editadoPorId], references: [id])
+
+  lineas          LineaPedido[]
+  historial       HistorialPedido[]
+
+  @@index([empresaId, dropId])
+  @@index([dropId, estado])
+}
+
+/// Registro de cada corrección manual de cantidades hecha desde el panel admin,
+/// para poder ver qué cambió, cuándo y quién lo hizo.
+model HistorialPedido {
+  id           String   @id @default(cuid())
+  pedidoId     String
+  pedido       Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  editadoPorId String
+  editadoPor   Usuario  @relation(fields: [editadoPorId], references: [id])
+  creadoEn     DateTime @default(now())
+  cambios      Json
+
+  @@index([pedidoId])
+}
+
+model LineaPedido {
+  id                     String   @id @default(cuid())
+  pedidoId               String
+  pedido                 Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  varianteId             String
+  variante               Variante @relation(fields: [varianteId], references: [id])
+  cantidad               Int
+  precioUnitarioAplicado Decimal  @db.Decimal(14, 2)
+
+  @@unique([pedidoId, varianteId])
+}
+
+/// Plantilla de mapeo de columnas del Excel de ordersheet, reutilizable entre drops.
+model PlantillaMapeo {
+  id         String   @id @default(cuid())
+  nombre     String
+  mapeoJson  Json
+  creadoEn   DateTime @default(now())
+}

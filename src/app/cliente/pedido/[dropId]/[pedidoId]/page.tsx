@@ -5,7 +5,9 @@ import { prisma } from "@/lib/db";
 import { calcularPrecioCliente, precioBasePorMoneda } from "@/lib/pricing";
 import { dropCerrado } from "@/lib/pedido-contexto";
 import { formatearFechaBogota } from "@/lib/tiempo";
+import { tieneInfoLogistica } from "@/lib/logistica";
 import { PedidoForm } from "@/components/cliente/pedido-form";
+import { Card } from "@/components/ui";
 
 export default async function PedidoDetallePage({
   params,
@@ -71,6 +73,39 @@ export default async function PedidoDetallePage({
         {drop.nombre} — Pedido #{numeroPedido}
       </h1>
       <p className="mb-6 text-sm text-brand-700">Cierra el {formatearFechaBogota(drop.fechaLimite)}</p>
+      {tieneInfoLogistica(pedido) && (
+        <Card className="mb-6 flex flex-col gap-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-700">
+            Información de despacho
+          </h2>
+          {pedido.transportadora && (
+            <p className="text-sm text-brand-700">Transportadora: {pedido.transportadora}</p>
+          )}
+          {pedido.numeroGuia && (
+            <p className="text-sm text-brand-700">Número de guía: {pedido.numeroGuia}</p>
+          )}
+          {pedido.linkSeguimiento && (
+            <a
+              href={pedido.linkSeguimiento}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-brand-700 underline"
+            >
+              Seguir el envío
+            </a>
+          )}
+          {pedido.guiaUrl && (
+            <a
+              href={pedido.guiaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-brand-700 underline"
+            >
+              Ver guía de despacho
+            </a>
+          )}
+        </Card>
+      )}
       <PedidoForm
         pedidoId={pedido.id}
         productos={productos}

@@ -84,6 +84,8 @@ def compute(orders, inv):
     kitT_old = new_sizemap(); kitT_new = new_sizemap()   # kit t-shirt (Un Guarito)
     kitM_old = new_sizemap(); kitM_new = new_sizemap()   # kit mesh
     rev_new_T = 0.0; rev_new_M = 0.0                      # ingreso real de kits nuevos
+    disc_units_T = 0; disc_units_M = 0                    # kits viejos vendidos con descuento
+    disc_rev_T = 0.0; disc_rev_M = 0.0                    # su ingreso real (prenda + abanico)
     ugStd  = new_sizemap()   # un guarito suelta
     meshStd= new_sizemap()   # mesh shirt suelta
     bloom  = new_sizemap()
@@ -107,7 +109,11 @@ def compute(orders, inv):
 
         # buffers del bloque de kit en curso (se resuelven al llegar la botella)
         seg = []       # [ ['T'/'M', size, qty, unit], ... ] prendas a precio de kit
+        weak = []      # [ ['T'/'M', size, qty, unit], ... ] prendas bajo el umbral pero
+                       # que podrían igual ser un kit con descuento (se confirma solo si
+                       # el bloque efectivamente cierra con una botella)
         seg_aba = 0    # abanicos a precio de kit acumulados en el bloque
+        block_aba_rev = 0.0   # ingreso real de esos abanicos (para kits con descuento)
 
         for le in o["lineItems"]["edges"]:
             n = le["node"]
@@ -137,18 +143,40 @@ def compute(orders, inv):
                     else:
                         kitM_old[sz] += o_take; kitM_new[sz] += n_take
                         rev_new_M += gp[3] * n_take
-                seg = []; seg_aba = 0
+                # si aún faltan botellas por asignar, es un kit vendido con descuento
+                # (la prenda quedó bajo el umbral de precio) — se reclasifica desde 'weak'
+                for gp in weak:
+                    if need <= 0: break
+                    take = min(gp[2], need); need -= take; gp[2] -= take
+                    o_take = min(old_left, take); old_left -= o_take
+                    n_take = take - o_take
+                    sz = gp[1] if gp[1] in SIZES else None
+                    if not sz: continue
+                    std = ugStd if gp[0] == 'T' else meshStd
+                    std[sz] -= (o_take + n_take)   # deshace la clasificación provisional de "suelta"
+                    aba_share = block_aba_rev * (o_take / seg_aba) if seg_aba else 0.0
+                    if gp[0] == 'T':
+                        kitT_old[sz] += o_take; kitT_new[sz] += n_take
+                        disc_units_T += o_take; disc_rev_T += gp[3] * o_take + aba_share
+                        rev_new_T += gp[3] * n_take
+                    else:
+                        kitM_old[sz] += o_take; kitM_new[sz] += n_take
+                        disc_units_M += o_take; disc_rev_M += gp[3] * o_take + aba_share
+                        rev_new_M += gp[3] * n_take
+                seg = []; weak = []; seg_aba = 0; block_aba_rev = 0.0
                 continue
 
             if prod == GUARITO:
                 if unit >= 143000: seg.append(['T', size, qty, unit])
-                elif size in ugStd: ugStd[size] += qty
+                elif size in ugStd:
+                    ugStd[size] += qty; weak.append(['T', size, qty, unit])
             elif prod == MESH:
                 if unit >= 150000: seg.append(['M', size, qty, unit])
-                elif size in meshStd: meshStd[size] += qty
+                elif size in meshStd:
+                    meshStd[size] += qty; weak.append(['M', size, qty, unit])
             elif prod == ABANICO:
                 if unit <= 63000: abanico += qty     # suelto (59.900)
-                else: seg_aba += qty                 # dentro de un kit viejo
+                else: seg_aba += qty; block_aba_rev += total   # dentro de un kit viejo
             elif prod == HK:
                 hk += qty
             elif prod == CHARM:
@@ -170,6 +198,8 @@ def compute(orders, inv):
         "kitT_old": kitT_old, "kitT_new": kitT_new,
         "kitM_old": kitM_old, "kitM_new": kitM_new,
         "rev_new_T": rev_new_T, "rev_new_M": rev_new_M,
+        "disc_units_T": disc_units_T, "disc_units_M": disc_units_M,
+        "disc_rev_T": disc_rev_T, "disc_rev_M": disc_rev_M,
         "kits_old": kits_old, "kits_new": kits_new,
         "ugStd": ugStd, "meshStd": meshStd,
         "bloom": bloom, "etm": etm, "ett": ett,
@@ -195,11 +225,15 @@ def build_products(c, inv):
     # Kits (comparten inventario con su prenda componente).
     # VIEJOS = prenda + abanico + botella.  NUEVOS = prenda + botella + cosmetiquera (sin abanico).
     P.append({"name": "Kit · T‑Shirt", "full": "Kit Medellín Mi Amor · T‑Shirt", "mono": "🎀", "kind": "kit", "gar": "T",
-              "price": KIT_PRICE, "revenue": sum(c["kitT_old"].values()) * KIT_PRICE, "buildable": g(GUARITO)["total"],
+              "price": KIT_PRICE,
+              "revenue": round((sum(c["kitT_old"].values()) - c["disc_units_T"]) * KIT_PRICE + c["disc_rev_T"]),
+              "buildable": g(GUARITO)["total"],
               "note": "Un Guarito + Abanico + Aguardiente. Inventario compartido con «Un Guarito».",
               "sizes": sized_entry(c["kitT_old"], g(GUARITO))})
     P.append({"name": "Kit · Mesh", "full": "Kit Medellín Mi Amor · Mesh", "mono": "🎀", "kind": "kit", "gar": "M",
-              "price": KIT_PRICE, "revenue": sum(c["kitM_old"].values()) * KIT_PRICE, "buildable": g(MESH)["total"],
+              "price": KIT_PRICE,
+              "revenue": round((sum(c["kitM_old"].values()) - c["disc_units_M"]) * KIT_PRICE + c["disc_rev_M"]),
+              "buildable": g(MESH)["total"],
               "note": "Mesh Shirt + Abanico + Aguardiente. Inventario compartido con «Mesh Shirt».",
               "sizes": sized_entry(c["kitM_old"], g(MESH))})
     P.append({"name": "Kit Nuevo · T‑Shirt", "full": "Kit Nuevo Medellín Mi Amor · T‑Shirt", "mono": "🍾", "kind": "kit", "gar": "T",
